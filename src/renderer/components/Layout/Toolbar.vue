@@ -18,7 +18,12 @@ export default {
   },
   methods: {
     showVerbose() {
-      const message = `Version label: ${this.version}\nVersion: ${packageJs.version}\nBuild: ${process.env.BUILD}`
+      const message = [
+        `Version label: ${this.version}`,
+        `Version: ${packageJs.version}`,
+        `Build: ${process.env.BUILD}`,
+        `Env: ${process.env.NODE_ENV}`
+      ].join('\n')
       showMessageBox(message)
     }
   }

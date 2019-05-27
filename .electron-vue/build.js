@@ -28,14 +28,14 @@ if (process.env.BUILD_TARGET === 'clean') clean()
 else if (process.env.BUILD_TARGET === 'web') web()
 else build()
 
-function clean () {
+function clean() {
   del.sync(['build/*', '!build/icons', '!build/icons/icon.*'])
   console.log(`\n${doneLog}\n`)
   process.exit()
 }
 
-async function build () {
-  await setBuildVersionAndNumber()
+async function build() {
+  const [ver, buildNumber] = await setBuildVersionAndNumber()
 
   del.sync(['dist/electron/*', '!.gitkeep'])
 
@@ -64,7 +64,15 @@ async function build () {
     process.exit(1)
   })
 
-  pack(rendererConfig).then(result => {
+  pack({
+    ...rendererConfig,
+    plugins: [
+      ...rendererConfig.plugins,
+      new webpack.DefinePlugin({
+        'process.env.BUILD': `"${buildNumber}"`
+      }),
+    ]
+  }).then(result => {
     results += result + '\n\n'
     m.success('renderer')
   }).catch(err => {
@@ -84,14 +92,19 @@ async function build () {
 }
 
 async function setBuildVersionAndNumber() {
+  const { version } = packageJson
+  const buildNumber = dateFormat(new Date(), 'yyyyddmm-HHMMss', true)
+
   await mkdirp(path.resolve(__dirname, '../build'))
-  return Promise.all([
-    fs.writeFile(path.resolve(__dirname, '../build/.number'), dateFormat(new Date(), "yyyyddmm-HHMMss", true)),
-    fs.writeFile(path.resolve(__dirname, '../build/.version'), packageJson.version),
+  await Promise.all([
+    fs.writeFile(path.resolve(__dirname, '../build/.number'), buildNumber),
+    fs.writeFile(path.resolve(__dirname, '../build/.version'), version),
   ])
+
+  return [version, buildNumber]
 }
 
-function pack (config) {
+function pack(config) {
   return new Promise((resolve, reject) => {
     config.mode = 'production'
     webpack(config, (err, stats) => {
@@ -103,10 +116,10 @@ function pack (config) {
           chunks: false,
           colors: true
         })
-        .split(/\r?\n/)
-        .forEach(line => {
-          err += `    ${line}\n`
-        })
+          .split(/\r?\n/)
+          .forEach(line => {
+            err += `    ${line}\n`
+          })
 
         reject(err)
       } else {
@@ -119,7 +132,7 @@ function pack (config) {
   })
 }
 
-function web () {
+function web() {
   del.sync(['dist/web/*', '!.gitkeep'])
   webConfig.mode = 'production'
   webpack(webConfig, (err, stats) => {
@@ -147,11 +160,11 @@ async function prepareLogo() {
       .background('none')
       .rotate('none', 45)
       .resize(512, 512)
-      .write(path.resolve(__dirname, '../build/icons/256x256.png'), function (err) {
+      .write(path.resolve(__dirname, '../build/icons/256x256.png'), function(err) {
         if (err) reject(err)
         else resolve()
-      });
+      })
   })
 
-  return createIconsDir.then(() => Promise.all([x256]) )
+  return createIconsDir.then(() => Promise.all([x256]))
 }
