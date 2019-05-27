@@ -1,3 +1,5 @@
+import { manuallyCheckForUpdates } from './appUpdater'
+
 export default function buildMenuTemplate(app) {
   const template = [
     {
@@ -53,6 +55,7 @@ export default function buildMenuTemplate(app) {
       label: app.getName(),
       submenu: [
         { role: 'about' },
+        { label: 'Check for Updates...', click: manuallyCheckForUpdates },
         { type: 'separator' },
         { role: 'services' },
         { type: 'separator' },

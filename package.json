@@ -38,13 +38,13 @@
       "contents": [
         {
           "x": 410,
-          "y": 150,
+          "y": 210,
           "type": "link",
           "path": "/Applications"
         },
         {
           "x": 130,
-          "y": 150,
+          "y": 210,
           "type": "file"
         }
       ]
@@ -57,7 +57,8 @@
     "mac": {
       "icon": "build/icons/icon.icns",
       "target": [
-        "dmg"
+        "dmg",
+        "zip"
       ]
     },
     "win": {
@@ -73,6 +74,7 @@
   "dependencies": {
     "@kubernetes/client-node": "^0.8.2",
     "clone-deep": "^4.0.1",
+    "electron-store": "^3.2.0",
     "electron-updater": "^4.0.6",
     "killable": "^1.0.1",
     "lodash": "^4.17.11",

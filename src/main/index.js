@@ -1,9 +1,10 @@
 'use strict'
 
-import { app, BrowserWindow, Menu, dialog } from 'electron'
-import { autoUpdater } from 'electron-updater'
+import { app, BrowserWindow, Menu } from 'electron'
+
 import buildMenuTemplate from './menuTemplate'
-import path from 'path'
+import { checkForUpdates } from './appUpdater'
+import store from './store'
 
 /**
  * Set `__static` path to static files in production
@@ -49,10 +50,12 @@ function createWindow() {
 
 app.on('ready', () => {
   createWindow()
-  // console.log('ready')
-  autoUpdater.updateConfigPath = path.join(__dirname, 'dev-app-update.yml')
-  // console.log(autoUpdater.updateConfigPath)
-  autoUpdater.checkForUpdates()
+
+  if (store.notFirstLaunch) {
+    checkForUpdates()
+  }
+
+  store.notFirstLaunch = true
 })
 
 app.on('window-all-closed', () => {
@@ -65,18 +68,4 @@ app.on('activate', () => {
   if (mainWindow === null) {
     createWindow()
   }
-})
-
-/**
- * Auto Updater
- *
- * Uncomment the following code below and install `electron-updater` to
- * support auto updating. Code Signing with a valid certificate is required.
- * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-electron-builder.html#auto-updating
- */
-
-autoUpdater.on('update-downloaded', () => {
-  // autoUpdater.
-  dialog.showMessageBox({ title: '123', message: 'ud' })
-  // autoUpdater.quitAndInstall()
 })
