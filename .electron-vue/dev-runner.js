@@ -1,5 +1,6 @@
 'use strict'
 
+require('../env')
 const chalk = require('chalk')
 const electron = require('electron')
 const path = require('path')

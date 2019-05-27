@@ -2,6 +2,7 @@
 
 process.env.NODE_ENV = 'production'
 
+require('../env')
 const fs = require('fs').promises
 const dateFormat = require('dateformat')
 const path = require('path')
@@ -54,7 +55,15 @@ async function build() {
     process.exit()
   })
 
-  pack(mainConfig).then(result => {
+  pack({
+    ...mainConfig,
+    plugins: [
+      ...mainConfig.plugins,
+      new webpack.DefinePlugin({
+        'process.env.BUILD': `"${buildNumber}"`
+      }),
+    ]
+  }).then(result => {
     results += result + '\n\n'
     m.success('main')
   }).catch(err => {

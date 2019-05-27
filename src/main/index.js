@@ -1,10 +1,16 @@
 'use strict'
 
+// require Sentry as soon as possible
+import configureSentry from '../common/configure-sentry'
+configureSentry()
+
+/* eslint-disable import/first */
 import { app, BrowserWindow, Menu } from 'electron'
 
 import buildMenuTemplate from './menuTemplate'
 import { checkForUpdates } from './appUpdater'
 import store from './store'
+/* eslint-enable import/first */
 
 /**
  * Set `__static` path to static files in production
@@ -52,7 +58,9 @@ app.on('ready', () => {
   createWindow()
 
   if (store.notFirstLaunch) {
-    checkForUpdates()
+    if (process.env.NODE_ENV === 'production') {
+      checkForUpdates()
+    }
   }
 
   store.notFirstLaunch = true

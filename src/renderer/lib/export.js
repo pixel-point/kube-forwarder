@@ -1,4 +1,4 @@
-import { readFile, writeFile } from 'promise-fs'
+import { promises as fs } from 'fs'
 import { omit, pick, intersection } from 'lodash'
 import Ajv from 'ajv'
 
@@ -6,11 +6,11 @@ import { serviceSchema } from '../store/modules/Services'
 import { clusterSchema } from '../store/modules/Clusters'
 
 export function saveObjectToJsonFile(object, filename) {
-  return writeFile(filename, JSON.stringify(object))
+  return fs.writeFile(filename, JSON.stringify(object))
 }
 
 export async function readObjectFromJsonFile(filename) {
-  const data = await readFile(filename, { encoding: 'utf8' })
+  const data = await fs.readFile(filename, { encoding: 'utf8' })
   return JSON.parse(data)
 }
 
