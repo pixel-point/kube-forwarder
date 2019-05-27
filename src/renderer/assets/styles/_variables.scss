@@ -1,0 +1,28 @@
+$color-text: #142d55;
+$color-text-placeholder: rgba($color-text, 0.75);
+$color-text-secondary: rgba($color-text, 0.5);
+$color-text-tertiary: rgba($color-text, 0.25);
+
+$color-primary: #3273e1;
+$color-secondary: #1ecde1;
+$color-warning: #ff7d00;
+$color-danger: #eb5569;
+$color-success: #19d78c;
+$color-info: #96a5be;
+
+$bg-secondary: rgba($color-text, 0.02);
+$bg-danger: rgba($color-danger, 0.15);
+
+$font-size-small: 13px;
+$font-size-base: 14px;
+$font-size-big: 15px;
+
+$border-radius: 2px;
+$border-color: rgba($color-text, 0.1);
+$border: 1px solid $border-color;
+
+$button-outline-hover-bg-opacity: 0.1;
+
+$toolbar-height: 37px;
+
+$table-border-color: mix($color-text, #fff, 15%);

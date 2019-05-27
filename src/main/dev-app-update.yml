@@ -1,0 +1,4 @@
+owner: pixel-point
+repo: kube-forwarder
+provider: github
+updaterCacheDirName: kubernetes-port-forwarder-updater

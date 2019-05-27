@@ -1,0 +1,21 @@
+@import "variables";
+
+.table {
+  width: 100%;
+  background-color: #fff;
+
+  tr {
+    height: 40px;
+  }
+
+  th {
+    border: 1px solid $table-border-color;
+    background-color: $bg-secondary;
+    font-weight: normal;
+    color: $color-text-secondary;
+  }
+
+  td {
+    border: 1px solid $table-border-color;
+  }
+}

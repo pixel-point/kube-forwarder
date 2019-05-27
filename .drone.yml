@@ -1,0 +1,45 @@
+kind: pipeline
+name: release
+trigger:
+  event: push
+  branch: release
+steps:
+  - name: build-dist
+    image: node:10.8
+    commands:
+      - npm install
+      - npm run build:dist
+
+  - name: build-target-win
+    image: proalexandr/node-wine
+    environment:
+      GH_TOKEN:
+        from_secret: gh_token
+    commands:
+      - npm run build:target -- --win -p always
+    depends_on:
+      - build-dist
+
+  - name: build-target-linux
+    image: node:10.8
+    environment:
+      GH_TOKEN:
+        from_secret: gh_token
+    commands:
+      - npm run build:target -- --linux -p always
+    depends_on:
+      - build-dist
+
+#  - name: upload
+#    image: proalexandr/node-minio
+#    environment:
+#      MC_HOST_pixelpoint:
+#        from_secret: mc_host
+#    commands:
+#      - npm run upload
+#    depends_on:
+#      - build-target-win
+#      - build-target-linux
+#    when:
+#      event: push
+#      branch: [master]

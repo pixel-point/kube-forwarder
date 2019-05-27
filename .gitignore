@@ -1,0 +1,9 @@
+.DS_Store
+dist/*
+build/*
+coverage
+node_modules/
+npm-debug.log
+npm-debug.log.*
+thumbs.db
+!.gitkeep

@@ -1,0 +1,8 @@
+.icon {
+  display: inline-block;
+
+  .dropdown > &:first-child {
+    // To avoid 3 empty pixels below
+    display: block;
+  }
+}

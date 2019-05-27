@@ -1,0 +1,8 @@
+@import "./_variables";
+
+@mixin hf {
+  &:hover {
+  //&:focus {
+    @content
+  }
+}
