@@ -4,7 +4,12 @@
 
 <script>
 export default {
-  name: 'KubernetesPortForwarder'
+  name: 'KubernetesPortForwarder',
+  mounted() {
+    if (process.env.IS_WEB) {
+      document.body.classList.add('body_target_web')
+    }
+  }
 }
 </script>
 
@@ -12,17 +17,29 @@ export default {
 @import "assets/styles/icon";
 @import "assets/styles/table";
 
-html, body {
-  margin: 0;
-  min-height: 100%;
-  width: 100%;
+// Note: For new web sites, it is often useful to begin by setting box-sizing to border-box.
+// https://developer.mozilla.org/en-US/docs/Web/CSS/box-sizing
+* {
+  box-sizing: border-box;
 }
 
 html {
-  display: flex;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+  width: 100%;
   font-family: system-ui, serif;
   font-size: 14px;
   color: #142d55; /* = $color-text */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.body_target_web {
+  font-family: Helvetica !important;
 }
 
 td, th {
@@ -31,10 +48,6 @@ td, th {
 
 table {
   border-collapse: collapse;
-}
-
-* {
-  box-sizing: border-box;
 }
 
 .space {

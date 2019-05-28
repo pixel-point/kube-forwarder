@@ -23,7 +23,8 @@
     "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
     "test:cypress:open": "cypress open",
-    "test:cypress": "node .electron-vue/cypress-runner.js",
+    "test:cypress:onhost": "node .electron-vue/cypress-runner.js --reporter cypress-image-snapshot/reporter",
+    "test:cypress": "docker run --rm -ti -w /app -v `pwd`:/app --entrypoint=/bin/bash cypress/included:3.3.1 -c \"npm rebuild node-sass && npm run test:cypress:onhost\"",
     "test": "npm run unit && npm run e2e",
     "unit": "karma start test/unit/karma.conf.js"
   },
@@ -145,7 +146,7 @@
     "mocha": "^5.2.0",
     "multispinner": "^0.2.1",
     "node-loader": "^0.6.0",
-    "node-sass": "^4.9.2",
+    "node-sass": "^4.12.0",
     "require-dir": "^1.0.0",
     "sass-loader": "^7.0.3",
     "spectron": "^3.8.0",

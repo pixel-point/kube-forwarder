@@ -9,5 +9,6 @@ thumbs.db
 !.gitkeep
 sentry.properties
 .env
+__diff_output__
 cypress/screenshots
 cypress/videos
