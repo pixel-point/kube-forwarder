@@ -18,9 +18,9 @@ Object.keys(modules).forEach(moduleName => {
 const store = new Vuex.Store({
   modules,
   plugins: [
-    createPersistedState({ paths: persistedModuleNames })
+    !process.env.IS_WEB && createPersistedState({ paths: persistedModuleNames })
     // createSharedMutations()
-  ],
+  ].filter(Boolean),
   strict: process.env.NODE_ENV !== 'production',
   mutations: {
     CLEANUP(state) {

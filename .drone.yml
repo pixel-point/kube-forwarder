@@ -1,4 +1,17 @@
 kind: pipeline
+name: test
+trigger:
+  event: push
+steps:
+  - name: test
+    image: jgpelaez/git-lfs
+    commands:
+      - npm install
+      - npm run test:cypress
+
+---
+
+kind: pipeline
 name: release
 trigger:
   event: push

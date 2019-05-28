@@ -6,7 +6,8 @@ module.exports = {
   },
   env: {
     browser: true,
-    node: true
+    node: true,
+    "cypress/globals": true
   },
   extends: [
     'standard',
@@ -16,7 +17,8 @@ module.exports = {
     __static: true
   },
   plugins: [
-    'vue'
+    'vue',
+    "cypress"
   ],
   'rules': {
     // allow paren-less arrow functions

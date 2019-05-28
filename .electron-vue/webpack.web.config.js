@@ -19,17 +19,6 @@ let webConfig = {
   module: {
     rules: [
       {
-        test: /\.(js|vue)$/,
-        enforce: 'pre',
-        exclude: /node_modules/,
-        use: {
-          loader: 'eslint-loader',
-          options: {
-            formatter: require('eslint-friendly-formatter')
-          }
-        }
-      },
-      {
         test: /\.scss$/,
         use: ['vue-style-loader', 'css-loader', 'sass-loader']
       },
@@ -52,7 +41,7 @@ let webConfig = {
       {
         test: /\.js$/,
         use: 'babel-loader',
-        include: [ path.resolve(__dirname, '../src/renderer') ],
+        include: [path.resolve(__dirname, '../src/renderer')],
         exclude: /node_modules/
       },
       {
@@ -93,7 +82,7 @@ let webConfig = {
   },
   plugins: [
     new VueLoaderPlugin(),
-    new MiniCssExtractPlugin({filename: 'styles.css'}),
+    new MiniCssExtractPlugin({ filename: 'styles.css' }),
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: path.resolve(__dirname, '../src/index.ejs'),
@@ -107,8 +96,19 @@ let webConfig = {
     new webpack.DefinePlugin({
       'process.env.IS_WEB': 'true'
     }),
+    new webpack.NamedModulesPlugin(),
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoEmitOnErrorsPlugin()
+    new webpack.NoEmitOnErrorsPlugin(),
+    new webpack.NormalModuleReplacementPlugin(
+      /^(fs)|(net)|(@kubernetes\/client-node)|(promise-fs)|(@sentry\/electron)|(vuex-electron)$/,
+      path.resolve(__dirname, 'web-stubs/default.js')
+    ),
+    new webpack.NormalModuleReplacementPlugin(
+      /k8s-port-forwarding-patch/,
+      path.resolve(__dirname, 'web-stubs/default.js')
+    ),
+    new webpack.NormalModuleReplacementPlugin(/^electron$/, path.resolve(__dirname, 'web-stubs/electron.js')),
+    new webpack.NormalModuleReplacementPlugin(/configure-sentry/, path.resolve(__dirname, 'web-stubs/configure-sentry.js'))
   ],
   output: {
     filename: '[name].js',

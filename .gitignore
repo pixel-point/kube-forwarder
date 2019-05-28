@@ -9,3 +9,5 @@ thumbs.db
 !.gitkeep
 sentry.properties
 .env
+cypress/screenshots
+cypress/videos
