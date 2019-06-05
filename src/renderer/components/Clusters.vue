@@ -4,7 +4,7 @@
       <Header>
         <SearchInput v-model="query" size="s" />
         <div class="space" />
-        <Dropdown theme="primary">
+        <Dropdown>
           <template v-slot:trigger="triggerSlotProps">
             <Button :outline="!triggerSlotProps.opened" theme="primary" @click="triggerSlotProps.toggle">
               Add a cluster
@@ -31,7 +31,19 @@
     </template>
 
     <template v-else>
-      <Button size="l" theme="primary" to="/clusters/new">Add a cluster</Button>
+      <Dropdown>
+        <template v-slot:trigger="triggerSlotProps">
+          <Button theme="primary" size="l" @click="triggerSlotProps.toggle">
+            Add a cluster
+            <IconArrowDropdown :to="triggerSlotProps.opened ? 'top' : 'bottom'" />
+          </Button>
+        </template>
+
+        <ul class="popup__actions">
+          <li><Action to="/clusters/new">FROM SCRATCH</Action></li>
+          <li><Action to="/clusters/import">FROM IMPORT</Action></li>
+        </ul>
+      </Dropdown>
     </template>
   </div>
 </template>

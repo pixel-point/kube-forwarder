@@ -36,6 +36,7 @@ body {
   color: #142d55; /* = $color-text */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  display: flex;
 }
 
 .body_target_web {

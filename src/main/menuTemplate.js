@@ -21,14 +21,14 @@ export default function buildMenuTemplate(app) {
       submenu: [
         { role: 'reload' },
         { role: 'forcereload' },
-        { role: 'toggledevtools' },
+        process.env.NODE_ENV === 'development' && { role: 'toggledevtools' },
         { type: 'separator' },
         { role: 'resetzoom' },
         { role: 'zoomin' },
         { role: 'zoomout' },
         { type: 'separator' },
         { role: 'togglefullscreen' }
-      ]
+      ].filter(Boolean)
     },
     {
       role: 'window',

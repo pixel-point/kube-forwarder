@@ -30,10 +30,11 @@ function createWindow() {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 563,
+    height: 542,
     useContentSize: true,
-    width: 1000,
+    width: 800,
     titleBarStyle: 'hiddenInset',
+    resizable: process.env.NODE_ENV === 'development',
     webPreferences: {
       nodeIntegration: true
     }

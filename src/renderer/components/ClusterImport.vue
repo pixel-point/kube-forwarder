@@ -61,9 +61,9 @@ export default {
             clusterId: cluster.id
           })
         }))
-
-        this.$router.push('/')
       }
+
+      this.$router.push('/')
     }
   }
 }
