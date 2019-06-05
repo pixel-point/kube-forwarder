@@ -39,10 +39,6 @@ function createWindow() {
     }
   })
 
-  if (process.env.NODE_ENV !== 'production') {
-    mainWindow.webContents.openDevTools({ mode: 'bottom' })
-  }
-
   mainWindow.loadURL(winURL)
 
   mainWindow.on('closed', () => {

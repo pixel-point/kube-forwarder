@@ -1,12 +1,14 @@
-import { buildState, StateBuilder } from '../factories/state'
+import { StateBuilder } from '../factories/state'
 
 context('pages/Clusters', () => {
   beforeEach(() => {
     cy.visit('#')
   })
 
-  it('success', () => {
-    cy.matchImageSnapshot()
+  context('visual', () => {
+    it('plain', () => {
+      cy.matchImageSnapshot()
+    })
   })
 
   context('with clusters', () => {
@@ -17,8 +19,31 @@ context('pages/Clusters', () => {
       cy.updateVueState(stateBuilder.getState())
     })
 
-    it('success', () => {
-      cy.matchImageSnapshot()
+    context('visual', () => {
+      it('plain', () => {
+        cy.matchImageSnapshot()
+      })
+    })
+
+    context('dropdown visual', () => {
+      beforeEach(() => {
+        cy.get('.clusters > .header > .dropdown').first().as('dropdown')
+      })
+
+      it('plain', () => {
+        cy.get('@dropdown').matchImageSnapshot()
+      })
+
+      // TODO
+      // it('hovered', () => {
+      //   cy.get('@dropdown').find('.button').trigger('mouseover').matchImageSnapshot()
+      // })
+
+      it('opened', () => {
+        cy.get('@dropdown').find('.button').click().then(() => {
+          cy.get('@dropdown').matchImageSnapshot()
+        })
+      })
     })
   })
 })

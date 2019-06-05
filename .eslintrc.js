@@ -28,7 +28,11 @@ module.exports = {
     // allow debugger during development
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
 
-    'space-before-function-paren': [2, 'never'], // was always
+    'space-before-function-paren': [2, {
+      "anonymous": "never",
+      "named": "never",
+      "asyncArrow": "always"
+    }], // was always
 
     'vue/require-default-prop': 2, // was 1
     'vue/order-in-components': 2, // was 1
