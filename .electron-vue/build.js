@@ -102,7 +102,7 @@ async function build() {
 
 async function setBuildVersionAndNumber() {
   const { version } = packageJson
-  const buildNumber = dateFormat(new Date(), 'yyyyddmm-HHMMss', true)
+  const buildNumber = dateFormat(new Date(), 'yyyymmdd-HHMMss', true)
 
   await mkdirp(path.resolve(__dirname, '../build'))
   await Promise.all([
