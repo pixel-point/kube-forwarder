@@ -1,7 +1,7 @@
 <template>
   <div class="page-cluster-new">
     <Header :back-path="backPath" />
-    <ClusterForm />
+    <ClusterForm @success="handleSuccess" />
   </div>
 </template>
 
@@ -17,6 +17,11 @@ export default {
   computed: {
     backPath() {
       return '/'
+    }
+  },
+  methods: {
+    async handleSuccess(cluster) {
+      this.$router.push(`/clusters/${cluster.id}/services/new`)
     }
   }
 }
