@@ -37,7 +37,7 @@ export default {
 .base-input {
   color: $color-text;
   border: 1px solid rgba($color-text, 0.15);
-  border-radius: 2px;
+  border-radius: $border-radius-l;
   padding: 9px 15px 10px;
   line-height: 16px;
   background: #fff;
@@ -84,5 +84,11 @@ export default {
 
 .base-input[disabled] {
   opacity: 0.5;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 </style>

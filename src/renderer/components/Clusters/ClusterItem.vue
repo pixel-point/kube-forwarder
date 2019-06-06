@@ -159,6 +159,7 @@ export default {
 
 .cluster-item {
   border: $border;
+  border-radius: $border-radius;
 }
 
 .cluster-item_hidden {

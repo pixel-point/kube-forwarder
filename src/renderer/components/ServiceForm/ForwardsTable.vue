@@ -130,6 +130,7 @@ export default {
   .forwards-table__column_name_arrow {
     border-right: none;
     border-left: none;
+    color: $color-text-tertiary;
   }
 
   .forwards-table__column-header_name_remote-port,
@@ -138,6 +139,8 @@ export default {
   }
 
   .forwards-table__column_name_actions {
+    width: 37px;
+
     .button {
       width: 30px;
       padding: 0;
@@ -148,6 +151,7 @@ export default {
   .forwards-table__column_name_remote-port {
     .base-input {
       text-align: center;
+      width: 100%;
     }
   }
 }
@@ -162,7 +166,7 @@ export default {
 }
 
 .forwards-table__column {
-  padding: 2px;
+  /*padding: 2px;*/
 
   .validation-errors {
     margin-top: 2px;
@@ -179,9 +183,5 @@ export default {
 .forwards-table__column_name_arrow {
   padding: 0;
   position: relative;
-}
-
-.forwards-table__column_last {
-  background-color: rgba(#ff0, 0.15);
 }
 </style>

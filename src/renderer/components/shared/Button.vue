@@ -29,9 +29,6 @@ export default {
     }
   },
   computed: {
-    bordered() {
-      return !this.borderless && this.outline
-    },
     tag() {
       if (this.to) return 'router-link'
       if (this.href) return 'a'
@@ -40,7 +37,7 @@ export default {
     className() {
       return {
         button: true,
-        button_bordered: this.bordered,
+        button_bordered: !this.borderless,
         button_outline: this.outline,
         button_loading: this.loading,
         button_disabled: this.disabled || this.disabledStyle,
@@ -73,6 +70,7 @@ export default {
   color: #fff;
   text-decoration: none;
   flex-shrink: 0;
+  text-align: center;
 
   & > span + svg,
   & > svg + span {
@@ -84,77 +82,61 @@ export default {
   }
 }
 
-.button_size_s {
-  height: 30px;
-  line-height: 30px;
-  padding: 0 10px;
-  font-size: $font-size-small;
+$sizes: s m l;
+$heights: (
+  "s": 30px,
+  "m": 36px,
+  "l": 50px
+);
+$paddings: (
+  "s": 10px,
+  "m": 15px,
+  "l": 25px
+);
 
-  &.button_bordered {
-    line-height: 28px;
-  }
-}
+$border-width: 1px;
 
-.button_size_m {
-  height: 36px;
-  line-height: 36px;
-  padding: 0 15px;
-  font-size: $font-size-small;
+@each $size in $sizes {
+  $height: map-get($heights, $size);
+  $padding: map-get($paddings, $size);
 
-  &.button_bordered {
-    line-height: 34px;
-  }
-}
+  .button_size_#{$size} {
+    height: $height;
+    line-height: $height;
+    padding: 0 $padding;
+    font-size: $font-size-small;
 
-.button_size_l {
-  height: 50px;
-  line-height: 50px;
-  padding: 0 25px;
-  font-size: 17px;
-
-  &.button_bordered {
-    line-height: 48px;
+    &.button_bordered {
+      line-height: $height - $border-width * 2;
+    }
   }
 }
 
 .button_bordered {
-  border: 1px solid transparent;
+  border: $border-width solid transparent;
 }
 
-.button_theme_primary {
-  background-color: $color-primary;
-  border-color: rgba($color-primary, 0.5);
+@each $theme in $button-themes {
+  $theme-color: map-get($colors, $theme);
 
-  @include hf {
-    background-color: #2364cd;
-  }
-
-  &.button_outline {
-    color: $color-primary;
+  .button_theme_#{$theme} {
+    background-color: $theme-color;
+    border-color: rgba($theme-color, 0.5);
 
     @include hf {
-      background-color: rgba($color-primary, $button-outline-hover-bg-opacity);
+      background-color: mix($theme-color, #000, 90%);
     }
 
-    &.button_loading:before {
-      border-color: $color-primary;
-    }
-  }
-}
+    &.button_outline {
+      color: $theme-color;
 
-.button_theme_danger {
-  background-color: $color-danger;
-  border-color: $color-danger;
+      @include hf {
+        background-color: rgba($theme-color, $button-outline-hover-bg-opacity);
+      }
 
-  @include hf {
-    background-color: #dd3e60;
-  }
-
-  &.button_outline {
-    color: $color-danger;
-
-    @include hf {
-      background-color: rgba(255, 65, 100, $button-outline-hover-bg-opacity);
+      &.button_loading:before {
+        border-color: $theme-color;
+      }
     }
   }
 }

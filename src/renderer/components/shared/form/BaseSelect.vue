@@ -1,5 +1,5 @@
 <template>
-  <Dropdown class="base-select" :popup-props="{ align: 'both', offsetVertical: 0 }">
+  <Dropdown class="base-select" :popup-props="{ align: 'both' }">
     <template v-slot:trigger="triggerSlotProps">
       <div class="base-select__input-wrap" @click="triggerSlotProps.toggle">
         <BaseInput readonly :value="valueLabel" :placeholder="placeholder"/>
@@ -70,7 +70,7 @@ export default {
 
   .icon_arrow-dropdown {
     position: absolute;
-    top: 15px;
+    top: 16px;
     right: 13px;
     color: $color-text-secondary;
   }

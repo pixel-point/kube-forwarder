@@ -51,6 +51,14 @@ export default {
     position: absolute;
     padding-top: 2px;
   }
+
+  .control-label {
+    font-size: $font-size-small;
+    color: rgba($color-text, 0.5);
+    font-weight: 500;
+    margin-bottom: 4px;
+    display: inline-block;
+  }
 }
 
 .control-group_error {

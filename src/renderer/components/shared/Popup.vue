@@ -11,7 +11,7 @@ export default {
     position: { type: String, required: true, validator: x => ['bottom'].includes(x) },
     align: { type: String, required: true, validator: x => ['center', 'right', 'both'].includes(x) },
     width: { type: null, default: null },
-    offsetVertical: { type: Number, default: 10 }
+    offsetVertical: { type: Number, default: 5 }
   },
   computed: {
     className() {

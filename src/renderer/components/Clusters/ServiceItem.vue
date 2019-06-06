@@ -154,8 +154,8 @@ export default {
 }
 
 .service-item__status {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 1px;
   background-color: $color-text-tertiary;
   margin-top: 5px;
@@ -166,7 +166,7 @@ export default {
 }
 
 .service-item__description {
-  margin: 0 15px
+  margin: 0 17px
 }
 
 .service-item__title {

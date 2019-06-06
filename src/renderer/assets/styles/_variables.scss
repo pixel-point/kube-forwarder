@@ -1,3 +1,5 @@
+$button-themes: primary danger;
+
 $color-text: #142d55;
 $color-text-placeholder: rgba($color-text, 0.75);
 $color-text-secondary: rgba($color-text, 0.5);
@@ -10,6 +12,15 @@ $color-danger: #eb5569;
 $color-success: #19d78c;
 $color-info: #96a5be;
 
+$colors: (
+  "primary": $color-primary,
+  "secondary": $color-secondary,
+  "warning": $color-warning,
+  "danger": $color-danger,
+  "success": $color-success,
+  "info": $color-info
+);
+
 $bg-secondary: rgba($color-text, 0.02);
 $bg-danger: rgba($color-danger, 0.15);
 
@@ -18,6 +29,7 @@ $font-size-base: 14px;
 $font-size-big: 15px;
 
 $border-radius: 2px;
+$border-radius-l: 4px;
 $border-color: rgba($color-text, 0.1);
 $border: 1px solid $border-color;
 

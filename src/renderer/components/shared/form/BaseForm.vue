@@ -21,14 +21,8 @@ export default {
 .base-form {
   background-color: rgba($color-text, 0.04);
   padding: 20px;
-
-  .control-label {
-    font-size: $font-size-small;
-    color: rgba($color-text, 0.5);
-    font-weight: 500;
-    margin-bottom: 5px;
-    display: inline-block;
-  }
+  border-radius: $border-radius;
+  font-size: 0; // to remove empty spaces
 
   .control-hint {
     color: rgba($color-text, 0.5);

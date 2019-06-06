@@ -4,7 +4,7 @@
       <Header>
         <SearchInput v-model="query" size="s" />
         <div class="space" />
-        <Dropdown>
+        <Dropdown :popup-props="{ align: 'both' }">
           <template v-slot:trigger="triggerSlotProps">
             <Button :outline="!triggerSlotProps.opened" theme="primary" @click="triggerSlotProps.toggle">
               Add a cluster
@@ -31,19 +31,13 @@
     </template>
 
     <template v-else>
-      <Dropdown>
-        <template v-slot:trigger="triggerSlotProps">
-          <Button theme="primary" size="l" @click="triggerSlotProps.toggle">
-            Add a cluster
-            <IconArrowDropdown :to="triggerSlotProps.opened ? 'top' : 'bottom'" />
-          </Button>
-        </template>
+      <h1>Add a cluster</h1>
 
-        <ul class="popup__actions">
-          <li><Action to="/clusters/new">FROM SCRATCH</Action></li>
-          <li><Action to="/clusters/import">FROM IMPORT</Action></li>
-        </ul>
-      </Dropdown>
+      <div class="clusters__controls">
+        <Button theme="primary" size="l" to="/clusters/new">FROM SCRATCH</Button>
+        <div class="cluster__control-or">OR</div>
+        <Button theme="primary" size="l" to="/clusters/import">FROM IMPORT</Button>
+      </div>
     </template>
   </div>
 </template>
@@ -116,7 +110,7 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 @import "../assets/styles/variables";
 
 .clusters {
@@ -126,8 +120,17 @@ export default {
   .header {
     margin-bottom: 20px;
 
-    .search-input {
+    .search-input .base-input {
       width: 158px;
+      transition: width linear 0.2s;
+
+      &:focus {
+        width: 320px;
+      }
+    }
+
+    .popup__actions {
+      font-size: $font-size-small;
     }
   }
 
@@ -137,8 +140,32 @@ export default {
 }
 
 .clusters_empty {
+  h1 {
+    font-size: 30px;
+    text-align: center;
+    line-height: 35px;
+    margin: 63px 0 60px;
+    font-weight: normal;
+  }
+
+  background: url('../assets/images/pattern@2x.png') no-repeat bottom center;
+  background-size: contain;
+}
+
+.clusters__controls {
   display: flex;
-  justify-content: space-around;
   align-items: center;
+  justify-content: center;
+
+  .button {
+    width: 220px;
+  }
+}
+
+.cluster__control-or {
+  line-height: 20px;
+  margin: 0 30px;
+  font-size: 17px;
+  color: $color-text-secondary;
 }
 </style>

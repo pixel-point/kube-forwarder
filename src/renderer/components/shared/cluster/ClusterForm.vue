@@ -1,5 +1,5 @@
 <template>
-  <BaseForm @submit="handleSubmit" class="cluster-form">
+  <BaseForm class="cluster-form" @submit="handleSubmit">
     <ControlGroup label="Cluster name" :attribute="$v.attributes.name">
       <BaseInput v-model.trim="$v.attributes.name.$model" />
     </ControlGroup>
@@ -99,3 +99,11 @@ export default {
   }
 }
 </script>
+
+<style lang="scss">
+.cluster-form {
+  .base-textarea {
+    height: 193px;
+  }
+}
+</style>
