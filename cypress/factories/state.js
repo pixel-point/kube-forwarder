@@ -17,7 +17,7 @@ export function buildCluster(overrides = {}) {
     id: generateClusterId(),
     name: 'cluster-name',
     config: '< Cluster-config >',
-    hidden: false,
+    folded: false,
     ...overrides
   }
 }

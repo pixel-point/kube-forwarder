@@ -47,10 +47,6 @@ td, th {
   padding: 0
 }
 
-table {
-  border-collapse: collapse;
-}
-
 .space {
   flex-grow: 1;
 }

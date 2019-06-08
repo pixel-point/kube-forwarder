@@ -21,7 +21,7 @@ export default {
 textarea {
   color: $color-text;
   border: 1px solid rgba($color-text, 0.15);
-  border-radius: 2px;
+  border-radius: $border-radius;
   padding: 8px 15px;
   height: 40px;
   line-height: 1.71;

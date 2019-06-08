@@ -36,7 +36,7 @@ export default {
       width: 100%;
     }
 
-    > textarea {
+    > .base-textarea {
       max-width: 100%;
       min-width: 100%;
       min-height: 100px;

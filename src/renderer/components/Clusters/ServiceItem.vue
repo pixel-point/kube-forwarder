@@ -11,9 +11,10 @@
       </div>
       <div class="service-item__ports">
         <span>Exposed to</span>
-        <span v-for="localPort in localPorts" :key="localPort" class="service-item__port">
-          <b>{{ localPort }}</b>
+        <span v-for="forward in forwards" :key="forward.id" class="service-item__port">
+          <b>{{ forward.localPort }}</b>
         </span>
+        <span>port{{ forwards.length > 1 ? 's' : '' }}</span>
       </div>
     </div>
 
@@ -72,11 +73,11 @@ export default {
     service: { type: Object, required: true }
   },
   computed: {
-    localPorts() {
-      return this.service.forwards.map(x => x.localPort)
+    forwards() {
+      return this.service.forwards
     },
     portStates() {
-      return this.service.forwards.map(forward => this.$store.state.Connections[forward.localPort] || {})
+      return this.forwards.map(forward => this.$store.state.Connections[forward.localPort] || {})
     },
     serviceState() {
       const isFree = this.portStates.every(state => !state.serviceId)
@@ -156,8 +157,8 @@ export default {
 .service-item__status {
   width: 10px;
   height: 10px;
-  border-radius: 1px;
-  background-color: $color-text-tertiary;
+  border-radius: 50%;
+  background-color: $color-danger;
   margin-top: 5px;
 }
 

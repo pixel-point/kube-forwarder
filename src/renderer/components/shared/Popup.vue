@@ -49,7 +49,7 @@ export default {
   position: absolute;
   background: #fff;
   z-index: 1;
-  border-radius: 3px;
+  border-radius: $border-radius;
   box-shadow: 0 2px 4px 0 $border-color;
   border: solid 1px #edeef1;
 }

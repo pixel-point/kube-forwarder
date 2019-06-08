@@ -102,8 +102,9 @@ export default {
 
 <style lang="scss">
 .cluster-form {
-  .base-textarea {
+  .controls > .base-textarea {
     height: 193px;
+    resize: none;
   }
 }
 </style>

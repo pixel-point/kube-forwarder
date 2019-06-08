@@ -21,7 +21,7 @@ export default {
 .alert {
   text-align: center;
   padding: 10px 15px;
-  border-radius: 3px;
+  border-radius: $border-radius;
 }
 
 .alert_theme_info,

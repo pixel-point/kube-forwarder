@@ -37,7 +37,7 @@ export default {
 .base-input {
   color: $color-text;
   border: 1px solid rgba($color-text, 0.15);
-  border-radius: $border-radius-l;
+  border-radius: $border-radius;
   padding: 9px 15px 10px;
   line-height: 16px;
   background: #fff;

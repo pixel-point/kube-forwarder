@@ -4,19 +4,36 @@
       <Header>
         <SearchInput v-model="query" size="s" />
         <div class="space" />
-        <Dropdown :popup-props="{ align: 'both' }">
-          <template v-slot:trigger="triggerSlotProps">
-            <Button :outline="!triggerSlotProps.opened" theme="primary" @click="triggerSlotProps.toggle">
-              Add a cluster
-              <IconArrowDropdown :to="triggerSlotProps.opened ? 'top' : 'bottom'" />
-            </Button>
-          </template>
+        <div class="clusters__header-actions">
+          <Dropdown :popup-props="{ align: 'both' }" class="clusters__add-cluster-dropdown">
+            <template v-slot:trigger="triggerSlotProps">
+              <Button :outline="!triggerSlotProps.opened" theme="primary" @click="triggerSlotProps.toggle">
+                Add a cluster
+                <IconArrowDropdown :to="triggerSlotProps.opened ? 'top' : 'bottom'" />
+              </Button>
+            </template>
 
-          <ul class="popup__actions">
-            <li><Action to="/clusters/new">FROM SCRATCH</Action></li>
-            <li><Action to="/clusters/import">FROM IMPORT</Action></li>
-          </ul>
-        </Dropdown>
+            <ul class="popup__actions">
+              <li><Action to="/clusters/new">FROM SCRATCH</Action></li>
+              <li><Action to="/clusters/import">FROM IMPORT</Action></li>
+            </ul>
+          </Dropdown>
+
+          <Dropdown class="clusters__more-dropdown">
+            <template v-slot:trigger="triggerSlotProps">
+              <Button outline @click="triggerSlotProps.toggle">
+                <IconDotes />
+              </Button>
+            </template>
+
+            <template v-slot="slotProps">
+              <ul class="popup__actions">
+                <li v-if="isEveryClusterFolded"><Action @click="unfoldAll(slotProps.close)">Unfold all clusters</Action></li>
+                <li v-else><Action @click="foldAll(slotProps.close)">Fold all clusters</Action></li>
+              </ul>
+            </template>
+          </Dropdown>
+        </div>
       </Header>
 
       <ClusterItem
@@ -34,7 +51,7 @@
       <h1>Add a cluster</h1>
 
       <div class="clusters__controls">
-        <Button theme="primary" size="l" to="/clusters/new">FROM SCRATCH</Button>
+        <Button theme="secondary" size="l" to="/clusters/new">FROM SCRATCH</Button>
         <div class="cluster__control-or">OR</div>
         <Button theme="primary" size="l" to="/clusters/import">FROM IMPORT</Button>
       </div>
@@ -43,6 +60,8 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
+
 import Button from './shared/Button'
 import Header from './shared/Header'
 import SearchInput from './shared/SearchInput'
@@ -50,6 +69,7 @@ import Dropdown from './shared/Dropdown'
 import ClusterItem from './Clusters/ClusterItem'
 import Alert from './shared/Alert'
 import IconArrowDropdown from './shared/icons/IconArrowDropdown'
+import IconDotes from './shared/icons/IconDotes'
 import Action from './shared/Action'
 
 export default {
@@ -62,7 +82,8 @@ export default {
     Dropdown,
     ClusterItem,
     Alert,
-    IconArrowDropdown
+    IconArrowDropdown,
+    IconDotes
   },
   data() {
     return {
@@ -100,11 +121,28 @@ export default {
     },
     clustersCount() {
       return Object.keys(this.clustersById).length
+    },
+    isEveryClusterFolded() {
+      return this.clustersToRender.every(cluster => cluster.folded)
     }
   },
   methods: {
+    ...mapActions('Clusters', ['updateCluster']),
     compareNames(a, b) {
       return a > b ? 1 : a < b ? -1 : 0
+    },
+    foldAll(callback) {
+      this.setFoldedToAll(true)
+      callback()
+    },
+    unfoldAll(callback) {
+      this.setFoldedToAll(false)
+      callback()
+    },
+    setFoldedToAll(folded) {
+      this.clustersToRender.forEach(cluster => {
+        this.updateCluster({ id: cluster.id, folded })
+      })
     }
   }
 }
@@ -121,16 +159,12 @@ export default {
     margin-bottom: 20px;
 
     .search-input .base-input {
-      width: 158px;
+      width: 191px;
       transition: width linear 0.2s;
 
       &:focus {
         width: 320px;
       }
-    }
-
-    .popup__actions {
-      font-size: $font-size-small;
     }
   }
 
@@ -143,13 +177,22 @@ export default {
   h1 {
     font-size: 30px;
     text-align: center;
-    line-height: 35px;
-    margin: 63px 0 60px;
+    line-height: 36px;
+    margin: 58px 0 60px;
     font-weight: normal;
   }
 
-  background: url('../assets/images/pattern@2x.png') no-repeat bottom center;
-  background-size: contain;
+  &:after {
+    content: "";
+    background: url('../assets/images/pattern@2x.png') no-repeat;
+    background-size: contain;
+    opacity: 0.75;
+    height: 180px;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    position: absolute;
+  }
 }
 
 .clusters__controls {
@@ -159,6 +202,29 @@ export default {
 
   .button {
     width: 220px;
+  }
+}
+
+.clusters__header-actions {
+  font-size: 0;
+
+  .popup__actions {
+    font-size: $font-size-base;
+  }
+}
+
+.clusters__add-cluster-dropdown {
+  .popup__actions {
+    font-size: $font-size-small;
+  }
+}
+
+.clusters__more-dropdown {
+  margin-left: 13px;
+
+  .button {
+    width: 22px;
+    padding: 0;
   }
 }
 

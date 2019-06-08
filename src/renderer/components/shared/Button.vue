@@ -24,8 +24,8 @@ export default {
     size: { type: String, default: 'm', validator: val => ['s', 'm', 'l'].includes(val) },
     theme: {
       type: String,
-      default: 'primary',
-      validator: val => ['primary', 'danger'].includes(val)
+      default: 'default',
+      validator: val => ['default', 'primary', 'danger', 'secondary'].includes(val)
     }
   },
   computed: {
@@ -93,18 +93,24 @@ $paddings: (
   "m": 15px,
   "l": 25px
 );
+$font-sizes: (
+  "s": $font-size-small,
+  "m": $font-size-small,
+  "l": $font-size-large,
+);
 
 $border-width: 1px;
 
 @each $size in $sizes {
   $height: map-get($heights, $size);
   $padding: map-get($paddings, $size);
+  $font-size: map-get($font-sizes, $size);
 
   .button_size_#{$size} {
     height: $height;
     line-height: $height;
     padding: 0 $padding;
-    font-size: $font-size-small;
+    font-size: $font-size;
 
     &.button_bordered {
       line-height: $height - $border-width * 2;
@@ -114,6 +120,22 @@ $border-width: 1px;
 
 .button_bordered {
   border: $border-width solid transparent;
+}
+
+.button_theme_default {
+  border-color: $border-color;
+
+  &.button_outline {
+    color: $color-text-tertiary;
+
+    @include hf {
+      background-color: rgba($color-text-tertiary, $button-outline-hover-bg-opacity);
+    }
+
+    &.button_loading:before {
+      border-color: $color-text-tertiary;
+    }
+  }
 }
 
 @each $theme in $button-themes {

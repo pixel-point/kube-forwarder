@@ -1,21 +1,56 @@
 @import "variables";
 
+$table-border: 1px solid $table-border-color;
+
 .table {
   width: 100%;
   background-color: #fff;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: $border-radius;
+
+  tr:first-child {
+    td:first-child {
+      border-top-left-radius: $border-radius;
+    }
+
+    td:last-child {
+      border-top-right-radius: $border-radius;
+    }
+
+    td {
+      background-color: $bg-secondary;
+      font-weight: normal;
+      color: $color-text-secondary;
+      text-align: center;
+    }
+  }
+
+  tr:last-child {
+    td:first-child {
+      border-bottom-left-radius: $border-radius;
+    }
+
+    td:last-child {
+      border-bottom-right-radius: $border-radius;
+    }
+
+    td {
+      border-bottom: $table-border;
+    }
+  }
+
 
   tr {
     height: 36px;
   }
 
-  th {
-    border: 1px solid $table-border-color;
-    background-color: $bg-secondary;
-    font-weight: normal;
-    color: $color-text-secondary;
+  td {
+    border-top: $table-border;
+    border-left: $table-border;
   }
 
-  td {
-    border: 1px solid $table-border-color;
+  td:last-child {
+    border-right: $table-border;
   }
 }

@@ -1,10 +1,10 @@
 <template>
   <div :class="className">
-    <div class="cluster-item__header">
+    <div class="cluster-item__header" @click="handleUnfold">
       <div class="cluster-item__title">{{ cluster.name }}</div>
       <div class="space" />
 
-      <IconArrowDropdown v-if="cluster.hidden" @click.native="show" />
+      <IconArrowDropdown v-if="cluster.folded" />
       <Dropdown v-else>
         <template v-slot:trigger="triggerSlotProps">
           <IconDotes @click.native="triggerSlotProps.toggle" />
@@ -14,18 +14,20 @@
           <li><Action :to="createServicePath">Add a Service</Action></li>
           <li><Action :to="editPath">Edit</Action></li>
           <li><Action @click="exportCluster">Export</Action></li>
-          <li><Action @click="hide">Hide</Action></li>
+          <li><Action @click="handleFold">Fold</Action></li>
           <li><Action theme="danger" @click="handleDelete">Delete</Action></li>
         </ul>
       </Dropdown>
     </div>
 
-    <div v-if="!cluster.hidden" class="cluster-item__services">
+    <div v-if="!cluster.folded" class="cluster-item__services">
       <template v-if="computedServices.length">
         <ServiceItem v-for="service in computedServices" :key="service.id" :service="service" />
       </template>
 
-      <div v-else class="cluster-item__empty">Services list is empty</div>
+      <div v-else class="cluster-item__empty">
+        <Button theme="primary" outline :to="createServicePath">Add a service</Button>
+      </div>
     </div>
   </div>
 </template>
@@ -40,6 +42,7 @@ import IconDotes from '../shared/icons/IconDotes'
 import ServiceItem from './ServiceItem'
 import Action from '../shared/Action'
 import IconArrowDropdown from '../shared/icons/IconArrowDropdown'
+import Button from '../shared/Button'
 
 export default {
   components: {
@@ -47,7 +50,8 @@ export default {
     Action,
     Dropdown,
     IconDotes,
-    ServiceItem
+    ServiceItem,
+    Button
   },
   props: {
     cluster: { type: Object, required: true },
@@ -56,7 +60,7 @@ export default {
   },
   computed: {
     className() {
-      return { 'cluster-item': true, 'cluster-item_hidden': this.cluster.hidden }
+      return { 'cluster-item': true, 'cluster-item_folded': this.cluster.folded }
     },
     computedServices() {
       if (this.services) return this.services
@@ -117,15 +121,16 @@ export default {
       // TODO
       alert('Not implemented yet.')
     },
-    hide() {
-      this.setHidden(true)
+    handleFold(e) {
+      this.setFolded(true)
+      e.stopPropagation()
     },
-    show() {
-      this.setHidden(false)
+    handleUnfold() {
+      if (this.cluster.folded) this.setFolded(false)
     },
-    async setHidden(hidden) {
+    async setFolded(folded) {
       const { id } = this.cluster
-      const result = await this.updateCluster({ id, hidden })
+      const result = await this.updateCluster({ id, folded })
 
       if (result.errors) alert(JSON.stringify(result.errors))
     },
@@ -160,9 +165,12 @@ export default {
 .cluster-item {
   border: $border;
   border-radius: $border-radius;
+  box-shadow: 0px 5px 10px $border-color;
 }
 
-.cluster-item_hidden {
+.cluster-item_folded {
+  cursor: pointer;
+
   .cluster-item__header {
     padding-right: 10px;
     border: none

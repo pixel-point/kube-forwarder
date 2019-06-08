@@ -15,7 +15,7 @@ export const clusterSchema = {
     id: { type: 'string' },
     name: { type: 'string' },
     config: { type: 'string' },
-    hidden: { type: 'boolean' }
+    folded: { type: 'boolean' }
   }
 }
 const { validate, pick } = createToolset(clusterSchema)

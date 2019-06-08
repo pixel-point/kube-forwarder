@@ -1,4 +1,4 @@
-$button-themes: primary danger;
+$button-themes: primary danger secondary;
 
 $color-text: #142d55;
 $color-text-placeholder: rgba($color-text, 0.75);
@@ -27,9 +27,9 @@ $bg-danger: rgba($color-danger, 0.15);
 $font-size-small: 13px;
 $font-size-base: 14px;
 $font-size-big: 15px;
+$font-size-large: 17px;
 
 $border-radius: 2px;
-$border-radius-l: 4px;
 $border-color: rgba($color-text, 0.1);
 $border: 1px solid $border-color;
 
