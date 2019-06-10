@@ -7,7 +7,10 @@
         <div class="clusters__header-actions">
           <Dropdown :popup-props="{ align: 'both' }" class="clusters__add-cluster-dropdown">
             <template v-slot:trigger="triggerSlotProps">
-              <Button :outline="!triggerSlotProps.opened" theme="primary" @click="triggerSlotProps.toggle">
+              <Button :layout="triggerSlotProps.opened ? 'filled' : 'outline'"
+                      theme="primary"
+                      @click="triggerSlotProps.toggle"
+              >
                 Add a cluster
                 <IconArrowDropdown :to="triggerSlotProps.opened ? 'top' : 'bottom'" />
               </Button>
@@ -21,14 +24,16 @@
 
           <Dropdown class="clusters__more-dropdown">
             <template v-slot:trigger="triggerSlotProps">
-              <Button outline @click="triggerSlotProps.toggle">
+              <Button layout="outline" @click="triggerSlotProps.toggle">
                 <IconDotes />
               </Button>
             </template>
 
             <template v-slot="slotProps">
               <ul class="popup__actions">
-                <li v-if="isEveryClusterFolded"><Action @click="unfoldAll(slotProps.close)">Unfold all clusters</Action></li>
+                <li v-if="isEveryClusterFolded">
+                  <Action @click="unfoldAll(slotProps.close)">Unfold all clusters</Action>
+                </li>
                 <li v-else><Action @click="foldAll(slotProps.close)">Fold all clusters</Action></li>
               </ul>
             </template>

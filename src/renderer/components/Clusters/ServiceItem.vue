@@ -4,10 +4,12 @@
 
     <div class="service-item__description">
       <div class="service-item__title">
-        <b v-if="service.alias">{{ service.alias }}</b>
-        <template v-else>
-          <b>{{ service.workloadName }}</b> from <b>{{ service.namespace }}</b>
-        </template>
+        <span v-if="service.alias">{{ service.alias }}</span>
+        <span v-else>
+          {{ service.workloadName }}
+          <span class="text text_theme_secondary"> from </span>
+          {{ service.namespace }}
+        </span>
       </div>
       <div class="service-item__ports">
         <span>Exposed to</span>
@@ -25,7 +27,7 @@
         theme="primary"
         size="s"
         class="service-item__action-button"
-        :outline="serviceState === 'connected'"
+        :layout="serviceState === 'connected' ? 'outline' : 'filled'"
         :disabled-style="serviceState === 'blocked'"
         :loading="serviceState === 'connecting'"
         @click="handleStartStop"
@@ -173,11 +175,6 @@ export default {
 .service-item__title {
   font-size: $font-size-big;
   margin-bottom: 5px;
-  color: $color-text-secondary;
-
-  b {
-    color: $color-text
-  }
 }
 
 .service-item__ports {

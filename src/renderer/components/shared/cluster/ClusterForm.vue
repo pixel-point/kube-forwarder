@@ -13,7 +13,7 @@
     </ControlGroup>
 
     <div class="control-actions">
-      <Button theme="danger" outline :to="backPath">Cancel</Button>
+      <Button theme="danger" layout="outline" :to="backPath">Cancel</Button>
       <div class="space" />
       <div v-if="error" class="control-actions__error">{{ error }}</div>
       <div v-else class="control-actions__message">{{ message }}</div>

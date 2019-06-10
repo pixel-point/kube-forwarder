@@ -16,6 +16,7 @@ export default {
 <style lang="scss">
 @import "assets/styles/icon";
 @import "assets/styles/table";
+@import "assets/styles/text";
 
 // Note: For new web sites, it is often useful to begin by setting box-sizing to border-box.
 // https://developer.mozilla.org/en-US/docs/Web/CSS/box-sizing

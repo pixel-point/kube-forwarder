@@ -165,10 +165,7 @@ async function prepareLogo() {
   })
 
   const x256 = new Promise((resolve, reject) => {
-    gm(path.resolve(__dirname, '../src/renderer/assets/logo.svg'))
-      .background('none')
-      .rotate('none', 45)
-      .resize(512, 512)
+    gm(path.resolve(__dirname, '../src/app-icon.png'))
       .write(path.resolve(__dirname, '../build/icons/256x256.png'), function(err) {
         if (err) reject(err)
         else resolve()

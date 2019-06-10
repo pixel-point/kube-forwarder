@@ -17,11 +17,10 @@ export default {
     href: { type: String, default: null },
     type: { type: String, default: 'button' },
     loading: { type: Boolean, default: false },
-    borderless: { type: Boolean, default: false },
-    outline: { type: Boolean, default: false },
     disabled: { type: Boolean, default: false },
     disabledStyle: { type: Boolean, default: false },
     size: { type: String, default: 'm', validator: val => ['s', 'm', 'l'].includes(val) },
+    layout: { type: String, default: 'filled', validator: val => ['filled', 'outline', 'text'].includes(val) },
     theme: {
       type: String,
       default: 'default',
@@ -37,10 +36,9 @@ export default {
     className() {
       return {
         button: true,
-        button_bordered: !this.borderless,
-        button_outline: this.outline,
         button_loading: this.loading,
         button_disabled: this.disabled || this.disabledStyle,
+        [`button_layout_${this.layout}`]: true,
         [`button_theme_${this.theme}`]: true,
         [`button_size_${this.size}`]: true
       }
@@ -59,29 +57,7 @@ export default {
 <style lang="scss">
 @import "../../assets/styles/mixins";
 
-.button {
-  background: none;
-  border: none;
-  display: inline-block;
-  text-transform: uppercase;
-  cursor: pointer;
-  font-weight: 500;
-  border-radius: $border-radius;
-  color: #fff;
-  text-decoration: none;
-  flex-shrink: 0;
-  text-align: center;
-
-  & > span + svg,
-  & > svg + span {
-    margin-left: 7px;
-  }
-
-  &:focus {
-    outline: none;
-  }
-}
-
+$border-width: 1px;
 $sizes: s m l;
 $heights: (
   "s": 30px,
@@ -99,7 +75,29 @@ $font-sizes: (
   "l": $font-size-large,
 );
 
-$border-width: 1px;
+.button {
+  background: none;
+  display: inline-block;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-weight: 500;
+  border-radius: $border-radius;
+  text-decoration: none;
+  flex-shrink: 0;
+  text-align: center;
+
+  // border exists always to prevent twitches
+  border: $border-width solid transparent;
+
+  & > span + svg,
+  & > svg + span {
+    margin-left: 7px;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
 
 @each $size in $sizes {
   $height: map-get($heights, $size);
@@ -108,24 +106,15 @@ $border-width: 1px;
 
   .button_size_#{$size} {
     height: $height;
-    line-height: $height;
     padding: 0 $padding;
     font-size: $font-size;
-
-    &.button_bordered {
-      line-height: $height - $border-width * 2;
-    }
+    line-height: $height - $border-width * 2;
   }
 }
 
-.button_bordered {
-  border: $border-width solid transparent;
-}
-
 .button_theme_default {
-  border-color: $border-color;
-
-  &.button_outline {
+  &.button_layout_outline {
+    border-color: $border-color;
     color: $color-text-tertiary;
 
     @include hf {
@@ -138,18 +127,27 @@ $border-width: 1px;
   }
 }
 
+.button_layout_filled {
+  color: #fff;
+}
+
 @each $theme in $button-themes {
   $theme-color: map-get($colors, $theme);
 
   .button_theme_#{$theme} {
-    background-color: $theme-color;
-    border-color: rgba($theme-color, 0.5);
-
-    @include hf {
-      background-color: mix($theme-color, #000, 90%);
+    &.button_layout_filled {
+      background-color: $theme-color;
+      @include hf {
+        background-color: mix($theme-color, #000, 90%);
+      }
     }
 
-    &.button_outline {
+    &.button_layout_outline {
+      border-color: rgba($theme-color, 0.5);
+    }
+
+    &.button_layout_text,
+    &.button_layout_outline {
       color: $theme-color;
 
       @include hf {
@@ -161,10 +159,6 @@ $border-width: 1px;
       }
     }
   }
-}
-
-.button_outline {
-  background-color: transparent;
 }
 
 @keyframes spin {

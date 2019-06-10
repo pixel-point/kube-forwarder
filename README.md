@@ -10,6 +10,7 @@ Built with [Electron](https://electronjs.org)
 * Node 10.8+
 * MacOS (if you want to build `.dmg` target)
 * Docker (if you want to run tests)
+* ImageMagick (to build app icon)
 
 ### Installing
 

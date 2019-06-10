@@ -33,8 +33,8 @@
           />
         </td>
         <td class="forwards-table__column forwards-table__column_name_actions">
-          <Button theme="danger" size="s" outline @click="() => removeForward(index)">
-            ✖
+          <Button theme="danger" size="s" layout="text" @click="() => removeForward(index)">
+            <IconCross />
           </Button>
         </td>
       </tr>
@@ -69,13 +69,15 @@ import uuidv1 from 'uuid'
 
 import BaseInput from '../shared/form/BaseInput'
 import IconArrowDropdown from '../shared/icons/IconArrowDropdown'
+import IconCross from '../shared/icons/IconCross'
 import Button from '../shared/Button'
 
 export default {
   components: {
     BaseInput,
     Button,
-    IconArrowDropdown
+    IconArrowDropdown,
+    IconCross
   },
   model: {
     event: 'change'
@@ -158,25 +160,5 @@ export default {
   width: 1px;
   left: 50%;
   background-color: $table-border-color;
-}
-
-.forwards-table__column {
-  /*padding: 2px;*/
-
-  .validation-errors {
-    margin-top: 2px;
-  }
-}
-
-.forwards-table__column-header_name_arrow {
-  .icon_arrow-dropdown {
-    display: block;
-    margin: auto;
-  }
-}
-
-.forwards-table__column_name_arrow {
-  padding: 0;
-  position: relative;
 }
 </style>
