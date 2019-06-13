@@ -89,6 +89,8 @@ $font-sizes: (
   // border exists always to prevent twitches
   border: $border-width solid transparent;
 
+  transition: background-color $hover-transition-speed, color $hover-transition-speed, border-color $hover-transition-speed;
+
   & > span + svg,
   & > svg + span {
     margin-left: 7px;
@@ -113,16 +115,24 @@ $font-sizes: (
 }
 
 .button_theme_default {
+  &.button_layout_text,
   &.button_layout_outline {
-    border-color: $border-color;
     color: $color-text-tertiary;
 
     @include hf {
-      background-color: rgba($color-text-tertiary, $button-outline-hover-bg-opacity);
+      color: $color-text-placeholder;
     }
 
     &.button_loading:before {
       border-color: $color-text-tertiary;
+    }
+  }
+
+  &.button_layout_outline {
+    border-color: $border-color;
+
+    @include hf {
+      border-color: $color-text-secondary;
     }
   }
 }
@@ -137,25 +147,26 @@ $font-sizes: (
   .button_theme_#{$theme} {
     &.button_layout_filled {
       background-color: $theme-color;
+
       @include hf {
         background-color: mix($theme-color, #000, 90%);
       }
-    }
-
-    &.button_layout_outline {
-      border-color: rgba($theme-color, 0.5);
     }
 
     &.button_layout_text,
     &.button_layout_outline {
       color: $theme-color;
 
-      @include hf {
-        background-color: rgba($theme-color, $button-outline-hover-bg-opacity);
-      }
-
       &.button_loading:before {
         border-color: $theme-color;
+      }
+    }
+
+    &.button_layout_outline {
+      border-color: rgba($theme-color, 0.5);
+
+      @include hf {
+        background-color: rgba($theme-color, $button-outline-hover-bg-opacity);
       }
     }
   }

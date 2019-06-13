@@ -2,19 +2,17 @@
   <div class="service-item">
     <div :class="`service-item__status service-item__status_state_${serviceState}`" />
 
-    <div class="service-item__description">
+    <div class="service-item__content">
       <div class="service-item__title">
-        <span v-if="service.alias">{{ service.alias }}</span>
-        <span v-else>
-          {{ service.workloadName }}
-          <span class="text text_theme_secondary"> from </span>
-          {{ service.namespace }}
-        </span>
+        <span>{{ getServiceLabel(service) }}</span>
       </div>
-      <div class="service-item__ports">
-        <span>Exposed to</span>
-        <span v-for="forward in forwards" :key="forward.id" class="service-item__port">
-          <b>{{ forward.localPort }}</b>
+      <div class="service-item__description">
+        <span>From <span class="service-item__namespace">{{ service.namespace }}</span> namespace exposed to</span>
+        <span class="service-item__ports">
+          <span v-for="(forward, index) in forwards" :key="forward.id" class="service-item__port">
+            <b>{{ forward.localPort }}</b><span v-if="index !== forwards.length - 1"
+                                                class="service-item__port-divider" />
+          </span>
         </span>
         <span>port{{ forwards.length > 1 ? 's' : '' }}</span>
       </div>
@@ -38,7 +36,9 @@
 
       <Dropdown>
         <template v-slot:trigger="triggerSlotProps">
-          <IconDotes @click.native="triggerSlotProps.toggle" />
+          <Button class="service-item__action-more" layout="text" @click="triggerSlotProps.toggle">
+            <IconDotes />
+          </Button>
         </template>
 
         <ul class="popup__actions">
@@ -54,6 +54,7 @@
 <script>
 import { CONNECTED } from '../../lib/constants/connection-states'
 import { showMessageBox, showConfirmBox } from '../../lib/helpers/ui'
+import { getServiceLabel } from '../../lib/helpers/service'
 
 import Dropdown from '../shared/Dropdown'
 import IconDotes from '../shared/icons/IconDotes'
@@ -125,21 +126,22 @@ export default {
     showBlockedReason() {
       const portsDetails = this.portStatesAlreadyInUse.map(state => {
         const service = this.$store.state.Services.items[state.serviceId]
-        const serviceName = service ? service.name : `Service(serviceId:${state.serviceId})`
+        const serviceName = service ? getServiceLabel(service) : `Service(serviceId:${state.serviceId})`
         return `${state.port} used by ${serviceName}`
       }).join(';\n')
 
       showMessageBox(`Service can't be forwarded. Some ports already in use.\n\n${portsDetails}`)
     },
     async handleDelete() {
-      const confirm = await showConfirmBox(`Are you sure to delete "${this.service.name}" service`)
+      const confirm = await showConfirmBox(`Are you sure to delete "${getServiceLabel(this.service)}" service`)
       if (confirm) {
         this.$store.dispatch('Services/deleteService', this.service.id)
       }
     },
     servicePath(postfix = '') {
       return `/clusters/${this.service.clusterId}/services/${this.service.id}${postfix}`
-    }
+    },
+    getServiceLabel
   }
 }
 </script>
@@ -168,7 +170,7 @@ export default {
   background-color: $color-secondary;
 }
 
-.service-item__description {
+.service-item__content {
   margin: 0 17px
 }
 
@@ -177,7 +179,11 @@ export default {
   margin-bottom: 5px;
 }
 
-.service-item__ports {
+.service-item__namespace {
+  color: $color-text
+}
+
+.service-item__description {
   color: $color-text-secondary;
 
   b {
@@ -185,21 +191,35 @@ export default {
   }
 }
 
-.service-item__port + .service-item__port:before {
-  content: ', '
+.service-item__port {
+  &:first-child {
+    padding-left: 2.5px;
+  }
+
+  &:last-child {
+    padding-right: 2.5px;
+  }
+}
+
+.service-item__port-divider {
+  width: 3px;
+  height: 3px;
+  display: inline-block;
+  background-color: $color-text-tertiary;
+  margin: -1px 5px 0;
+  border-radius: 50%;
+  vertical-align: middle;
 }
 
 .service-item__actions {
   display: flex;
   align-items: center;
+}
 
-  .icon_dotes {
-    box-sizing: content-box;
-    padding: 0 10px;
-    cursor: pointer;
-    color: $color-text-tertiary;
-    margin-left: 10px;
-  }
+.service-item__action-more {
+  padding: 0;
+  width: 24px;
+  margin-left: 10px;
 }
 
 .service-item__action-button {

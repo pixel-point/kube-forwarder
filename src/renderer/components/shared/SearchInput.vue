@@ -51,7 +51,13 @@ export default {
       width: 10px;
       height: 10px;
       cursor: pointer;
-      background-image: url("data:image/svg+xml,%3Csvg width='10' height='11' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6.374 5.404l3.372 3.372a.954.954 0 1 1-1.349 1.348L5.025 6.753l-3.372 3.371A.954.954 0 1 1 .304 8.776l3.372-3.372L.304 2.032A.954.954 0 0 1 1.654.683l3.371 3.372L8.397.683a.954.954 0 0 1 1.349 1.349L6.374 5.404z' fill='%23142d55' fill-rule='nonzero'%0Aopacity='0.25' /%3E%3C/svg%3E");
+      opacity: 0.25;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='11' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6.374 5.404l3.372 3.372a.954.954 0 1 1-1.349 1.348L5.025 6.753l-3.372 3.371A.954.954 0 1 1 .304 8.776l3.372-3.372L.304 2.032A.954.954 0 0 1 1.654.683l3.371 3.372L8.397.683a.954.954 0 0 1 1.349 1.349L6.374 5.404z' fill='%23142d55' fill-rule='nonzero'%0Aopacity='1' /%3E%3C/svg%3E");
+      transition: opacity $hover-transition-speed;
+
+      &:hover {
+        opacity: 0.75;
+      }
     }
   }
 }

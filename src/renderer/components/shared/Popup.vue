@@ -87,6 +87,8 @@ export default {
     display: block;
     min-width: 160px;
 
+    transition: background-color $hover-transition-speed;
+
     &:hover {
       background-color: $bg-secondary;
     }

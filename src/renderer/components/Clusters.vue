@@ -1,5 +1,5 @@
 <template>
-  <div class="clusters" :class="{ clusters_empty: clustersCount === 0 }">
+  <div :class="{ clusters: true, clusters_empty: clustersCount === 0, 'clusters_not-found': !filteredClusterIds.length }">
     <template v-if="clustersCount">
       <Header>
         <SearchInput v-model="query" size="s" />
@@ -18,7 +18,7 @@
 
             <ul class="popup__actions">
               <li><Action to="/clusters/new">FROM SCRATCH</Action></li>
-              <li><Action to="/clusters/import">FROM IMPORT</Action></li>
+              <li><Action to="/clusters/import">FROM JSON</Action></li>
             </ul>
           </Dropdown>
 
@@ -32,9 +32,9 @@
             <template v-slot="slotProps">
               <ul class="popup__actions">
                 <li v-if="isEveryClusterFolded">
-                  <Action @click="unfoldAll(slotProps.close)">Unfold all clusters</Action>
+                  <Action @click="unfoldAll(slotProps.close)">Unfold All Clusters</Action>
                 </li>
-                <li v-else><Action @click="foldAll(slotProps.close)">Fold all clusters</Action></li>
+                <li v-else><Action @click="foldAll(slotProps.close)">Fold All Clusters</Action></li>
               </ul>
             </template>
           </Dropdown>
@@ -49,16 +49,16 @@
         :filtered="!!query"
       />
 
-      <Alert v-if="!filteredClusterIds.length">Not found</Alert>
+      <div v-if="!filteredClusterIds.length" class="text_theme_secondary">Nothing found...</div>
     </template>
 
     <template v-else>
-      <h1>Add a cluster</h1>
+      <h1>Add a Cluster</h1>
 
       <div class="clusters__controls">
         <Button theme="secondary" size="l" to="/clusters/new">FROM SCRATCH</Button>
         <div class="cluster__control-or">OR</div>
-        <Button theme="primary" size="l" to="/clusters/import">FROM IMPORT</Button>
+        <Button theme="primary" size="l" to="/clusters/import">FROM JSON</Button>
       </div>
     </template>
   </div>
@@ -72,7 +72,6 @@ import Header from './shared/Header'
 import SearchInput from './shared/SearchInput'
 import Dropdown from './shared/Dropdown'
 import ClusterItem from './Clusters/ClusterItem'
-import Alert from './shared/Alert'
 import IconArrowDropdown from './shared/icons/IconArrowDropdown'
 import IconDotes from './shared/icons/IconDotes'
 import Action from './shared/Action'
@@ -86,7 +85,6 @@ export default {
     SearchInput,
     Dropdown,
     ClusterItem,
-    Alert,
     IconArrowDropdown,
     IconDotes
   },
@@ -109,7 +107,17 @@ export default {
       const services = Object.values(this.$store.state.Services.items)
 
       for (const service of services) {
-        if (this.clustersById[service.clusterId] && (!this.query || service.name.includes(this.query))) {
+        if (
+          this.clustersById[service.clusterId] && // cluster present
+          (
+            // no query or service matches to query
+            !this.query ||
+            (
+              (service.alias && service.alias.includes(this.query)) ||
+              service.workloadName.includes(this.query)
+            )
+          )
+        ) {
           result[service.clusterId] = result[service.clusterId] || []
           result[service.clusterId].push(service)
         }
@@ -165,7 +173,7 @@ export default {
 
     .search-input .base-input {
       width: 191px;
-      transition: width linear 0.2s;
+      transition: width $hover-transition-speed, border-color $hover-transition-speed;
 
       &:focus {
         width: 320px;
@@ -184,7 +192,7 @@ export default {
     text-align: center;
     line-height: 36px;
     margin: 58px 0 60px;
-    font-weight: normal;
+    font-weight: 500;
   }
 
   &:after {
@@ -197,6 +205,24 @@ export default {
     bottom: 0;
     right: 0;
     position: absolute;
+  }
+}
+
+.clusters_not-found {
+  .header {
+    z-index: 10
+  }
+  .text_theme_secondary {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    z-index: 0;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
   }
 }
 
@@ -228,7 +254,7 @@ export default {
   margin-left: 13px;
 
   .button {
-    width: 22px;
+    width: 26px;
     padding: 0;
   }
 }

@@ -43,6 +43,7 @@ export default {
   background: #fff;
   font-weight: 500;
   font-size: $font-size-base;
+  transition: border-color $hover-transition-speed;
 
   &:focus {
     border-color: $color-primary;

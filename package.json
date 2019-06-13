@@ -39,19 +39,26 @@
       "dist/electron/**/*"
     ],
     "dmg": {
+      "background": "src/bg.tiff",
+      "iconSize": 125,
+      "iconTextSize": 13,
       "contents": [
         {
-          "x": 410,
-          "y": 210,
+          "x": 501,
+          "y": 183,
           "type": "link",
           "path": "/Applications"
         },
         {
-          "x": 130,
-          "y": 210,
+          "x": 163,
+          "y": 183,
           "type": "file"
         }
-      ]
+      ],
+      "window": {
+        "width": 675,
+        "height": 433
+      }
     },
     "publish": {
       "provider": "github",

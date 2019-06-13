@@ -9,6 +9,7 @@ import { createToolset } from '../helpers/validations'
 import * as connectionStates from '../../lib/constants/connection-states'
 import { k8nApiPrettyError } from '../../lib/helpers/k8n-api-error'
 import { netServerPrettyError } from '../../lib/helpers/net-server-error'
+import { getServiceLabel } from '../../lib/helpers/service'
 
 const { validate } = createToolset({
   type: 'object',
@@ -79,7 +80,7 @@ async function startForward(commit, k8sForward, service, forward, podName) {
       } else {
         server.kill()
         const prettyError = netServerPrettyError(error)
-        console.info(`Error while forwarding Service ${service.name}(${service.id}): ${prettyError.message}`)
+        console.info(`Error while forwarding Service ${getServiceLabel(service)}(${service.id}): ${prettyError.message}`)
         resolve({ success: false, error: prettyError, service, forward })
       }
     })
@@ -87,7 +88,7 @@ async function startForward(commit, k8sForward, service, forward, podName) {
     server.on('listening', () => {
       servers[listenPort] = server
       commit('SET', { port: listenPort, serviceId: service.id, state: connectionStates.CONNECTED })
-      console.info(`Service ${service.name}(${service.id}) is forwarding port ${listenPort} to ${podName}:${forward.remotePort}`)
+      console.info(`Service ${getServiceLabel(service.name)}(${service.id}) is forwarding port ${listenPort} to ${podName}:${forward.remotePort}`)
       resolve({ success: true, service, forward })
     })
 

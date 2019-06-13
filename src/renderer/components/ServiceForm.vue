@@ -3,40 +3,42 @@
     <Header :back-path="backPath" />
 
     <BaseForm @submit="handleSubmit" multicolumn>
-      <ControlGroup label="Cluster Name" size="2" :attribute="$v.attributes.clusterId">
-        <BaseSelect v-model="$v.attributes.clusterId.$model" :options="clusterOptions" />
-      </ControlGroup>
+      <fieldset>
+        <ControlGroup label="Cluster Name" size="2" :attribute="$v.attributes.clusterId">
+          <BaseSelect v-model="$v.attributes.clusterId.$model" :options="clusterOptions" />
+        </ControlGroup>
 
-      <ControlGroup label="Namespace" size="2" :attribute="$v.attributes.namespace">
-        <BaseInput v-model="$v.attributes.namespace.$model" />
-      </ControlGroup>
+        <ControlGroup label="Namespace" size="2" :attribute="$v.attributes.namespace">
+          <BaseInput v-model="$v.attributes.namespace.$model" />
+        </ControlGroup>
 
-      <ControlGroup label="Workload Type" size="2" :attribute="$v.attributes.workloadType">
-        <BaseSelect
-          v-model="$v.attributes.workloadType.$model"
-          :options="workloadTypeOptions"
-          placeholder="Select Workload Type"
-        />
-      </ControlGroup>
+        <ControlGroup label="Workload Type" size="2" :attribute="$v.attributes.workloadType">
+          <BaseSelect
+            v-model="$v.attributes.workloadType.$model"
+            :options="workloadTypeOptions"
+            placeholder="Select Workload Type"
+          />
+        </ControlGroup>
 
-      <ControlGroup
-        label="Workload Name"
-        size="2"
-        :attribute="$v.attributes.workloadName"
-        :disabled="!attributes.workloadType"
-      >
-        <template v-slot="slotProps">
-          <BaseInput v-model="slotProps.attribute.$model" v-bind="slotProps" />
-        </template>
-      </ControlGroup>
+        <ControlGroup
+          label="Workload Name"
+          size="2"
+          :attribute="$v.attributes.workloadName"
+          :disabled="!attributes.workloadType"
+        >
+          <template v-slot="slotProps">
+            <BaseInput v-model="slotProps.attribute.$model" v-bind="slotProps" />
+          </template>
+        </ControlGroup>
 
-      <ControlGroup label="Alias" size="2" :attribute="$v.attributes.alias">
-        <BaseInput v-model="$v.attributes.alias.$model" placeholder="Optional..."/>
-      </ControlGroup>
+        <ControlGroup label="Alias" size="2" :attribute="$v.attributes.alias">
+          <BaseInput v-model="$v.attributes.alias.$model" placeholder="Optional..." />
+        </ControlGroup>
 
-      <ControlGroup label="Ports Forwarding">
-        <ForwardsTable v-model="$v.attributes.forwards.$model" :attribute="$v.attributes.forwards" />
-      </ControlGroup>
+        <ControlGroup label="Ports Forwarding">
+          <ForwardsTable v-model="$v.attributes.forwards.$model" :attribute="$v.attributes.forwards" />
+        </ControlGroup>
+      </fieldset>
 
       <div class="control-actions">
         <Button theme="danger" layout="outline" :to="backPath">Cancel</Button>
@@ -159,6 +161,16 @@ export default {
 
   .header {
     margin-bottom: 20px
+  }
+
+  .base-form {
+    display: flex;
+    flex-direction: column;
+
+    /*fieldset {*/
+    /*  overflow: auto;*/
+    /*}*/
+    /*max-height: 409px;*/
   }
 }
 </style>

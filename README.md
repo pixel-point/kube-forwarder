@@ -83,7 +83,12 @@ Notes:
 1) `.dmg` target is added to release by your mac computer. 
 `.AppImage` and `.exe` have to be added to the release by drone CI.
 2) A release tag (for example: `v1.0.3`) will be added automatically 
-by Github when you release your draft. 
+by Github when you release your draft.
+
+## Tips
+
+Use `tiffutil -cathidpicheck bg.png bg@2x.png -out bg.tiff` to build a tiff
+background for .DMG 
 
 ## License
 

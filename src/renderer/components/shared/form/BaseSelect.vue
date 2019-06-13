@@ -72,7 +72,7 @@ export default {
     position: absolute;
     top: 16px;
     right: 13px;
-    color: $color-text-secondary;
+    color: $color-text-tertiary;
   }
 }
 

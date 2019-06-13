@@ -67,11 +67,17 @@ export default {
 }
 
 .base-form_multicolumn {
-  font-size: 0;
   padding: 20px 5px;
 
-  > * {
-    font-size: $font-size-base;
+  fieldset {
+    margin: 0;
+    padding: 0;
+    border: none;
+    font-size: 0;
+
+    > * {
+      font-size: $font-size-base;
+    }
   }
 
   .control-group,

@@ -7,7 +7,9 @@
       <IconArrowDropdown v-if="cluster.folded" />
       <Dropdown v-else>
         <template v-slot:trigger="triggerSlotProps">
-          <IconDotes @click.native="triggerSlotProps.toggle" />
+          <Button class="cluster-item__action-more" layout="text" @click="triggerSlotProps.toggle" >
+            <IconDotes />
+          </Button>
         </template>
 
         <ul class="popup__actions">
@@ -26,7 +28,7 @@
       </template>
 
       <div v-else class="cluster-item__empty">
-        <Button theme="primary" layout="outline" :to="createServicePath">Add a service</Button>
+        <Button theme="primary" :to="createServicePath">Add a service</Button>
       </div>
     </div>
   </div>
@@ -72,30 +74,6 @@ export default {
     },
     editPath() {
       return `clusters/${this.cluster.id}/edit`
-    },
-    forwardAllConflicts() {
-      if (!this.services) return null
-
-      const serviceNamesByPort = {}
-      for (const service of this.services) {
-        for (const forward of service.forwards) {
-          serviceNamesByPort[forward.localPort] = serviceNamesByPort[forward.localPort] || []
-          serviceNamesByPort[forward.localPort].push(service.name)
-        }
-      }
-
-      const conflicts = []
-      for (const localPort of Object.keys(serviceNamesByPort)) {
-        const serviceNames = serviceNamesByPort[localPort]
-        if (serviceNames.length > 1) {
-          conflicts.push({ services: serviceNames, port: localPort })
-        }
-      }
-
-      return conflicts.length ? conflicts : null
-    },
-    canForwardAll() {
-      return !this.filtered && !this.forwardAllConflicts && false // since not implemented
     }
   },
   methods: {
@@ -105,21 +83,6 @@ export default {
       if (confirm) {
         this.$store.dispatch('Clusters/deleteCluster', this.cluster.id)
       }
-    },
-    forwardAll() {
-      if (this.filtered) {
-        alert('Please clear the search field to forward all services')
-      }
-
-      if (this.forwardAllConflicts) {
-        const excuses = 'Sorry, you can\'t forward all services.'
-        const conflict = this.forwardAllConflicts[0]
-
-        alert(`${excuses} Services "${conflict.services.join('", "')}" uses the same port ${conflict.port}`)
-      }
-
-      // TODO
-      alert('Not implemented yet.')
     },
     handleFold(e) {
       this.setFolded(true)
@@ -165,11 +128,12 @@ export default {
 .cluster-item {
   border: $border;
   border-radius: $border-radius;
-  box-shadow: 0px 5px 10px $border-color;
+  box-shadow: 0 5px 10px $border-color;
 }
 
 .cluster-item_folded {
   cursor: pointer;
+  box-shadow: none;
 
   .cluster-item__header {
     padding-right: 10px;
@@ -182,22 +146,21 @@ export default {
   font-size: $font-size-big;
   font-weight: 500;
   color: $color-text-secondary;
-  height: 36px;
+  height: 35px;
   padding: 0 0 0 15px;
   display: flex;
   align-items: center;
   border-bottom: $border;
 
-  .icon_dotes {
-    box-sizing: content-box;
-    padding: 0 10px;
+  .icon_arrow-dropdown {
     cursor: pointer;
     color: $color-text-tertiary;
   }
+}
 
-  .icon_arrow-dropdown {
-    cursor: pointer;
-  }
+.cluster-item__action-more {
+  padding: 0;
+  width: 24px;
 }
 
 .cluster-item__empty {

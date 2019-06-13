@@ -3,10 +3,10 @@
     <tbody>
       <tr>
         <td class="forwards-table__column-header forwards-table__column-header_name_local-port">
-          Local port
+          Local Port
           <IconArrowDropdown thin to="right" class="forwards-table__arrow-column-divider" />
         </td>
-        <td class="forwards-table__column-header forwards-table__column-header_name_remote-port">Destination port</td>
+        <td class="forwards-table__column-header forwards-table__column-header_name_remote-port">Destination Port</td>
         <td class="forwards-table__column-header forwards-table__column-header_name_actions" />
       </tr>
       <tr
@@ -39,7 +39,7 @@
         </td>
       </tr>
 
-      <tr>
+      <tr :key="newForward.id">
         <td class="forwards-table__column forwards-table__column_name_local-port">
           <BaseInput
             v-model.number="newForward.localPort"

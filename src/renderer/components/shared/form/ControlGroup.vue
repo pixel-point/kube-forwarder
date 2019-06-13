@@ -42,8 +42,10 @@ export default {
 @import "../../../assets/styles/variables";
 
 .control-group {
-  & + .control-group {
-    margin-top: 30px;
+  margin-bottom: 30px;
+
+  &:last-child {
+    margin-bottom: 0;
   }
 
   > .validation-errors {
