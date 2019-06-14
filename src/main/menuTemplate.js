@@ -54,7 +54,7 @@ export default function buildMenuTemplate(app) {
     template.unshift({
       label: app.getName(),
       submenu: [
-        { role: 'about' },
+        { role: 'about', label: 'About Kube Forwarder' },
         { label: 'Check for Updates...', click: manuallyCheckForUpdates },
         { type: 'separator' },
         { role: 'services' },

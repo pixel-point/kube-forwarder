@@ -63,6 +63,12 @@ export default {
   .base-input {
     width: 100%;
   }
+
+  &.dropdown_opened {
+    .base-select__input-wrap .icon_arrow-dropdown {
+      color: $color-text-placeholder
+    }
+  }
 }
 
 .base-select__input-wrap {
@@ -73,6 +79,7 @@ export default {
     top: 16px;
     right: 13px;
     color: $color-text-tertiary;
+    transition: color $hover-transition-speed;
   }
 }
 

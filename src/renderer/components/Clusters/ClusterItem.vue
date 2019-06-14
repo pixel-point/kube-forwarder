@@ -128,7 +128,6 @@ export default {
 .cluster-item {
   border: $border;
   border-radius: $border-radius;
-  box-shadow: 0 5px 10px $border-color;
 }
 
 .cluster-item_folded {
@@ -137,7 +136,8 @@ export default {
 
   .cluster-item__header {
     padding-right: 10px;
-    border: none
+    border: none;
+    height: 34px;
   }
 }
 

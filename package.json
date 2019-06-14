@@ -1,5 +1,5 @@
 {
-  "name": "kubernetes-port-forwarder",
+  "name": "kube-forwarder",
   "version": "0.0.1",
   "versionString": "0.0.1",
   "author": "Alexandr Promakh <s-promakh@ya.ru>",

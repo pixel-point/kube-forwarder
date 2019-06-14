@@ -1,9 +1,10 @@
 <template>
-  <div v-click-outside="close" class="dropdown">
+  <div v-click-outside="close" :class="className">
     <slot name="trigger" :toggle="toggle" :opened="opened" />
 
     <Popup
       v-if="opened"
+      ref="popup"
       :position="position"
       :align="align"
       v-bind="popupProps"
@@ -34,6 +35,12 @@ export default {
     }
   },
   computed: {
+    className() {
+      return {
+        dropdown: true,
+        dropdown_opened: this.opened
+      }
+    },
     position() {
       return this.popupProps.position || 'bottom'
     },
@@ -44,6 +51,9 @@ export default {
   methods: {
     toggle() {
       this.opened = !this.opened
+      if (this.opened) {
+        this.$nextTick(() => this.$refs.popup.$el.scrollIntoView())
+      }
     },
     close() {
       this.opened = false

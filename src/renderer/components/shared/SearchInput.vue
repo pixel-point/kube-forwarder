@@ -59,6 +59,10 @@ export default {
         opacity: 0.75;
       }
     }
+
+    &:focus + .icon_magnifier {
+      color: $color-text-placeholder;
+    }
   }
 }
 </style>

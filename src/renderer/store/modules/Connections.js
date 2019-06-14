@@ -88,7 +88,7 @@ async function startForward(commit, k8sForward, service, forward, podName) {
     server.on('listening', () => {
       servers[listenPort] = server
       commit('SET', { port: listenPort, serviceId: service.id, state: connectionStates.CONNECTED })
-      console.info(`Service ${getServiceLabel(service.name)}(${service.id}) is forwarding port ${listenPort} to ${podName}:${forward.remotePort}`)
+      console.info(`Service ${getServiceLabel(service)}(${service.id}) is forwarding port ${listenPort} to ${podName}:${forward.remotePort}`)
       resolve({ success: true, service, forward })
     })
 

@@ -1,11 +1,11 @@
 <template>
   <div class="service-item">
-    <div :class="`service-item__status service-item__status_state_${serviceState}`" />
+    <div :class="`service-item__status service-item__status_state_${serviceState}`">
+      <Hint showOn="hover" :offset="-7.5">{{ serviceState === 'connected' ? 'Running' : 'Stopped' }}</Hint>
+    </div>
 
     <div class="service-item__content">
-      <div class="service-item__title">
-        <span>{{ getServiceLabel(service) }}</span>
-      </div>
+      <div class="service-item__title">{{ getServiceLabel(service) }}</div>
       <div class="service-item__description">
         <span>From <span class="service-item__namespace">{{ service.namespace }}</span> namespace exposed to</span>
         <span class="service-item__ports">
@@ -62,6 +62,7 @@ import Button from '../shared/Button'
 import IconPause from '../shared/icons/IconPause'
 import IconPlay from '../shared/icons/IconPlay'
 import Action from '../shared/Action'
+import Hint from '../shared/Hint'
 
 export default {
   components: {
@@ -70,7 +71,8 @@ export default {
     IconDotes,
     IconPause,
     IconPlay,
-    Action
+    Action,
+    Hint
   },
   props: {
     service: { type: Object, required: true }
@@ -164,6 +166,8 @@ export default {
   border-radius: 50%;
   background-color: $color-danger;
   margin-top: 5px;
+  position: relative;
+  cursor: default;
 }
 
 .service-item__status_state_connected {
@@ -177,6 +181,7 @@ export default {
 .service-item__title {
   font-size: $font-size-big;
   margin-bottom: 5px;
+  font-weight: 500;
 }
 
 .service-item__namespace {
@@ -219,7 +224,7 @@ export default {
 .service-item__action-more {
   padding: 0;
   width: 24px;
-  margin-left: 10px;
+  margin-left: 14px;
 }
 
 .service-item__action-button {

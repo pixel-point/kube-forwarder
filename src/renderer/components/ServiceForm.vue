@@ -36,7 +36,7 @@
         </ControlGroup>
 
         <ControlGroup label="Ports Forwarding">
-          <ForwardsTable v-model="$v.attributes.forwards.$model" :attribute="$v.attributes.forwards" />
+          <ForwardsTable v-model="attributes.forwards" :attribute="$v.attributes.forwards" />
         </ControlGroup>
       </fieldset>
 
