@@ -263,6 +263,6 @@ export default {
   line-height: 20px;
   margin: 0 30px;
   font-size: 17px;
-  color: $color-text-secondary;
+  color: $color-text-tertiary;
 }
 </style>

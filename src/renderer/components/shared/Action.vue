@@ -57,6 +57,6 @@ export default {
 }
 
 .action_disabled {
-  color: $color-text-secondary;
+  color: $color-text-tertiary;
 }
 </style>

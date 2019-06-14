@@ -117,14 +117,14 @@ $font-sizes: (
 .button_theme_default {
   &.button_layout_text,
   &.button_layout_outline {
-    color: $color-text-tertiary;
+    color: $color-text-quaternary;
 
     @include hf {
-      color: $color-text-placeholder;
+      color: $color-text-secondary;
     }
 
     &.button_loading:before {
-      border-color: $color-text-tertiary;
+      border-color: $color-text-quaternary;
     }
   }
 
@@ -132,7 +132,7 @@ $font-sizes: (
     border-color: $border-color;
 
     @include hf {
-      border-color: $color-text-secondary;
+      border-color: $color-text-tertiary;
     }
   }
 }

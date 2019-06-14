@@ -57,12 +57,13 @@ export default {
   .control-actions__error {
     font-size: $font-size-small;
     color: $color-danger;
-    padding: 0 10px
+    padding: 0 20px
   }
 
   .control-actions__message {
+    color: $color-text-secondary;
     font-size: $font-size-small;
-    padding: 0 10px
+    padding: 0 20px
   }
 }
 

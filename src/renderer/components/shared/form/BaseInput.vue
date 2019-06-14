@@ -55,7 +55,7 @@ export default {
   }
 
   &::placeholder {
-    color: $color-text-placeholder;
+    color: $color-text-secondary;
     font-weight: normal;
   }
 }

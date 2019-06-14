@@ -47,5 +47,10 @@ export default {
 
 .header__back {
   cursor: pointer;
+  color: $color-text-quaternary;
+
+  &:hover {
+    color: $color-text-secondary;
+  }
 }
 </style>

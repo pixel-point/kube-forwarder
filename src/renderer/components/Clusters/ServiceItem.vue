@@ -189,7 +189,7 @@ export default {
 }
 
 .service-item__description {
-  color: $color-text-secondary;
+  color: $color-text-tertiary;
 
   b {
     color: $color-text
@@ -210,7 +210,7 @@ export default {
   width: 3px;
   height: 3px;
   display: inline-block;
-  background-color: $color-text-tertiary;
+  background-color: $color-text-quaternary;
   margin: -1px 5px 0;
   border-radius: 50%;
   vertical-align: middle;

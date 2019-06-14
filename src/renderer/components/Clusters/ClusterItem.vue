@@ -128,6 +128,7 @@ export default {
 .cluster-item {
   border: $border;
   border-radius: $border-radius;
+  box-shadow: 0 5px 10px $border-color;
 }
 
 .cluster-item_folded {
@@ -145,7 +146,7 @@ export default {
   background: $bg-secondary;
   font-size: $font-size-big;
   font-weight: 500;
-  color: $color-text-secondary;
+  color: $color-text-tertiary;
   height: 35px;
   padding: 0 0 0 15px;
   display: flex;
@@ -154,7 +155,7 @@ export default {
 
   .icon_arrow-dropdown {
     cursor: pointer;
-    color: $color-text-tertiary;
+    color: $color-text-quaternary;
   }
 }
 
@@ -164,7 +165,7 @@ export default {
 }
 
 .cluster-item__empty {
-  color: $color-text-secondary;
+  color: $color-text-tertiary;
   padding: 21px;
   text-align: center;
 }

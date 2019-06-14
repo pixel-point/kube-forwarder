@@ -71,7 +71,7 @@ export default {
 
 .control-group_disabled {
   .control-label {
-    color: $color-text-tertiary
+    color: $color-text-quaternary
   }
 }
 </style>

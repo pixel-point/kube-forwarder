@@ -52,6 +52,7 @@ export default {
   border-radius: $border-radius;
   box-shadow: 0 2px 4px 0 $border-color;
   border: solid 1px #edeef1;
+  margin-bottom: 20px;
 }
 
 .popup_position_bottom {
@@ -81,11 +82,11 @@ export default {
   }
 
   .action {
-    padding: 0 15px;
+    padding: 0 30px 0 15px;
     height: 36px;
     line-height: 36px;
     display: block;
-    min-width: 160px;
+    white-space: nowrap;
 
     transition: background-color $hover-transition-speed;
 

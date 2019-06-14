@@ -50,7 +50,7 @@ export default {
 }
 
 .toolbar__version {
-  color: $color-text-tertiary;
+  color: $color-text-quaternary;
   float: right;
   flex-shrink: 0;
 }
