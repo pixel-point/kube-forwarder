@@ -9,7 +9,7 @@
       :align="align"
       v-bind="popupProps"
     >
-      <slot :close="close"/>
+      <slot :close="close" />
     </Popup>
   </div>
 </template>
@@ -51,12 +51,29 @@ export default {
   methods: {
     toggle() {
       this.opened = !this.opened
+
       if (this.opened) {
-        this.$nextTick(() => this.$refs.popup.$el.scrollIntoView())
+        this.$nextTick(() => {
+          const popupEl = this.$refs.popup.$el
+
+          if (!this.isInViewport(popupEl)) {
+            popupEl.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          }
+        })
       }
     },
     close() {
       this.opened = false
+    },
+    isInViewport(elem) {
+      const bounding = elem.getBoundingClientRect()
+
+      return (
+        bounding.top >= 0 &&
+        bounding.left >= 0 &&
+        bounding.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        bounding.right <= (window.innerWidth || document.documentElement.clientWidth)
+      )
     }
   }
 }
@@ -66,5 +83,9 @@ export default {
 .dropdown {
   position: relative;
   display: inline-block;
+
+  .popup {
+    margin-bottom: 20px;
+  }
 }
 </style>

@@ -5,7 +5,7 @@
       <div class="space" />
 
       <IconArrowDropdown v-if="cluster.folded" />
-      <Dropdown v-else>
+      <Dropdown v-else :popup-props="{ offsetHorizontal: 1 }">
         <template v-slot:trigger="triggerSlotProps">
           <Button class="cluster-item__action-more" layout="text" @click="triggerSlotProps.toggle" >
             <IconDotes />

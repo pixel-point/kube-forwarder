@@ -34,7 +34,7 @@
         <IconPlay v-else />
       </Button>
 
-      <Dropdown>
+      <Dropdown :popup-props="{ offsetHorizontal: 1 }">
         <template v-slot:trigger="triggerSlotProps">
           <Button class="service-item__action-more" layout="text" @click="triggerSlotProps.toggle">
             <IconDotes />

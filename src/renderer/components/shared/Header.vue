@@ -48,6 +48,7 @@ export default {
 .header__back {
   cursor: pointer;
   color: $color-text-quaternary;
+  transition: color $hover-transition-speed;
 
   &:hover {
     color: $color-text-secondary;

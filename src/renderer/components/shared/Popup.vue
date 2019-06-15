@@ -11,7 +11,8 @@ export default {
     position: { type: String, required: true, validator: x => ['bottom'].includes(x) },
     align: { type: String, required: true, validator: x => ['center', 'right', 'both'].includes(x) },
     width: { type: null, default: null },
-    offsetVertical: { type: Number, default: 5 }
+    offsetVertical: { type: Number, default: 5 },
+    offsetHorizontal: { type: Number, default: 0 }
   },
   computed: {
     className() {
@@ -24,6 +25,8 @@ export default {
     style() {
       const result = {}
 
+      result.transform = `translate3d(${this.offsetHorizontal}px, ${this.offsetVertical}px, 0px)`
+
       if (this.position === 'bottom') {
         if (this.align === 'right') {
           result.width = `${this.width}px`
@@ -32,8 +35,6 @@ export default {
         if (this.align === 'center') {
           result.marginLeft = `-${this.width / 2}px`
         }
-
-        result.marginTop = `${this.offsetVertical}px`
       }
 
       return result
@@ -52,7 +53,6 @@ export default {
   border-radius: $border-radius;
   box-shadow: 0 2px 4px 0 $border-color;
   border: solid 1px #edeef1;
-  margin-bottom: 20px;
 }
 
 .popup_position_bottom {
