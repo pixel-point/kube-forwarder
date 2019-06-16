@@ -32,9 +32,9 @@
             <template v-slot="slotProps">
               <ul class="popup__actions">
                 <li v-if="isEveryClusterFolded">
-                  <Action @click="unfoldAll(slotProps.close)">Unfold All Clusters</Action>
+                  <Action @click="unfoldAll(slotProps.close)">Show All Clusters</Action>
                 </li>
-                <li v-else><Action @click="foldAll(slotProps.close)">Fold All Clusters</Action></li>
+                <li v-else><Action @click="foldAll(slotProps.close)">Collapse All Clusters</Action></li>
               </ul>
             </template>
           </Dropdown>

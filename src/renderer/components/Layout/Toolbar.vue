@@ -1,7 +1,7 @@
 <template>
   <div class="toolbar">
     <div class="space" />
-    <div class="toolbar__version" @click="showVerbose">v {{ version }}</div>
+    <div class="toolbar__version" @click="showVerbose">v{{ version }}</div>
   </div>
 </template>
 

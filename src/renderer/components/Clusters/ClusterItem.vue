@@ -16,7 +16,7 @@
           <li><Action :to="createServicePath">Add a Service</Action></li>
           <li><Action :to="editPath">Edit</Action></li>
           <li><Action @click="exportCluster">Export</Action></li>
-          <li><Action @click="handleFold">Fold</Action></li>
+          <li><Action @click="handleFold">Collapse</Action></li>
           <li><Action theme="danger" @click="handleDelete">Delete</Action></li>
         </ul>
       </Dropdown>
