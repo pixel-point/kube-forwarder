@@ -69,7 +69,8 @@ function killServer(commit, port) {
 async function startForward(commit, k8sForward, service, forward, podName) {
   const listenPort = forward.localPort
   const server = net.createServer(function(socket) {
-    k8sForward.portForward(service.namespace, podName, [forward.remotePort], socket, socket, socket, 3)
+    k8sForward.portForward(service.namespace, podName, [forward.remotePort], socket, null, socket, 3)
+    k8sForward.disconnectOnErr = false
   })
 
   killable(server)

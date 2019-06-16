@@ -6,7 +6,7 @@ import WebSocket from 'isomorphic-ws'
 WebSocketHandler.restartableHandleStandardInput = async function (createWS, stdin, streamNum = 0) {
   const tryLimit = 3;
   let queue = Promise.resolve()
-  let ws = await createWS()
+  let ws = null
 
   async function processData(data) {
     const buff = Buffer.alloc(data.length + 1);
@@ -20,7 +20,7 @@ WebSocketHandler.restartableHandleStandardInput = async function (createWS, stdi
 
     let i = 0;
     for (; i < tryLimit; ++i) {
-      if (ws.readyState === WebSocket.OPEN) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(buff);
         break;
       } else {
@@ -36,6 +36,7 @@ WebSocketHandler.restartableHandleStandardInput = async function (createWS, stdi
   stdin.on('data', (data) => {
     queue = queue.then(processData(data))
   })
+
   stdin.on('end', () => {
     ws.close();
   });
@@ -53,13 +54,15 @@ export function patchForward (forward) {
       ports: targetPorts[0]
     }
     const queryStr = querystring.stringify(query)
-    const needsToReadPortNumber = []
-    targetPorts.forEach((value, index) => {
-      needsToReadPortNumber[index * 2] = true
-      needsToReadPortNumber[index * 2 + 1] = true
-    })
     const path = `/api/v1/namespaces/${namespace}/pods/${podName}/portforward?${queryStr}`
+
     const createWebSocket = async () => {
+      const needsToReadPortNumber = []
+      targetPorts.forEach((value, index) => {
+        needsToReadPortNumber[index * 2] = true
+        needsToReadPortNumber[index * 2 + 1] = true
+      })
+
       return await this.handler.connect(path, null, (streamNum, buff) => {
         if (streamNum >= targetPorts.length * 2) {
           return !this.disconnectOnErr
