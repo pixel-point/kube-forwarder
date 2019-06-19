@@ -40,7 +40,7 @@ export default {
   .logo {
     position: absolute;
     left: 50%;
-    top: 0;
+    top: -6px;
     margin-left: -18px
   }
 }
