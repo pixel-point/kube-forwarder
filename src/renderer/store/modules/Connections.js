@@ -10,6 +10,7 @@ import * as connectionStates from '../../lib/constants/connection-states'
 import { k8nApiPrettyError } from '../../lib/helpers/k8n-api-error'
 import { netServerPrettyError } from '../../lib/helpers/net-server-error'
 import { getServiceLabel } from '../../lib/helpers/service'
+import { isWebDemo } from '../../lib/environment'
 
 const { validate } = createToolset({
   type: 'object',
@@ -185,7 +186,7 @@ function validateThatRequiredPortsFree(state, service) {
   }
 }
 
-const actions = {
+let actions = {
   async createConnection({ commit, state, rootState }, service) {
     try {
       validateThatRequiredPortsFree(state, service)
@@ -215,6 +216,21 @@ const actions = {
   deleteConnection({ commit }, service) {
     for (const forward of service.forwards) {
       killServer(commit, forward.localPort)
+    }
+  }
+}
+
+if (isWebDemo) {
+  actions = {
+    createConnection({ commit }, service) {
+      service.forwards.map(forward =>
+        commit('SET', { port: forward.localPort, serviceId: service.id, state: connectionStates.CONNECTED })
+      )
+    },
+    deleteConnection({ commit }, service) {
+      service.forwards.map(forward =>
+        commit('DELETE', forward.localPort)
+      )
     }
   }
 }

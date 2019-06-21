@@ -1,19 +1,30 @@
 <template>
   <div class="toolbar">
-    <div class="space" />
-    <div class="toolbar__version" @click="showVerbose">v{{ version }}</div>
+    <template v-if="isWebDemo">
+      <img src="../../assets/images/macos-system-buttons.svg" alt="system buttons" />
+      <div class="space" />
+      <div class="toolbar__demo-label"> Demonstration Version </div>
+    </template>
+    <template v-else>
+      <div class="space" />
+      <div class="toolbar__version" @click="showVerbose">v{{ version }}</div>
+    </template>
   </div>
 </template>
 
 <script>
 import packageJs from '../../../../package'
 import { showMessageBox } from '../../lib/helpers/ui'
+import { isWebDemo } from '../../lib/environment'
 
 export default {
   name: 'Toolbar',
   computed: {
     version: function() {
       return packageJs.versionString
+    },
+    isWebDemo() {
+      return isWebDemo
     }
   },
   methods: {
@@ -47,6 +58,18 @@ export default {
   top: 0;
   z-index: 100;
   background: #fff;
+}
+
+.toolbar__demo-label {
+  padding: 4px 20px;
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 16px;
+  color: #fff;
+  background: #3273E1;
+  background: linear-gradient(72.1deg, #3273E1 0%, #1ECDE1 100%);
+  text-shadow: 0 1px 1px rgba(20, 45, 85, 0.25);
+  border-radius: 2px;
 }
 
 .toolbar__version {

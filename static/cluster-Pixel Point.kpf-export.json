@@ -1,0 +1,82 @@
+{
+  "_clusters": [
+    {
+      "name": "Pixel Point",
+      "config": "// A cluster config will be here",
+      "_services": [
+        {
+          "namespace": "longhorn-0thq3",
+          "workloadType": "deployment",
+          "workloadName": "longhorn-ui",
+          "forwards": [
+            {
+              "localPort": 3010,
+              "remotePort": 8000,
+              "id": "5b40002f-afee-4957-ac87-a11ba560f84b"
+            }
+          ]
+        },
+        {
+          "namespace": "elk",
+          "workloadType": "deployment",
+          "workloadName": "elasticsearch",
+          "forwards": [
+            {
+              "localPort": 9200,
+              "remotePort": 9200,
+              "id": "3c8cf0f6-f08a-4246-bec3-6e358aed5c58"
+            }
+          ]
+        },
+        {
+          "namespace": "monitoring",
+          "workloadType": "deployment",
+          "workloadName": "grafana",
+          "forwards": [
+            {
+              "localPort": 3005,
+              "remotePort": 3000,
+              "id": "c5434689-d182-42eb-80bd-fb9a1dcb248f"
+            }
+          ]
+        },
+        {
+          "namespace": "monitoring",
+          "workloadType": "deployment",
+          "workloadName": "prometheus",
+          "forwards": [
+            {
+              "localPort": 3006,
+              "remotePort": 9090,
+              "id": "a7e7a7a9-b110-4d50-8361-32ce3f3eed46"
+            }
+          ]
+        },
+        {
+          "namespace": "pixelpoint-site",
+          "workloadType": "deployment",
+          "workloadName": "postgres",
+          "forwards": [
+            {
+              "localPort": 8432,
+              "remotePort": 5432,
+              "id": "7533169c-9b99-41fe-a620-e18d45273673"
+            }
+          ]
+        },
+        {
+          "namespace": "elk",
+          "workloadType": "deployment",
+          "workloadName": "kibana",
+          "forwards": [
+            {
+              "localPort": 3006,
+              "remotePort": 9399,
+              "id": "fa9ac7f4-147f-4932-9496-2720c43d6a36"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
