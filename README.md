@@ -1,9 +1,42 @@
 # Kube Forwarder
 
-A tool for managing port forwarding configs for kubernetes clusters. 
-Built with [Electron](https://electronjs.org) 
+<p>
+  <a href="https://nodejs.org/en/">
+    <img src="https://img.shields.io/badge/Node-v10.16.0-brightgreen.svg" alt="node version">
+  </a>
+  <a href="https://electronjs.org/">
+    <img src="https://img.shields.io/badge/Electron-v5.0.2-brightgreen.svg" alt="rails version">
+  </a>
+  <a href="https://electronjs.org/">
+    <img src="https://img.shields.io/badge/Vue-v2.6.10-brightgreen.svg" alt="rails version">
+  </a>
+  <a href="https://drone.pixelpoint.io/pixel-point/kube-forwarder">
+    <img src="https://drone.pixelpoint.io/api/badges/pixel-point/kube-forwarder/status.svg" alt="Travis Status for thepracticaldev/dev.to">
+  </a>
+</p>
 
-## Getting Started
+Easy to use Kubernetes port forwarding management. 
+Built with [Electron](https://electronjs.org)
+
+![Clusters Page](./.github/page-clusters.png?raw=true) 
+
+## Contributing
+
+We encourage you to contribute to Kube Forwarder!
+
+We expect contributors to abide by our underlying [code of conduct](./.github/CODE_OF_CONDUCT.md). 
+All conversations and discussions on GitHub (issues, pull requests) 
+must be respectful and harassment-free.
+
+### How to contribute
+
+1.  Fork the project & clone locally. Follow the initial setup [here](#getting-started).
+2.  Create a branch, naming it either a feature or bug: `git checkout -b feature/that-new-feature` or `bug/fixing-that-bug`
+3.  Code and commit your changes. Bonus points if you write a [good commit message](https://chris.beams.io/posts/git-commit/): `git commit -m 'Add some feature'`
+4.  Push to the branch: `git push origin feature/that-new-feature`
+5.  Create a pull request for your branch 🎉
+
+## Getting started
 
 ### Prerequisites
 
@@ -14,11 +47,16 @@ Built with [Electron](https://electronjs.org)
 
 ### Installing
 
+Fork Kube Forwarder repository (https://github.com/pixel-point/kube-forwarder/fork)
+
 ```
+# Clone source code
+git clone https://github.com/<your-username>/kube-forwarder
+
 # install dependencies
 npm install
 
-# serve with hot reload at localhost:9080
+# serve with hot reload in Electron Dev app
 npm run dev
 
 # serve WEB version with hot reload at localhost:9081

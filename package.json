@@ -1,7 +1,7 @@
 {
   "name": "kube-forwarder",
-  "version": "0.0.1",
-  "versionString": "0.0.1",
+  "version": "1.0.0",
+  "versionString": "1.0.0",
   "author": "Alexandr Promakh <s-promakh@ya.ru>",
   "description": "A tool for managing port forwarding configs for kubernetes clusters",
   "license": null,
