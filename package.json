@@ -4,7 +4,7 @@
   "versionString": "1.0.0",
   "author": "Alexandr Promakh <s-promakh@ya.ru>",
   "description": "A tool for managing port forwarding configs for kubernetes clusters",
-  "license": null,
+  "license": "MIT License",
   "main": "./dist/electron/main.js",
   "scripts": {
     "build": "npm run build:dist && npm run build:target",
@@ -88,6 +88,7 @@
     "@sentry/integrations": "^5.3.1",
     "clone-deep": "^4.0.1",
     "dotenv-safe": "^6.1.0",
+    "electron-ga": "^1.0.6",
     "electron-store": "^3.2.0",
     "electron-updater": "^4.0.6",
     "killable": "^1.0.1",

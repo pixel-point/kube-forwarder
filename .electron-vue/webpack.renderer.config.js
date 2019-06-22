@@ -169,7 +169,8 @@ if (process.env.NODE_ENV === 'production') {
     ]),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': '"production"',
-      'process.env.SENTRY_DSN': `"${process.env.SENTRY_DSN}"`
+      'process.env.SENTRY_DSN': `"${process.env.SENTRY_DSN}"`,
+      'process.env.GA_TRACKING_ID': `"${process.env.GA_TRACKING_ID}"`
     }),
     new webpack.LoaderOptionsPlugin({
       minimize: true
