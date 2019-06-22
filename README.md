@@ -15,6 +15,8 @@
   </a>
 </p>
 
+[Official Site](https://kube-forwarder.pixelpoint.io)
+
 Easy to use Kubernetes port forwarding management. 
 Built with [Electron](https://electronjs.org)
 
@@ -55,6 +57,10 @@ git clone https://github.com/<your-username>/kube-forwarder
 
 # install dependencies
 npm install
+
+# prepare .env files
+cp .env.example .env
+cp .env.example .env.production
 
 # serve with hot reload in Electron Dev app
 npm run dev
@@ -109,12 +115,13 @@ npm run test:cypress:open
 
 ## Release guide
 
-1) Update the version in `package.json`.
-2) Push to `release` branch. [Drone(pixel-point/kube-forwarder)](https://drone.pixelpoint.io/pixel-point/kube-forwarder/)
+1) Be sure that you created `.env.production` and filled it in the right way.
+2) Update the version in `package.json`.
+3) Push to `release` branch. [Drone(pixel-point/kube-forwarder)](https://drone.pixelpoint.io/pixel-point/kube-forwarder/)
 will build packages for Windows and Linux and upload them to [releases](https://github.com/pixel-point/kube-forwarder/releases)
-3) Run `npm run release` on a Mac computer to build `.dmg` target. 
+4) Run `npm run release` on a Mac computer to build `.dmg` target. 
 It will be automatically pushed to releases at Github.
-4) Go to [Releases](https://github.com/pixel-point/kube-forwarder/releases) in the repository. 
+5) Go to [Releases](https://github.com/pixel-point/kube-forwarder/releases) in the repository. 
 Make sure that the created draft is OK and release it (Edit -> Release). 
 
 Notes: 
@@ -123,7 +130,7 @@ Notes:
 2) A release tag (for example: `v1.0.3`) will be added automatically 
 by Github when you release your draft.
 
-## Tips
+## Development Tips
 
 Use `tiffutil -cathidpicheck bg.png bg@2x.png -out bg.tiff` to build a tiff
 background for .DMG 
