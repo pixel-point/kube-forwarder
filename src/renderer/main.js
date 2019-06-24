@@ -8,10 +8,8 @@ configureSentry({ Vue })
 import App from './App'
 import router from './router'
 import store from './store'
-import Analytics from 'electron-ga'
+import './analytics'
 /* eslint-enable import/first */
-
-window.ga = new Analytics(process.env.GA_TRACKING_ID)
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.config.productionTip = false

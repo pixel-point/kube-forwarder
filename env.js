@@ -1,4 +1,2 @@
 const dotEnv = require('dotenv-safe')
-if (!process.env.CI) dotEnv.load({
-    allowEmptyValues: true
-})
+dotEnv.load({ path: '.env.production', allowEmptyValues: true })
