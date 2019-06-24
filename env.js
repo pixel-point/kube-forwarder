@@ -1,2 +1,4 @@
 const dotEnv = require('dotenv-safe')
-if (!process.env.CI) dotEnv.load()
+if (!process.env.CI) dotEnv.load({
+    allowEmptyValues: true
+})

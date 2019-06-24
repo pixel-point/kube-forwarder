@@ -6,6 +6,7 @@ configureSentry()
 
 /* eslint-disable import/first */
 import { app, BrowserWindow, Menu } from 'electron'
+import os from "os"
 
 import buildMenuTemplate from './menuTemplate'
 import { checkForUpdates } from './appUpdater'
@@ -20,9 +21,11 @@ if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
 
-app.setAboutPanelOptions({
-  copyright: 'Copyright © 2019 Pixel Point'
-})
+if (typeof app.setAboutPanelOptions === 'function' ) {
+  app.setAboutPanelOptions({
+    copyright: 'Copyright © 2019 Pixel Point'
+  })
+}
 
 let mainWindow
 const winURL = process.env.NODE_ENV === 'development'
@@ -34,7 +37,7 @@ function createWindow() {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 542,
+    height: os.platform() === 'win32' ? 562 : 542,
     useContentSize: true,
     width: 800,
     titleBarStyle: 'hiddenInset',
