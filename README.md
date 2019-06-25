@@ -51,6 +51,8 @@ We expect contributors to abide by our underlying [code of conduct](./.github/CO
 All conversations and discussions on GitHub (issues, pull requests) 
 must be respectful and harassment-free.
 
+This project was generated with [electron-vue](https://github.com/SimulatedGREG/electron-vue)@[8fae476](https://github.com/SimulatedGREG/electron-vue/tree/8fae4763e9d225d3691b627e83b9e09b56f6c935) using [vue-cli](https://github.com/vuejs/vue-cli). Documentation about the original structure can be found [here](https://simulatedgreg.gitbooks.io/electron-vue/content/index.html).
+
 ### How to contribute
 
 1.  Fork the project & clone locally. Follow the initial setup [here](#getting-started).
@@ -159,7 +161,3 @@ background for .DMG
 ## License
 
 This project is licensed under the MIT License - see the LICENSE.md file for details
-
----
-
-This project was generated with [electron-vue](https://github.com/SimulatedGREG/electron-vue)@[8fae476](https://github.com/SimulatedGREG/electron-vue/tree/8fae4763e9d225d3691b627e83b9e09b56f6c935) using [vue-cli](https://github.com/vuejs/vue-cli). Documentation about the original structure can be found [here](https://simulatedgreg.gitbooks.io/electron-vue/content/index.html).
