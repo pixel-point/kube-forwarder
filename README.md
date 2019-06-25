@@ -17,7 +17,7 @@
 
 Easy to use Kubernetes port forwarding manager. Available for macOS, Windows and Linux. [Learn more](https://kube-forwarder.pixelpoint.io).
 
-![Clusters Page](./.github/page-clusters.png?raw=true) 
+![Clusters Page](https://user-images.githubusercontent.com/2697570/60103100-524d5d80-975f-11e9-84ab-bcc962be0bb7.png) 
 
 ## Features
 
