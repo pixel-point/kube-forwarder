@@ -15,12 +15,27 @@
   </a>
 </p>
 
-[Official Site](https://kube-forwarder.pixelpoint.io)
-
-Easy to use Kubernetes port forwarding management. 
-Built with [Electron](https://electronjs.org)
+Easy to use Kubernetes port forwarding manager. Available for macOS, Windows and Linux. [Learn more](https://kube-forwarder.pixelpoint.io).
 
 ![Clusters Page](./.github/page-clusters.png?raw=true) 
+
+## Features
+
+**Auto-reconnect**
+
+Kube Forwarder watches for connection status and always tries reconnect on failure
+
+**Multiple clusters support**
+
+Bookmark and forward Kubernetes services from multiple clusters easily like never before
+
+**Share bookmarks**
+
+Use import and export functionality to share bookmarked services with your team or simply backup it
+
+**Zero native dependencies**
+
+Use port-forwarding without installing kubectl and avoid explanations to developers on how to use it
 
 ## Contributing
 
