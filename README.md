@@ -1,6 +1,4 @@
-# Kube Forwarder
-
-<p>
+<p align="center">
   <a href="https://nodejs.org/en/">
     <img src="https://img.shields.io/badge/Node-v10.16.0-brightgreen.svg" alt="node version">
   </a>
@@ -15,7 +13,15 @@
   </a>
 </p>
 
-Easy to use Kubernetes port forwarding manager. Available for macOS, Windows and Linux. [Learn more](https://kube-forwarder.pixelpoint.io).
+<h1 align="center"> Kube Forwarder</h1>
+<h3 align="center">Easy to use Kubernetes port forwarding manager</h3>
+<h4 align="center">
+  <a href="https://kube-forwarder.pixelpoint.io">Visit a Website</a> · 
+  <a href="https://github.com/pixel-point/kube-forwarder/releases/latest/download/kube-forwarder.dmg">Download for macOS</a> · 
+  <a href="https://github.com/pixel-point/kube-forwarder/releases/latest/download/kube-forwarder.exe">Download for Windows</a> · 
+  <a href="https://github.com/pixel-point/kube-forwarder/releases/latest/download/kube-forwarder.zip">Download for Linux</a>
+</h4>
+
 
 ![Clusters Page](https://user-images.githubusercontent.com/2697570/60103100-524d5d80-975f-11e9-84ab-bcc962be0bb7.png) 
 
