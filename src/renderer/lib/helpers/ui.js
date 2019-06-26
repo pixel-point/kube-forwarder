@@ -2,7 +2,12 @@ const { dialog, app } = require('electron').remote
 
 export function showMessageBox(message, options = {}) {
   return new Promise((resolve) => {
-    dialog.showMessageBox({ title: 'Message', message, ...options }, (...args) => resolve(args))
+    dialog.showMessageBox({
+      title: 'Message',
+      message,
+      ...options,
+      buttons: ['OK']
+    }, (...args) => resolve(args))
   })
 }
 

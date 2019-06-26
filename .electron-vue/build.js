@@ -7,13 +7,11 @@ const fs = require('fs').promises
 const dateFormat = require('dateformat')
 const path = require('path')
 const mkdirp = require('mkdirp')
-const { say } = require('cfonts')
 const chalk = require('chalk')
 const del = require('del')
-const { spawn } = require('child_process')
+const { exec } = require('child_process')
 const webpack = require('webpack')
 const Multispinner = require('multispinner')
-const gm = require('gm').subClass({ imageMagick: true })
 
 const mainConfig = require('./webpack.main.config')
 const rendererConfig = require('./webpack.renderer.config')
@@ -164,13 +162,11 @@ async function prepareLogo() {
     })
   })
 
-  const x256 = new Promise((resolve, reject) => {
-    gm(path.resolve(__dirname, '../src/app-icon.png'))
-      .write(path.resolve(__dirname, '../build/icons/256x256.png'), function(err) {
-        if (err) reject(err)
-        else resolve()
-      })
+  const generateIcons = new Promise((resolve, reject) => {
+    exec('bash .electron-vue/generate-icons.sh src/app-icon.png build', (error, stdout, stderr) => {
+      error ? reject(error) : resolve()
+    })
   })
 
-  return createIconsDir.then(() => Promise.all([x256]))
+  return createIconsDir.then(generateIcons)
 }

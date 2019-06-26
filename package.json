@@ -1,8 +1,9 @@
 {
   "name": "kube-forwarder",
-  "version": "1.0.0",
-  "versionString": "1.0.0",
-  "author": "Alexandr Promakh <s-promakh@ya.ru>",
+  "version": "1.0.1",
+  "versionString": "1.0.1",
+  "author": "Pixel Point <info@pixelpoint.io>",
+  "homepage": "https://kube-forwarder.poxelpoint.io",
   "description": "A tool for managing port forwarding configs for kubernetes clusters",
   "license": "MIT License",
   "main": "./dist/electron/main.js",
@@ -31,7 +32,7 @@
   "build": {
     "productName": "Kube Forwarder",
     "appId": "com.pixelpoint.kube-forwarder",
-    "artifactName": "kube-forwarder-${version}.${ext}",
+    "artifactName": "kube-forwarder.${ext}",
     "directories": {
       "output": "build"
     },
@@ -66,7 +67,6 @@
       "repo": "kube-forwarder"
     },
     "mac": {
-      "icon": "build/icons/icon.icns",
       "target": [
         "dmg",
         "zip"
@@ -76,7 +76,6 @@
       "icon": "build/icons/icon.ico"
     },
     "linux": {
-      "icon": "build/icons",
       "target": [
         "AppImage"
       ]
@@ -139,7 +138,6 @@
     "eslint-plugin-standard": "^4.0.0",
     "eslint-plugin-vue": "^5.2.2",
     "file-loader": "^1.1.11",
-    "gm": "^1.23.1",
     "html-webpack-plugin": "^3.2.0",
     "inject-loader": "^4.0.1",
     "karma": "^4.1.0",
