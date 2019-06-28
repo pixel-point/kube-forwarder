@@ -127,9 +127,10 @@ npm run test:cypress
 
 Or you can run it manually on a local machine.
 ```
+# Run the web version to test it
 npm run web
 
-# In a separate terminal tab
+# Run this command in a separate terminal tab
 npm run test:cypress:onhost
 
 # Or you can open Cypress GUI

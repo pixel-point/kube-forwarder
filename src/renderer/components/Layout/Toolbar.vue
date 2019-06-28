@@ -1,14 +1,7 @@
 <template>
   <div class="toolbar">
-    <template v-if="isWebDemo">
-      <img src="../../assets/images/macos-system-buttons.svg" alt="system buttons" />
-      <div class="space" />
-      <div class="toolbar__demo-label"> Demonstration Version </div>
-    </template>
-    <template v-else>
-      <div class="space" />
-      <div class="toolbar__version" @click="showVerbose">v{{ version }}</div>
-    </template>
+    <div class="space" />
+    <div class="toolbar__version" @click="showVerbose">v{{ version }}</div>
   </div>
 </template>
 
@@ -21,7 +14,7 @@ export default {
   name: 'Toolbar',
   computed: {
     version: function() {
-      return packageJs.versionString
+      return process.env.NODE_ENV === 'test' ? '0.0.0' : packageJs.versionString
     },
     isWebDemo() {
       return isWebDemo
@@ -58,18 +51,6 @@ export default {
   top: 0;
   z-index: 100;
   background: #fff;
-}
-
-.toolbar__demo-label {
-  padding: 4px 20px;
-  font-weight: 600;
-  font-size: 13px;
-  line-height: 16px;
-  color: #fff;
-  background: #3273E1;
-  background: linear-gradient(72.1deg, #3273E1 0%, #1ECDE1 100%);
-  text-shadow: 0 1px 1px rgba(20, 45, 85, 0.25);
-  border-radius: 2px;
 }
 
 .toolbar__version {

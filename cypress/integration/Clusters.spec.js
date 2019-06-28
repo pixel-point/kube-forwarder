@@ -27,7 +27,7 @@ context('pages/Clusters', () => {
 
     context('dropdown visual', () => {
       beforeEach(() => {
-        cy.get('.clusters > .header > .dropdown').first().as('dropdown')
+        cy.get('.clusters__add-cluster-dropdown').first().as('dropdown')
       })
 
       it('plain', () => {

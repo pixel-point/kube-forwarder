@@ -8,7 +8,7 @@ configureSentry({ Vue })
 import App from './App'
 import router from './router'
 import store from './store'
-import './analytics'
+import('./analytics')
 /* eslint-enable import/first */
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))

@@ -6,7 +6,8 @@ import analytics from '../analytics'
 Vue.use(Router)
 
 const router = new Router({
-  mode: 'history',
+  // in Cypress 'hash' saves state between routes
+  mode: process.env.NODE_ENV === 'test' ? 'hash' : 'history',
   routes: [
     {
       path: '/',
