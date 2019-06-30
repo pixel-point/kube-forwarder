@@ -38,7 +38,9 @@ WebSocketHandler.restartableHandleStandardInput = async function (createWS, stdi
   })
 
   stdin.on('end', () => {
-    ws.close();
+    if (ws) {
+      ws.close();
+    }
   });
 }
 
