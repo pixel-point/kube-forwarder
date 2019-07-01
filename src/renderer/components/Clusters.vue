@@ -1,5 +1,5 @@
 <template>
-  <div :class="{ clusters: true, clusters_empty: clustersCount === 0, 'clusters_not-found': !filteredClusterIds.length }">
+  <div :class="{ page: true, clusters: true, clusters_empty: clustersCount === 0, 'clusters_not-found': !filteredClusterIds.length }">
     <template v-if="clustersCount">
       <Header>
         <SearchInput v-model="query" size="s" />
@@ -165,12 +165,9 @@ export default {
 @import "../assets/styles/variables";
 
 .clusters {
-  padding: 20px;
   flex-grow: 1;
 
   .header {
-    margin-bottom: 20px;
-
     .search-input .base-input {
       width: 191px;
       transition: width $hover-transition-speed, border-color $hover-transition-speed;

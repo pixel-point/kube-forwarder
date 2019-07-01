@@ -113,7 +113,7 @@ export default {
       const result = await this.$store.dispatch('Connections/createConnection', this.service)
 
       if (!result.success) {
-        if (result.message) return showMessageBox(result.message)
+        if (result.message) return showMessageBox(result.message, { details: result.details })
         if (result.results) {
           const messages = result.results.filter(x => !x.success)
             .map(x => `Failed to forward port ${x.forward.localPort} to ${x.forward.remotePort}  - ${x.error}`)

@@ -20,5 +20,13 @@ function getMessageKey(error) {
 
 export function k8nApiPrettyError(error, messages = {}) {
   const messageKey = getMessageKey(error)
-  return new Error(buildMessage(error, messages, messageKey))
+  const prettyError = new Error(buildMessage(error, messages, messageKey))
+
+  prettyError.details = error.message
+
+  if (error.response) {
+    prettyError.sentryIgnore = true
+  }
+
+  return prettyError
 }

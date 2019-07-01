@@ -21,7 +21,7 @@ export default {
   },
   methods: {
     async handleSuccess(cluster) {
-      this.$router.push(`/clusters/${cluster.id}/services/new`)
+      this.$router.push(`/clusters/${cluster.id}/services/new?messageKey=clusterCreated`)
     }
   }
 }

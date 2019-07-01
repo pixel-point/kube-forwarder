@@ -67,10 +67,10 @@
 <script>
 import uuidv1 from 'uuid'
 
-import BaseInput from '../shared/form/BaseInput'
-import IconArrowDropdown from '../shared/icons/IconArrowDropdown'
-import IconCross from '../shared/icons/IconCross'
-import Button from '../shared/Button'
+import BaseInput from '../form/BaseInput'
+import IconArrowDropdown from '../icons/IconArrowDropdown'
+import IconCross from '../icons/IconCross'
+import Button from '../Button'
 
 export default {
   components: {
@@ -112,7 +112,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import "../../assets/styles/variables";
+@import "../../../assets/styles/variables";
 
 .forwards-table {
   .forwards-table__column {

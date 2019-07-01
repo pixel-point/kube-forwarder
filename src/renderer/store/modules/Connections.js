@@ -2,6 +2,7 @@ import Vue from 'vue'
 import * as k8s from '@kubernetes/client-node'
 import * as net from 'net'
 import killable from 'killable'
+import * as Sentry from '@sentry/electron'
 
 import { patchForward } from '../../lib/k8s-port-forwarding-patch'
 import * as workloadTypes from '../../lib/constants/workload-types'
@@ -11,6 +12,7 @@ import { k8nApiPrettyError } from '../../lib/helpers/k8n-api-error'
 import { netServerPrettyError } from '../../lib/helpers/net-server-error'
 import { getServiceLabel } from '../../lib/helpers/service'
 import { isWebDemo } from '../../lib/environment'
+import { buildSentryIgnoredError } from '../../lib/errors'
 
 const { validate } = createToolset({
   type: 'object',
@@ -104,7 +106,10 @@ function prepareK8sToolsWithCluster(cluster) {
   try {
     kubeConfig.loadFromString(cluster.config)
   } catch (error) {
-    throw new Error('Cluster config is invalid.')
+    const message = typeof error.message === 'string'
+      ? `\nError message:\n---\n${error.message.substr(0, 1000)}`
+      : null
+    throw buildSentryIgnoredError(`Cluster config is invalid.${message}`)
   }
 
   const k8sPortForward = new k8s.PortForward(kubeConfig)
@@ -181,7 +186,7 @@ function clearStates(commit, service) {
 function validateThatRequiredPortsFree(state, service) {
   for (const forward of service.forwards) {
     if (state[forward.localPort]) {
-      throw new Error(`Port ${forward.localPort} is busy.`)
+      throw buildSentryIgnoredError(`Port ${forward.localPort} is busy.`)
     }
   }
 }
@@ -208,8 +213,11 @@ let actions = {
       return { success, results }
     } catch (error) {
       console.error(error)
+      if (!error.sentryIgnore) {
+        Sentry.captureException(error)
+      }
       clearStates(commit, service)
-      return { success: false, message: error.message }
+      return { success: false, message: error.message, details: error.details }
     }
   },
 

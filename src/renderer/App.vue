@@ -9,6 +9,9 @@ export default {
     if (process.env.IS_WEB) {
       document.body.classList.add('body_target_web')
     }
+    if (process.env.ENV === 'test') {
+      document.body.classList.add('body_env_test')
+    }
   }
 }
 </script>
@@ -17,6 +20,7 @@ export default {
 @import "assets/styles/icon";
 @import "assets/styles/table";
 @import "assets/styles/text";
+@import "assets/styles/page";
 
 // Note: For new web sites, it is often useful to begin by setting box-sizing to border-box.
 // https://developer.mozilla.org/en-US/docs/Web/CSS/box-sizing

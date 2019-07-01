@@ -58,6 +58,12 @@ export default {
     color: $color-text-secondary;
     font-weight: normal;
   }
+
+  // Remove caret at screenshots.
+  .body_env_test & {
+    color: transparent;
+    text-shadow: 0 0 0 red;
+  }
 }
 
 .base-input_size_m {

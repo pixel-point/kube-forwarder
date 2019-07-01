@@ -20,7 +20,7 @@ context('components/shared/SearchInput', () => {
     })
 
     it('filled', () => {
-      cy.get('@searchInput').find('input').type('query').matchImageSnapshot()
+      cy.get('@searchInput').find('input').type('query').wait(500).matchImageSnapshot()
     })
   })
 })

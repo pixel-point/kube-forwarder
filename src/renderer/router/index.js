@@ -6,8 +6,6 @@ import analytics from '../analytics'
 Vue.use(Router)
 
 const router = new Router({
-  // in Cypress 'hash' saves state between routes
-  mode: process.env.NODE_ENV === 'test' ? 'hash' : 'history',
   routes: [
     {
       path: '/',
@@ -36,7 +34,7 @@ const router = new Router({
         {
           name: 'Service New',
           path: 'clusters/:clusterId/services/new',
-          component: require('@/components/ServiceForm').default
+          component: require('@/components/ServiceNew').default
         },
         {
           name: 'Service Edit',
