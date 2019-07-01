@@ -42,9 +42,9 @@
         </template>
 
         <ul class="popup__actions">
-          <li><Action :to="servicePath('/edit')" :disabled="!canModify">Edit</Action></li>
+          <li><Action :disabled-style="!canModify" @click="handleEdit">Edit</Action></li>
           <li><Action :to="servicePath('/clone')">Clone</Action></li>
-          <li><Action theme="danger" :disabled="!canModify" @click="handleDelete">Delete</Action></li>
+          <li><Action theme="danger" :disabled-style="!canModify" @click="handleDelete">Delete</Action></li>
         </ul>
       </Dropdown>
     </div>
@@ -104,6 +104,7 @@ export default {
     }
   },
   methods: {
+    getServiceLabel,
     handleStartStop() {
       if (this.serviceState === 'ready') this.startService()
       else if (this.serviceState === 'connected') this.stopService()
@@ -135,15 +136,25 @@ export default {
       showMessageBox(`Service can't be forwarded. Some ports already in use.\n\n${portsDetails}`)
     },
     async handleDelete() {
+      if (!this.canModify) {
+        return showMessageBox('You must stop forwarding before deleting the service')
+      }
+
       const confirm = await showConfirmBox(`Are you sure to delete "${getServiceLabel(this.service)}" service`)
       if (confirm) {
         this.$store.dispatch('Services/deleteService', this.service.id)
       }
     },
+    handleEdit() {
+      if (!this.canModify) {
+        return showMessageBox('You must stop forwarding before editing the service')
+      }
+
+      this.$router.push(this.servicePath('/edit'))
+    },
     servicePath(postfix = '') {
       return `/clusters/${this.service.clusterId}/services/${this.service.id}${postfix}`
-    },
-    getServiceLabel
+    }
   }
 }
 </script>
