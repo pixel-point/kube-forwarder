@@ -55,4 +55,8 @@ td, th {
 .space {
   flex-grow: 1;
 }
+
+b {
+  font-weight: 600;
+}
 </style>

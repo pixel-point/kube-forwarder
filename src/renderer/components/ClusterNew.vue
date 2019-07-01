@@ -16,7 +16,7 @@ export default {
   },
   computed: {
     backPath() {
-      return '/'
+      return this.$route.query.back || '/'
     }
   },
   methods: {

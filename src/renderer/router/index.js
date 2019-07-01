@@ -22,6 +22,11 @@ const router = new Router({
           component: require('@/components/ClusterNew').default
         },
         {
+          name: 'Cluster Add',
+          path: 'clusters/add',
+          component: require('@/components/ClusterAdd').default
+        },
+        {
           name: 'Cluster Import',
           path: 'clusters/import',
           component: require('@/components/ClusterImport').default

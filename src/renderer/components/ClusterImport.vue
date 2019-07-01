@@ -32,6 +32,9 @@ export default {
       }
 
       return null
+    },
+    backPath() {
+      return this.$route.query.back || '/'
     }
   },
   async mounted() {
@@ -50,7 +53,7 @@ export default {
         showErrorBox(`Sorry, an error occurred while saving the file. Raw error message: ${error.message}`)
       }
     }
-    this.$router.push('/')
+    this.$router.push(this.backPath)
   },
   methods: {
     async handleSuccess(cluster) {

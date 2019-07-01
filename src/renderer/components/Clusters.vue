@@ -5,22 +5,7 @@
         <SearchInput v-model="query" size="s" />
         <div class="space" />
         <div class="clusters__header-actions">
-          <Dropdown :popup-props="{ align: 'both' }" class="clusters__add-cluster-dropdown">
-            <template v-slot:trigger="triggerSlotProps">
-              <Button :layout="triggerSlotProps.opened ? 'filled' : 'outline'"
-                      theme="primary"
-                      @click="triggerSlotProps.toggle"
-              >
-                Add a cluster
-                <IconArrowDropdown :to="triggerSlotProps.opened ? 'top' : 'bottom'" />
-              </Button>
-            </template>
-
-            <ul class="popup__actions">
-              <li><Action to="/clusters/new">FROM SCRATCH</Action></li>
-              <li><Action to="/clusters/import">FROM JSON</Action></li>
-            </ul>
-          </Dropdown>
+          <Button layout="outline" theme="primary" to="/clusters/add">Add a cluster</Button>
 
           <Dropdown class="clusters__more-dropdown">
             <template v-slot:trigger="triggerSlotProps">
@@ -53,12 +38,10 @@
     </template>
 
     <template v-else>
-      <h1>Add a Cluster</h1>
+      <h1>Add your <span class="text_theme_gradient">first cluster</span> before<br/>you start forward services</h1>
 
       <div class="clusters__controls">
-        <Button theme="secondary" size="l" to="/clusters/new">FROM SCRATCH</Button>
-        <div class="cluster__control-or">OR</div>
-        <Button theme="primary" size="l" to="/clusters/import">FROM JSON</Button>
+        <Button theme="primary" size="l" to="/clusters/add">ADD A CLUSTER</Button>
       </div>
     </template>
   </div>
@@ -72,7 +55,6 @@ import Header from './shared/Header'
 import SearchInput from './shared/SearchInput'
 import Dropdown from './shared/Dropdown'
 import ClusterItem from './Clusters/ClusterItem'
-import IconArrowDropdown from './shared/icons/IconArrowDropdown'
 import IconDotes from './shared/icons/IconDotes'
 import Action from './shared/Action'
 
@@ -85,7 +67,6 @@ export default {
     SearchInput,
     Dropdown,
     ClusterItem,
-    IconArrowDropdown,
     IconDotes
   },
   data() {
@@ -188,8 +169,8 @@ export default {
     font-size: 30px;
     text-align: center;
     line-height: 36px;
-    margin: 58px 0 60px;
-    font-weight: 500;
+    margin: 63px 0 40px;
+    font-weight: normal;
   }
 
   &:after {
@@ -209,6 +190,7 @@ export default {
   .header {
     z-index: 10
   }
+
   .text_theme_secondary {
     position: fixed;
     display: flex;

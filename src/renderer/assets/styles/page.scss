@@ -9,3 +9,24 @@
     margin-bottom: 20px;
   }
 }
+
+
+.page__block {
+  padding: 20px;
+  border-radius: $border-radius;
+  background-color: rgba($color-text, 0.04);
+}
+
+.page__blocks-row {
+  display: flex;
+  align-items: stretch;
+
+  .page__block {
+    // set them equal width
+    width: 100%;
+  }
+
+  .page__block + .page__block {
+    margin-left: 20px;
+  }
+}
