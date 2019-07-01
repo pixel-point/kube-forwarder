@@ -22,9 +22,7 @@ export default {
       return '/'
     },
     alert() {
-      const params = new URLSearchParams(location.search)
-
-      if (params.get('messageKey') === 'clusterCreated') {
+      if (this.$route.query.messageKey === 'clusterCreated') {
         return {
           theme: 'success',
           message: 'We successfully added your cluster. Add your first service by filling the form below.'
