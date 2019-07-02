@@ -3,7 +3,7 @@
     <img src="https://img.shields.io/badge/Node-v10.16.0-brightgreen.svg" alt="node version">
   </a>
   <a href="https://electronjs.org/">
-    <img src="https://img.shields.io/badge/Electron-v5.0.2-brightgreen.svg" alt="rails version">
+    <img src="https://img.shields.io/badge/Electron-v5.0.6-brightgreen.svg" alt="rails version">
   </a>
   <a href="https://electronjs.org/">
     <img src="https://img.shields.io/badge/Vue-v2.6.10-brightgreen.svg" alt="rails version">

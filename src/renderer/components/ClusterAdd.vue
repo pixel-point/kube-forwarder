@@ -3,10 +3,12 @@
     <Header :back-path="backPath" />
     <div class="page__block clusters-add__contexts-block">
       <template v-if="contexts.length">
-        We have detected existing <b>~/.kube/config</b> file with the following clusters:
+        <span v-if="manualConfig">Please, choose clusters to import:</span>
+        <span v-else>We have detected existing <b>~/.kube/config</b> file with the following clusters:</span>
         <div class="clusters-add__contexts">
           <BaseCheckbox v-for="context in contexts" :key="context.name" v-model="checkedContexts[context.name]">
-            <b>{{ context.name }}</b> (cluster: <b>{{ context.cluster }}</b>, user: <b>{{ context.user }}</b>)
+            <b>{{ context.cluster }}</b>
+            <span v-if="nonUniqClusters[context.cluster]">(user: <b>{{ context.user }}</b>)</span>
           </BaseCheckbox>
         </div>
 
@@ -67,19 +69,33 @@ export default {
     },
     isAnySelected() {
       return Boolean(Object.values(this.checkedContexts).find(x => x))
+    },
+    // returns the index of context.names whos clusters occur al least twice.
+    nonUniqClusters() {
+      const index = {}
+      const result = {}
+      for (const context of this.contexts) {
+        if (index[context.cluster]) {
+          result[context.cluster] = true
+        } else {
+          index[context.cluster] = true
+        }
+      }
+
+      return result
+    },
+    manualConfig() {
+      return this.$store.state.manualClusterConfig
     }
   },
   async mounted() {
-    const kubeConfigDefaultPath = path.join(app.getPath('home'), '.kube/config')
-
-    const config = await fs.readFile(kubeConfigDefaultPath, { encoding: 'utf8' }).catch(() => null)
-    if (!config) return
+    const configString = await this.getConfigString()
 
     const kubeConfig = new KubeConfig()
     let configObject
     try {
-      kubeConfig.loadFromString(config)
-      configObject = yaml.safeLoad(config)
+      kubeConfig.loadFromString(configString)
+      configObject = yaml.safeLoad(configString)
     } catch (error) {
       return
     }
@@ -92,12 +108,19 @@ export default {
   },
   methods: {
     ...mapActions('Clusters', ['createCluster']),
+    async getConfigString() {
+      if (this.manualConfig) return this.manualConfig
+
+      const kubeConfigDefaultPath = path.join(app.getPath('home'), '.kube/config')
+      return fs.readFile(kubeConfigDefaultPath, { encoding: 'utf8' }).catch(() => '')
+    },
     saveSelected() {
       for (const context of this.contexts) {
-        if (!this.checkedContexts[context.name]) return
+        if (!this.checkedContexts[context.name]) continue
 
         this.configObject['current-context'] = context.name
-        this.createCluster({ name: context.name, config: yaml.safeDump(this.configObject) })
+        const name = this.nonUniqClusters[context.cluster] ? `${context.cluster} — ${context.user}` : context.cluster
+        this.createCluster({ name, config: yaml.safeDump(this.configObject) })
       }
 
       this.$router.push('/')
@@ -114,6 +137,10 @@ export default {
 
 .clusters-add__contexts {
   margin: 30px 0;
+
+  .base-checkbox {
+    display: block;
+  }
 
   .base-checkbox + .base-checkbox {
     margin-top: 20px;

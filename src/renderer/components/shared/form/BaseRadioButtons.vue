@@ -1,20 +1,20 @@
 <template>
   <div class="base-radio-buttons">
     <div
-      v-for="(oName, oValue) in options"
-      :key="oValue"
-      class="option"
+      v-for="option in options"
+      :key="option[0]"
+      class="base-radio-buttons__option"
     >
       <input
-        :id="`${name}-${oValue}`"
+        :id="`${name}-${option[0]}`"
         type="radio"
         :name="name"
-        :value="oValue"
-        :checked="oValue === value"
+        :value="option[0]"
+        :checked="option[0] === value"
         @change="$emit('input', $event.target.value)"
       >
-      <label :for="`${name}-${oValue}`">
-        {{ oName }}
+      <label :for="`${name}-${option[1]}`">
+        {{ option[1] }}
       </label>
     </div>
   </div>
@@ -26,7 +26,7 @@ export default {
   props: {
     name: { type: String, required: true },
     value: { type: String, required: true },
-    options: { type: Object, required: true }
+    options: { type: Array, required: true }
   }
 }
 </script>

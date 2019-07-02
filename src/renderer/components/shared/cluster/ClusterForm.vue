@@ -67,10 +67,13 @@ export default {
   },
   computed: {
     submitButtonTitle() {
-      return this.clusterId ? `Save` : 'Add a cluster'
+      return this.isNew ? 'Add a cluster' : 'Save'
     },
     backPath() {
       return '/'
+    },
+    isNew() {
+      return !this.clusterId
     }
   },
   methods: {
@@ -86,6 +89,9 @@ export default {
         return
       }
 
+      return this.saveCluster()
+    },
+    async saveCluster() {
       const action = this.clusterId ? 'updateCluster' : 'createCluster'
       const result = await this[action](this.attributes)
 
