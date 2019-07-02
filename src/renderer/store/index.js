@@ -25,6 +25,7 @@ const store = new Vuex.Store({
   strict: process.env.NODE_ENV !== 'production',
   mutations: {
     CLEANUP(state) {
+      Vue.delete(state, 'manualClusterConfig')
       for (const moduleName of noPersistedModuleNames) {
         state[moduleName] = modules[moduleName].state
       }

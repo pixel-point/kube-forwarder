@@ -3,7 +3,10 @@
     <Header :back-path="backPath" />
     <div class="page__block clusters-add__contexts-block">
       <template v-if="contexts.length">
-        <span v-if="manualConfig">Please, choose clusters to import:</span>
+        <span v-if="manualConfig">
+          We have detected the following clusters in the submitted config.
+          Please choose clusters you want to add:
+        </span>
         <span v-else>We have detected existing <b>~/.kube/config</b> file with the following clusters:</span>
         <div class="clusters-add__contexts">
           <BaseCheckbox v-for="context in contexts" :key="context.name" v-model="checkedContexts[context.name]">
@@ -22,7 +25,7 @@
       </template>
     </div>
 
-    <div class="page__blocks-row">
+    <div v-if="!manualConfig" class="page__blocks-row">
       <div class="page__block clusters-add__option">
         Add cluster manually by inserting <b>~/.kube/config</b>
         <Button layout="outline" theme="primary" to="/clusters/new?back=/clusters/add">ADD MANUALLY</Button>
