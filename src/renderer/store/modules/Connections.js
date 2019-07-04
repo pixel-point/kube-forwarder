@@ -134,6 +134,8 @@ async function getPodName(kubeConfig, service) {
       return workloadName
     case workloadTypes.DEPLOYMENT:
       return getPodNameFromDeployment(kubeConfig, service.namespace, workloadName)
+    case workloadTypes.SERVICE:
+      return getPodNameFromService(kubeConfig, service.namespace, workloadName)
     default:
       throw new Error(`Unacceptable workloadType=${workloadType}`)
   }
@@ -167,6 +169,32 @@ async function getPodNameFromDeployment(kubeConfig, namespace, deploymentName) {
   const { body: podsBody } = await coreApi.listNamespacedPod(namespace, null, null, null, null, labelSelector)
   const podName = podsBody.items.length && podsBody.items[0].metadata.name
   if (!podName) throw new Error(`There are no pods in '${deploymentName}' deployment.`)
+
+  return podName
+}
+
+function stringifySelector(selector) {
+  const strings = []
+  for (const key of Object.keys(selector)) {
+    strings.push(`${key}=${selector[key]}`)
+  }
+  return strings.join(',')
+}
+
+async function getPodNameFromService(kubeConfig, namespace, serviceName) {
+  const coreApi = kubeConfig.makeApiClient(k8s.Core_v1Api)
+
+  let service
+  try {
+    service = (await coreApi.readNamespacedService(serviceName, namespace)).body
+  } catch (error) {
+    throw k8nApiPrettyError(error, { _object: `Service "${serviceName}"` })
+  }
+
+  const selector = stringifySelector(service.spec.selector)
+  const { body: pods } = await coreApi.listNamespacedPod(namespace, null, null, null, null, selector)
+  const podName = pods.items.length && pods.items[0].metadata.name
+  if (!podName) throw new Error(`There are no pods in '${serviceName}' service.`)
 
   return podName
 }

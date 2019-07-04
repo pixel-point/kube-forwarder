@@ -112,7 +112,8 @@ export default {
     workloadTypeOptions() {
       return [
         [workloadTypes.POD, 'Pod'],
-        [workloadTypes.DEPLOYMENT, 'Deployment']
+        [workloadTypes.DEPLOYMENT, 'Deployment'],
+        [workloadTypes.SERVICE, 'Service (svc)']
       ]
     },
     submitButtonTitle() {
