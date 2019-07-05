@@ -9,15 +9,28 @@
         </span>
         <span v-else>We have detected existing <b>~/.kube/config</b> file with the following clusters:</span>
         <div class="clusters-add__contexts">
-          <BaseCheckbox v-for="context in contexts" :key="context.name" v-model="checkedContexts[context.name]">
-            <b>{{ context.cluster }}</b>
-            <span v-if="nonUniqClusters[context.cluster]">(user: <b>{{ context.user }}</b>)</span>
-          </BaseCheckbox>
+          <div v-for="context in contexts" :key="context.name" class="clusters-add__context">
+            <BaseCheckbox v-model="checkedContexts[context.name]">
+              <b>{{ context.cluster }}</b>
+              <span v-if="nonUniqClusters[context.cluster]">(user: <b>{{ context.user }}</b>)</span>
+            </BaseCheckbox>
+            <Button layout="outline"
+                    theme="primary"
+                    size="s"
+                    :loading="checkingConnection === context.name"
+                    :disabled="checkingConnection && checkingConnection !== context.name"
+                    @click="handleCheckConnection(context.name)"
+            >
+              Check connection
+            </Button>
+          </div>
         </div>
 
-        <Button layout="filled" theme="primary" :disabled="!isAnySelected" @click="saveSelected">
-          ADD SELECTED CLUSTERS
-        </Button>
+        <div class="clusters-add__actions">
+          <Button layout="filled" theme="primary" :disabled="!isAnySelected" @click="saveSelected">
+            ADD SELECTED CLUSTERS
+          </Button>
+        </div>
       </template>
 
       <template v-else>
@@ -51,6 +64,7 @@ import Vue from 'vue'
 import Header from './shared/Header'
 import Button from './shared/Button'
 import BaseCheckbox from './shared/form/BaseCheckbox'
+import { checkConnection } from '../lib/helpers/cluster'
 
 const { app } = remote
 
@@ -63,7 +77,8 @@ export default {
   data() {
     return {
       contexts: [],
-      checkedContexts: {}
+      checkedContexts: {},
+      checkingConnection: false
     }
   },
   computed: {
@@ -103,6 +118,7 @@ export default {
       return
     }
 
+    this.kubeConfig = kubeConfig // Shouldn't be a part of the data.
     this.configObject = configObject
     this.contexts = kubeConfig.contexts
     for (const context of this.contexts) {
@@ -127,6 +143,13 @@ export default {
       }
 
       this.$router.push('/')
+    },
+    async handleCheckConnection(contextName) {
+      if (!this.checkingConnection && this.kubeConfig && typeof this.kubeConfig.makeApiClient === 'function') {
+        this.checkingConnection = contextName
+        await checkConnection(this.kubeConfig, contextName)
+        this.checkingConnection = false
+      }
     }
   }
 }
@@ -140,19 +163,25 @@ export default {
 
 .clusters-add__contexts {
   margin: 30px 0;
-
-  .base-checkbox {
-    display: block;
-  }
-
-  .base-checkbox + .base-checkbox {
-    margin-top: 20px;
-  }
 }
 
 .clusters-add__option {
   .button {
     margin-top: 30px
+  }
+}
+
+.clusters-add__context {
+  display: flex;
+  align-items: center;
+
+  .button {
+    margin-left: 20px;
+  }
+
+  & + .clusters-add__context {
+    margin-top: 10px;
+    word-break: break-all;
   }
 }
 </style>

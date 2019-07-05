@@ -17,6 +17,9 @@
       <div class="space" />
       <div v-if="error" class="control-actions__error">{{ error }}</div>
       <div v-else class="control-actions__message">{{ message }}</div>
+      <Button layout="outline" theme="primary" :loading="checkingConnection" @click="handleCheckConnection">
+        Check Connection
+      </Button>
       <Button type="submit" theme="primary" :disabled="$v.$invalid">{{ submitButtonTitle }}</Button>
     </div>
   </BaseForm>
@@ -27,12 +30,15 @@ import cloneDeep from 'clone-deep'
 import { mapActions } from 'vuex'
 import { required } from 'vuelidate/lib/validators'
 import { validationMixin } from 'vuelidate'
+import { KubeConfig } from '@kubernetes/client-node'
 
 import BaseForm from '../form/BaseForm'
 import BaseInput from '../form/BaseInput'
 import BaseTextArea from '../form/BaseTextArea'
 import Button from '../Button'
 import ControlGroup from '../form/ControlGroup'
+import { checkConnection } from '../../../lib/helpers/cluster'
+import { showMessageBox } from '../../../lib/helpers/ui'
 
 export default {
   name: 'ClusterForm',
@@ -52,6 +58,7 @@ export default {
   data() {
     return {
       error: null,
+      checkingConnection: false,
       attributes: {
         ...this.buildCluster(),
         clusterId: this.clusterId,
@@ -101,6 +108,21 @@ export default {
       } else {
         this.error = result.errors[0].toString()
       }
+    },
+    async handleCheckConnection() {
+      if (this.checkingConnection) return
+
+      const kubeConfig = new KubeConfig()
+      try {
+        kubeConfig.loadFromString(this.attributes.config)
+      } catch (error) {
+        showMessageBox('Config is invalid', { details: error.message })
+        return
+      }
+
+      this.checkingConnection = true
+      await checkConnection(kubeConfig)
+      this.checkingConnection = false
     }
   }
 }
@@ -111,6 +133,12 @@ export default {
   .controls > .base-textarea {
     height: 193px;
     resize: none;
+  }
+
+  .control-actions {
+    .button + .button {
+      margin-left: 10px;
+    }
   }
 }
 </style>

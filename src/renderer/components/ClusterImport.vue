@@ -28,7 +28,7 @@ export default {
   computed: {
     formMessage() {
       if (this.services && this.services.length) {
-        return `The cluster will be imported with ${this.services.length} services`
+        return `The cluster will be imported with ${this.services.length} resources`
       }
 
       return null

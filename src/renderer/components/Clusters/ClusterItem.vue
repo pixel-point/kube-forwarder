@@ -13,7 +13,7 @@
         </template>
 
         <ul class="popup__actions">
-          <li><Action :to="createServicePath">Add a Service</Action></li>
+          <li><Action :to="createServicePath">Add a Resource</Action></li>
           <li><Action :to="editPath">Edit</Action></li>
           <li><Action @click="exportCluster">Export</Action></li>
           <li><Action @click="handleFold">Collapse</Action></li>

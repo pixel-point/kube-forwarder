@@ -10,6 +10,12 @@ const state = {
   }
 }
 
+// TODO Renaming
+//   "Service" module should be renamed to "Resource" to evade similarity with Service in Kubernetes
+//   workloadType and workloadName could be renamed to kind and name.
+//   Names should be changes due to new kind: 'Service'
+//   I don't do renaming, since current configs at users and exports will be broken without proper migration
+//   I could be good to accumulate more changes to do and do them in the v2 of config.
 export const serviceSchema = {
   type: 'object',
   required: ['id', 'clusterId', 'namespace', 'workloadType', 'workloadName', 'forwards'],

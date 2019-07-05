@@ -9,7 +9,7 @@
         <BaseInput v-model="$v.attributes.namespace.$model" />
       </ControlGroup>
 
-      <ControlGroup label="Workload Type" size="2" :attribute="$v.attributes.workloadType">
+      <ControlGroup label="Kind" size="2" :attribute="$v.attributes.workloadType">
         <BaseSelect
           v-model="$v.attributes.workloadType.$model"
           :options="workloadTypeOptions"
@@ -18,7 +18,7 @@
       </ControlGroup>
 
       <ControlGroup
-        label="Workload Name"
+        label="Name"
         size="2"
         :attribute="$v.attributes.workloadName"
         :disabled="!attributes.workloadType"
@@ -113,11 +113,11 @@ export default {
       return [
         [workloadTypes.POD, 'Pod'],
         [workloadTypes.DEPLOYMENT, 'Deployment'],
-        [workloadTypes.SERVICE, 'Service (svc)']
+        [workloadTypes.SERVICE, 'Service']
       ]
     },
     submitButtonTitle() {
-      return this.serviceId ? `Save` : 'Add a service'
+      return this.serviceId ? `Save` : 'Add a resource'
     },
     backPath() {
       return '/'

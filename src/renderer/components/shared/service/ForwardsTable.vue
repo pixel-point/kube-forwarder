@@ -6,7 +6,7 @@
           Local Port
           <IconArrowDropdown thin to="right" class="forwards-table__arrow-column-divider" />
         </td>
-        <td class="forwards-table__column-header forwards-table__column-header_name_remote-port">Pod Port</td>
+        <td class="forwards-table__column-header forwards-table__column-header_name_remote-port">Resource Port</td>
         <td class="forwards-table__column-header forwards-table__column-header_name_actions" />
       </tr>
       <tr
