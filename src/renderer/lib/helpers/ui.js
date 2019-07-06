@@ -4,7 +4,7 @@ const { dialog, app } = require('electron').remote
 export function showMessageBox(message, options = {}) {
   const { details } = options
   const detailsLabel = 'Details'
-  const buttons = ['OK']
+  const buttons = options.buttons ? options.buttons.slice(0) : ['OK']
   if (details) buttons.push(detailsLabel)
 
   return new Promise((resolve) => {

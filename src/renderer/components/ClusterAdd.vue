@@ -10,24 +10,15 @@
         <span v-else>We have detected existing <b>~/.kube/config</b> file with the following clusters:</span>
         <div class="clusters-add__contexts">
           <div v-for="context in contexts" :key="context.name" class="clusters-add__context">
-            <BaseCheckbox v-model="checkedContexts[context.name]">
+            <BaseCheckbox v-model="checkedContextsIndex[context.name]">
               <b>{{ context.cluster }}</b>
               <span v-if="nonUniqClusters[context.cluster]">(user: <b>{{ context.user }}</b>)</span>
             </BaseCheckbox>
-            <Button layout="outline"
-                    theme="primary"
-                    size="s"
-                    :loading="checkingConnection === context.name"
-                    :disabled="checkingConnection && checkingConnection !== context.name"
-                    @click="handleCheckConnection(context.name)"
-            >
-              Check connection
-            </Button>
           </div>
         </div>
 
         <div class="clusters-add__actions">
-          <Button layout="filled" theme="primary" :disabled="!isAnySelected" @click="saveSelected">
+          <Button layout="filled" theme="primary" :disabled="!isAnySelected" :loading="saving" @click="handleSave">
             ADD SELECTED CLUSTERS
           </Button>
         </div>
@@ -65,6 +56,7 @@ import Header from './shared/Header'
 import Button from './shared/Button'
 import BaseCheckbox from './shared/form/BaseCheckbox'
 import { checkConnection } from '../lib/helpers/cluster'
+import { showConfirmBox } from '../lib/helpers/ui'
 
 const { app } = remote
 
@@ -77,8 +69,8 @@ export default {
   data() {
     return {
       contexts: [],
-      checkedContexts: {},
-      checkingConnection: false
+      checkedContextsIndex: {},
+      saving: false
     }
   },
   computed: {
@@ -86,7 +78,7 @@ export default {
       return '/'
     },
     isAnySelected() {
-      return Boolean(Object.values(this.checkedContexts).find(x => x))
+      return this.selectedContexts.length > 0
     },
     // returns the index of context.names whos clusters occur al least twice.
     nonUniqClusters() {
@@ -104,6 +96,9 @@ export default {
     },
     manualConfig() {
       return this.$store.state.manualClusterConfig
+    },
+    selectedContexts() {
+      return this.contexts.filter(context => this.checkedContextsIndex[context.name])
     }
   },
   async mounted() {
@@ -122,7 +117,7 @@ export default {
     this.configObject = configObject
     this.contexts = kubeConfig.contexts
     for (const context of this.contexts) {
-      Vue.set(this.checkedContexts, context.name, false)
+      Vue.set(this.checkedContextsIndex, context.name, false)
     }
   },
   methods: {
@@ -133,23 +128,41 @@ export default {
       const kubeConfigDefaultPath = path.join(app.getPath('home'), '.kube/config')
       return fs.readFile(kubeConfigDefaultPath, { encoding: 'utf8' }).catch(() => '')
     },
-    saveSelected() {
-      for (const context of this.contexts) {
-        if (!this.checkedContexts[context.name]) continue
+    async handleSave() {
+      if (!this.kubeConfig) return
+      if (this.saving) return
+      this.saving = true
 
+      const connectionResult = await this.checkConnectionToContexts(this.selectedContexts)
+      const continueSaving = connectionResult.success || await this.confirmInvalidConnection(connectionResult.errors)
+
+      if (continueSaving) {
+        this.saveSelected()
+        this.$router.push('/')
+      }
+
+      this.saving = false
+    },
+    saveSelected() {
+      for (const context of this.selectedContexts) {
         this.configObject['current-context'] = context.name
         const name = this.nonUniqClusters[context.cluster] ? `${context.cluster} — ${context.user}` : context.cluster
         this.createCluster({ name, config: yaml.safeDump(this.configObject) })
       }
-
-      this.$router.push('/')
     },
-    async handleCheckConnection(contextName) {
-      if (!this.checkingConnection && this.kubeConfig && typeof this.kubeConfig.makeApiClient === 'function') {
-        this.checkingConnection = contextName
-        await checkConnection(this.kubeConfig, contextName)
-        this.checkingConnection = false
+    async checkConnectionToContexts(contexts) {
+      const errors = []
+
+      for (const context of contexts) {
+        const error = await checkConnection(this.kubeConfig, context.name)
+        if (error) errors.push({ error, contextName: context.name })
       }
+
+      return { success: errors.length === 0, errors }
+    },
+    async confirmInvalidConnection(errors) {
+      const contextNames = errors.map(x => x.contextName).join(', ')
+      return showConfirmBox(`Failed to connect to ${contextNames} cluster(s). Do you want to continue saving?`)
     }
   }
 }

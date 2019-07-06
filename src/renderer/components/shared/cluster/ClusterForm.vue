@@ -121,7 +121,16 @@ export default {
       }
 
       this.checkingConnection = true
-      await checkConnection(kubeConfig)
+
+      const error = await checkConnection(kubeConfig)
+      if (error) {
+        await showMessageBox('Connection failed', {
+          details: `${error.message}${error.details ? `\n${error.details}` : ''}`
+        })
+      } else {
+        await showMessageBox('Connection successful')
+      }
+
       this.checkingConnection = false
     }
   }

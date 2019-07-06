@@ -28,7 +28,7 @@
       </template>
 
       <div v-else class="cluster-item__empty">
-        <Button theme="primary" :to="createServicePath">Add a service</Button>
+        <Button theme="primary" :to="createServicePath">Add a resource</Button>
       </div>
     </div>
   </div>
