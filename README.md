@@ -3,13 +3,13 @@
     <img src="https://img.shields.io/badge/Node-v10.16.0-brightgreen.svg" alt="node version">
   </a>
   <a href="https://electronjs.org/">
-    <img src="https://img.shields.io/badge/Electron-v5.0.6-brightgreen.svg" alt="rails version">
+    <img src="https://img.shields.io/badge/Electron-v5.0.6-brightgreen.svg" alt="electron version">
   </a>
   <a href="https://electronjs.org/">
-    <img src="https://img.shields.io/badge/Vue-v2.6.10-brightgreen.svg" alt="rails version">
+    <img src="https://img.shields.io/badge/Vue-v2.6.10-brightgreen.svg" alt="vue version">
   </a>
   <a href="https://drone.pixelpoint.io/pixel-point/kube-forwarder">
-    <img src="https://drone.pixelpoint.io/api/badges/pixel-point/kube-forwarder/status.svg" alt="Travis Status for thepracticaldev/dev.to">
+    <img src="https://drone.pixelpoint.io/api/badges/pixel-point/kube-forwarder/status.svg" alt="build status">
   </a>
 </p>
 
@@ -20,6 +20,8 @@
   <a href="https://github.com/pixel-point/kube-forwarder/releases/latest/download/kube-forwarder.dmg">Download for macOS</a> · 
   <a href="https://github.com/pixel-point/kube-forwarder/releases/latest/download/kube-forwarder.exe">Download for Windows</a> · 
   <a href="https://github.com/pixel-point/kube-forwarder/releases/latest/download/kube-forwarder.zip">Download for Linux</a>
+  ·
+  <a href="#install-with-homebrew">Install with Homebrew</a>
 </h4>
 
 
@@ -81,6 +83,12 @@ We ask you to fill the form with the following fields:
 Kube Forwarder allows you export cluster configuration in JSON that you could use to share with your team members or for the backup purpose. You could easily store it on Github. When you export cluster, you could export it with or without confidential information.
 
 <a target="_blank" href="https://user-images.githubusercontent.com/2697570/60754844-54c57800-9fe7-11e9-9de0-fe77fc6b4290.png"><img width="320" alt="Screenshot 2019-07-06 at 12 12 20" src="https://user-images.githubusercontent.com/2697570/60754844-54c57800-9fe7-11e9-9de0-fe77fc6b4290.png"></a>
+
+### Install with Homebrew
+
+```
+brew cask install kube-forwarder
+```
 
 ## Contributing
 
