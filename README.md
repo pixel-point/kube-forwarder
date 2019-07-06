@@ -43,6 +43,45 @@ Use import and export functionality to share bookmarked services with your team 
 
 Use port-forwarding without installing kubectl and avoid explanations to developers on how to use it
 
+## Functionality walkthrough
+### Add a cluster(s)
+
+Before you start forwarding interal resources to your local machine, you have to add cluster configuration. To do this we have 3 different options in the app:
+
+- Auto-detection of ~/.kube/config file and parsing settings from it
+- Manual adding of Kubernetes config
+- Import of the JSON file that could be generated via Kube Forwarder export functionality
+
+When you add a new cluster via auto-detection or manually, we could parse config and if there are multiple contexts inside we will suggest you to add multiple clusters to the app. Few examples of yaml files we expect to have you could find [there](https://github.com/pixel-point/kube-forwarder/issues/7)
+
+<a target="_blank" href="https://user-images.githubusercontent.com/2697570/60754775-58a4ca80-9fe6-11e9-8d67-d15a1423b506.png"><img width="320" alt="Screenshot 2019-07-06 at 12 04 45" src="https://user-images.githubusercontent.com/2697570/60754775-58a4ca80-9fe6-11e9-8d67-d15a1423b506.png"></a>
+
+### Add a resource
+
+Kube Forwarder supports forwarding of all types of resources that supported by `kubectl` – Pod, Deployment, Service. 
+
+We ask you to fill the form with the following fields:
+
+**Cluster Name** - pick a cluster from one of the added clusters.
+
+**Namespace** - the namespace of the resource you plan to forward.
+
+**Kind** – pick one of the options Pod, Deployment or Service.
+
+**Name** - name of the Pod, Deployment or Service.
+
+**Alias** - alternative name of the resource that will be displayed on the homepage(optional)
+
+**Port Forwarding** - Fill two fields. Local port - port from your local machine where the resource will be forwarded. Resource port - port of the resource from the Kubernetes cluster 
+
+<a target="_blank" href="https://user-images.githubusercontent.com/2697570/60754738-e207cd00-9fe5-11e9-95b3-8f4704ca3dce.png"><img width="320" alt="Port Forwarding Form" src="https://user-images.githubusercontent.com/2697570/60754738-e207cd00-9fe5-11e9-95b3-8f4704ca3dce.png"></a>
+
+### Import/Export 
+
+Kube Forwarder allows you export cluster configuration in JSON that you could use to share with your team members or for the backup purpose. You could easily store it on Github. When you export cluster, you could export it with or without confidential information.
+
+<a target="_blank" href="https://user-images.githubusercontent.com/2697570/60754844-54c57800-9fe7-11e9-9de0-fe77fc6b4290.png"><img width="320" alt="Screenshot 2019-07-06 at 12 12 20" src="https://user-images.githubusercontent.com/2697570/60754844-54c57800-9fe7-11e9-9de0-fe77fc6b4290.png"></a>
+
 ## Contributing
 
 We encourage you to contribute to Kube Forwarder!
