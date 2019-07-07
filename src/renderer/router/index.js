@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import * as Sentry from '@sentry/electron'
 
 import store from '../store'
 import analytics from '../analytics'
@@ -66,6 +67,7 @@ const router = new Router({
 
 router.afterEach((to, from) => {
   analytics.send('screenview', { cd: to.name })
+  Sentry.addBreadcrumb({ message: `Navigated from '${from.name}' to '${to.name}'` })
 
   // todo Move it in the right place.
   if (from.name === 'Cluster Add') {

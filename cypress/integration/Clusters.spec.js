@@ -24,26 +24,5 @@ context('pages/Clusters', () => {
         cy.matchImageSnapshot()
       })
     })
-
-    context('dropdown visual', () => {
-      beforeEach(() => {
-        cy.get('.clusters__add-cluster-dropdown').first().as('dropdown')
-      })
-
-      it('plain', () => {
-        cy.get('@dropdown').matchImageSnapshot()
-      })
-
-      // TODO
-      // it('hovered', () => {
-      //   cy.get('@dropdown').find('.button').trigger('mouseover').matchImageSnapshot()
-      // })
-
-      it('opened', () => {
-        cy.get('@dropdown').find('.button').click().then(() => {
-          cy.get('@dropdown').matchImageSnapshot()
-        })
-      })
-    })
   })
 })

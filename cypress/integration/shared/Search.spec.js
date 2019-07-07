@@ -15,12 +15,14 @@ context('components/shared/SearchInput', () => {
       cy.get('@searchInput').matchImageSnapshot()
     })
 
-    it('focus', () => {
-      cy.get('@searchInput').find('input').focus().matchImageSnapshot()
-    })
+    // TODO stabilize blinking cursor
+    // it('focus', () => {
+    //   cy.get('@searchInput').find('input').focus().matchImageSnapshot()
+    // })
 
-    it('filled', () => {
-      cy.get('@searchInput').find('input').type('query').wait(500).matchImageSnapshot()
-    })
+    // TODO stabilize blinking cursor
+    // it('filled', () => {
+    //   cy.get('@searchInput').find('input').type('query').wait(500).matchImageSnapshot()
+    // })
   })
 })

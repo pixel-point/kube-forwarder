@@ -24,7 +24,7 @@ export function k8nApiPrettyError(error, messages = {}) {
 
   prettyError.details = error.message
 
-  if (error.response) {
+  if (error.response || error.code) {
     prettyError.sentryIgnore = true
   }
 

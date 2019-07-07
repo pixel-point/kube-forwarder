@@ -6,7 +6,7 @@ configureSentry()
 
 /* eslint-disable import/first */
 import { app, BrowserWindow, Menu } from 'electron'
-import os from "os"
+import os from 'os'
 
 import buildMenuTemplate from './menuTemplate'
 import { checkForUpdates } from './appUpdater'
