@@ -66,7 +66,7 @@ export default {
 
   &.dropdown_opened {
     .base-select__input-wrap .icon_arrow-dropdown {
-      color: $color-text-secondary
+      color: var(--color-text-secondary);
     }
   }
 }
@@ -78,7 +78,7 @@ export default {
     position: absolute;
     top: 16px;
     right: 13px;
-    color: $color-text-quaternary;
+    color: var(--color-text-quaternary);
     transition: color $hover-transition-speed;
   }
 }

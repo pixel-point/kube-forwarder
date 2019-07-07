@@ -196,14 +196,14 @@ export default {
 }
 
 .service-item__namespace {
-  color: $color-text
+  color: var(--color-text)
 }
 
 .service-item__description {
-  color: $color-text-tertiary;
+  color: var(--color-text-secondary);
 
   b {
-    color: $color-text
+    color: var(--color-text)
   }
 }
 
@@ -221,7 +221,7 @@ export default {
   width: 3px;
   height: 3px;
   display: inline-block;
-  background-color: $color-text-quaternary;
+  background-color: var(--color-text-quaternary);
   margin: -1px 5px 0;
   border-radius: 50%;
   vertical-align: middle;

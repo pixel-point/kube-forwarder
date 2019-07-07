@@ -1,9 +1,30 @@
 $button-themes: primary danger secondary;
+$themes: light dark;
 
-$color-text: #142d55;
-$color-text-secondary: rgba($color-text, 0.75);
-$color-text-tertiary: rgba($color-text, 0.5);
-$color-text-quaternary: rgba($color-text, 0.25);
+$opacity-secondary: 0.75;
+$opacity-tertiary: 0.5;
+$opacity-quaternary: 0.25;
+
+$border-opacity: 0.1;
+
+$color-text-theme-light: #142d55;
+$color-text-theme-dark: #fff;
+
+$body-color: ("light": #fff, "dark": #2e2d2b);
+
+$color-text: ("light": $color-text-theme-light, "dark": $color-text-theme-dark);
+$color-text-secondary: (
+  "light": rgba($color-text-theme-light, $opacity-secondary),
+  "dark": rgba($color-text-theme-dark, $opacity-secondary)
+);
+$color-text-tertiary: (
+  "light": rgba($color-text-theme-light, $opacity-tertiary),
+  "dark": rgba($color-text-theme-dark, $opacity-tertiary)
+);
+$color-text-quaternary: (
+  "light": rgba($color-text-theme-light, $opacity-quaternary),
+  "dark": rgba($color-text-theme-dark, $opacity-quaternary)
+);
 
 $color-primary: #3273e1;
 $color-secondary: #1ecde1;
@@ -21,7 +42,15 @@ $colors: (
   "info": $color-info
 );
 
-$bg-secondary: rgba($color-text, 0.02);
+$border-color: (
+  "light": rgba($color-text-theme-light, $border-opacity),
+  "dark": rgba($color-text-theme-dark, $border-opacity)
+);
+
+$bg-secondary: (
+  "light": rgba($color-text-theme-light, 0.02),
+  "dark": rgba($color-text-theme-dark, 0.02)
+);
 $bg-danger: rgba($color-danger, 0.15);
 
 $font-size-small: 13px;
@@ -30,13 +59,16 @@ $font-size-big: 15px;
 $font-size-large: 17px;
 
 $border-radius: 2px;
-$border-color: rgba($color-text, 0.1);
-$border: 1px solid $border-color;
+
+$border: 1px solid var(--border-color);
 
 $button-outline-hover-bg-opacity: 0.1;
 
 $toolbar-height: 37px;
 
-$table-border-color: mix($color-text, #fff, 15%);
+$table-border-color: (
+  "light": mix($color-text-theme-light, map-get($body-color, "light"), 15%),
+  "dark": mix($color-text-theme-dark, map-get($body-color, "dark"), 15%)
+);
 
 $hover-transition-speed: 0.25s;

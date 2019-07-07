@@ -16,16 +16,21 @@ export default {
 </script>
 
 <style lang="scss">
-@import "../../../assets/styles/variables";
+@import "../../../assets/styles/mixins";
 
 .base-form {
-  background-color: rgba($color-text, 0.04);
+  --background-color: #{rgba($color-text-theme-light, 0.04)};
+  @include theme("dark") {
+    --background-color: #{rgba($color-text-theme-dark, 0.04)};
+  }
+
+  background-color: var(--background-color);
   padding: 20px;
   border-radius: $border-radius;
   font-size: 0; // to remove empty spaces
 
   .control-hint {
-    color: rgba($color-text, 0.5);
+    color: var(--color-text-secondary);
     font-size: $font-size-small;
     font-style: italic;
     float: right
@@ -61,7 +66,7 @@ export default {
   }
 
   .control-actions__message {
-    color: $color-text-secondary;
+    color: var(--color-text-secondary);
     font-size: $font-size-small;
     padding: 0 20px
   }

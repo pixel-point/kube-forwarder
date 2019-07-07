@@ -50,11 +50,11 @@ export default {
   left: 0;
   top: 0;
   z-index: 100;
-  background: #fff;
+  background: var(--body-background-color);
 }
 
 .toolbar__version {
-  color: $color-text-quaternary;
+  color: var(--color-text-quaternary);
   float: right;
   flex-shrink: 0;
 }

@@ -47,7 +47,7 @@ function createWindow() {
     mainWindow = null
   })
 
-  const menuTemplate = buildMenuTemplate(app)
+  const menuTemplate = buildMenuTemplate(app, mainWindow)
   const menu = Menu.buildFromTemplate(menuTemplate)
   Menu.setApplicationMenu(menu)
 }

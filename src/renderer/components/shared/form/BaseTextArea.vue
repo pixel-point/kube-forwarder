@@ -16,16 +16,22 @@ export default {
 </script>
 
 <style lang="scss">
-@import "../../../assets/styles/_variables.scss";
+@import "../../../assets/styles/mixins";
 
 textarea {
-  color: $color-text;
-  border: 1px solid rgba($color-text, 0.15);
+  --border-color: #{rgba(map-get($color-text, "light"), 0.15)};
+  @include theme("dark") {
+    --border-color: #{rgba(map-get($color-text, "dark"), 0.15)};
+  }
+
+  color: var(--color-text);
+  border: 1px solid var(--border-color);
   border-radius: $border-radius;
   padding: 8px 15px;
   height: 40px;
   line-height: 1.71;
   font-size: $font-size-base;
+  background-color: var(--body-background-color);
 }
 
 textarea:focus {
@@ -34,7 +40,7 @@ textarea:focus {
 }
 
 textarea::placeholder {
-  color: rgba($color-text, 0.6);
+  color: rgba($color-text-theme-light, 0.6);
 }
 
 .control-group_error .base-textarea {

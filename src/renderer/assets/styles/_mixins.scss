@@ -6,3 +6,9 @@
     @content
   }
 }
+
+@mixin theme($name) {
+  .body_theme_#{$name} & {
+    @content
+  }
+}

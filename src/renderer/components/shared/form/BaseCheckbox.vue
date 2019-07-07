@@ -24,7 +24,9 @@ export default {
 
 <!-- TODO: Think about extracting common code from BaseCheckbox and BaseRadioButtons -->
 
-<style scoped>
+<style scoped lang="scss">
+@import '../../../assets/styles/variables';
+
 .base-checkbox {
   display: inline-block;
 }
@@ -49,11 +51,11 @@ label:before {
   position: absolute;
   width: 18px;
   height: 18px;
-  border: 1px solid rgba(25, 45, 70, 0.25);
+  border: 1px solid var(--color-text-quaternary);
   border-radius: 3px;
   top: 0;
   left: 0;
-  background-color: #fff;
+  background-color: var(--body-background-color);
 }
 
 label:hover:before {

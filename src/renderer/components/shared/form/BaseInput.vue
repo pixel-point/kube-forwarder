@@ -32,15 +32,20 @@ export default {
 </script>
 
 <style lang="scss">
-@import "../../../assets/styles/_variables.scss";
+@import "../../../assets/styles/mixins.scss";
 
 .base-input {
-  color: $color-text;
-  border: 1px solid rgba($color-text, 0.15);
+  --border-color: #{rgba(map-get($color-text, "light"), 0.15)};
+  @include theme("dark") {
+    --border-color: #{rgba(map-get($color-text, "dark"), 0.15)};
+  }
+
+  color: var(--color-text);
+  border: 1px solid var(--border-color);
   border-radius: $border-radius;
   padding: 9px 15px 10px;
   line-height: 16px;
-  background: #fff;
+  background-color: var(--body-background-color);
   font-weight: 500;
   font-size: $font-size-base;
   transition: border-color $hover-transition-speed;
@@ -55,7 +60,7 @@ export default {
   }
 
   &::placeholder {
-    color: $color-text-secondary;
+    color: var(--color-text-secondary);
     font-weight: normal;
   }
 

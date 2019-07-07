@@ -126,7 +126,7 @@ export default {
   }
 
   .forwards-table__arrow-column-divider {
-    color: $color-text-quaternary;
+    color: var(--color-text-quaternary);
     position: absolute;
     right: -5px;
     top: 10px;
@@ -159,6 +159,6 @@ export default {
   bottom: 0;
   width: 1px;
   left: 50%;
-  background-color: $table-border-color;
+  background-color: var(--table-border-color);
 }
 </style>

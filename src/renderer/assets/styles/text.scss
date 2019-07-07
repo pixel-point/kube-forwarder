@@ -1,7 +1,7 @@
 @import "variables";
 
 .text_theme_secondary {
-  color: $color-text-tertiary;
+  color: var(--color-text-secondary);
 }
 
 .text_theme_gradient {

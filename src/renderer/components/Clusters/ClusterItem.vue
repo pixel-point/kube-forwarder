@@ -128,7 +128,7 @@ export default {
 .cluster-item {
   border: $border;
   border-radius: $border-radius;
-  box-shadow: 0 5px 10px $border-color;
+  box-shadow: 0 5px 10px var(--border-color);
 }
 
 .cluster-item_folded {
@@ -143,10 +143,10 @@ export default {
 }
 
 .cluster-item__header {
-  background: $bg-secondary;
+  background: var(--bg-secondary);
   font-size: $font-size-big;
   font-weight: 500;
-  color: $color-text-tertiary;
+  color: var(--color-text-secondary);
   height: 35px;
   padding: 0 0 0 15px;
   display: flex;
@@ -155,7 +155,7 @@ export default {
 
   .icon_arrow-dropdown {
     cursor: pointer;
-    color: $color-text-quaternary;
+    color: var(--color-text-quaternary);
   }
 }
 
@@ -165,7 +165,7 @@ export default {
 }
 
 .cluster-item__empty {
-  color: $color-text-tertiary;
+  color: var(--color-text-secondary);
   padding: 21px;
   text-align: center;
 }

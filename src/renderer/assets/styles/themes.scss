@@ -1,0 +1,17 @@
+@import './variables';
+
+@each $theme in $themes {
+  .body_theme_#{$theme} {
+    --color-text: #{map-get($color-text, $theme)};
+    --color-text-secondary: #{map-get($color-text-secondary, $theme)};
+    --color-text-tertiary: #{map-get($color-text-tertiary, $theme)};
+    --color-text-quaternary: #{map-get($color-text-quaternary, $theme)};
+
+    --bg-secondary: #{map-get($bg-secondary, $theme)};
+
+    --border-color: #{map-get($border-color, $theme)};
+    --table-border-color: #{map-get($table-border-color, $theme)};
+
+    --body-background-color: #{map-get($body-color, $theme)};
+  }
+}

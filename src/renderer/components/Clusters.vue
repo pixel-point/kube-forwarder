@@ -242,6 +242,6 @@ export default {
   line-height: 20px;
   margin: 0 30px;
   font-size: 17px;
-  color: $color-text-tertiary;
+  color: var(--color-text-secondary);
 }
 </style>

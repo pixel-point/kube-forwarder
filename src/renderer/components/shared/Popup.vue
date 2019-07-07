@@ -48,11 +48,11 @@ export default {
 
 .popup {
   position: absolute;
-  background: #fff;
+  background: var(--body-background-color);
   z-index: 1;
   border-radius: $border-radius;
-  box-shadow: 0 2px 4px 0 $border-color;
-  border: solid 1px #edeef1;
+  box-shadow: 0 2px 4px 0 var(--border-color);
+  border: solid 1px var(--border-color);
 }
 
 .popup_position_bottom {
@@ -91,7 +91,7 @@ export default {
     transition: background-color $hover-transition-speed;
 
     &:hover {
-      background-color: $bg-secondary;
+      background-color: var(--bg-secondary);
     }
   }
 }

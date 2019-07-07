@@ -56,7 +56,7 @@ export default {
 
   .control-label {
     font-size: $font-size-small;
-    color: rgba($color-text, 0.5);
+    color: var(--color-text-tertiary);
     font-weight: 500;
     margin-bottom: 4px;
     display: inline-block;
@@ -71,7 +71,7 @@ export default {
 
 .control-group_disabled {
   .control-label {
-    color: $color-text-quaternary
+    color: var(--color-text-quaternary)
   }
 }
 </style>

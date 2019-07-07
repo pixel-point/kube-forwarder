@@ -5,7 +5,20 @@
 <script>
 export default {
   name: 'KubernetesPortForwarder',
+  computed: {
+    theme() {
+      return this.$store.state.Settings.theme
+    }
+  },
+  watch: {
+    theme(nextTheme, prevTheme) {
+      document.body.classList.replace(`body_theme_${prevTheme}`, `body_theme_${nextTheme}`)
+    }
+  },
   mounted() {
+    document.body.classList.add('body')
+    document.body.classList.add(`body_theme_${this.theme}`)
+
     if (process.env.IS_WEB) {
       document.body.classList.add('body_target_web')
     }
@@ -21,6 +34,7 @@ export default {
 @import "assets/styles/table";
 @import "assets/styles/text";
 @import "assets/styles/page";
+@import "assets/styles/themes";
 
 // Note: For new web sites, it is often useful to begin by setting box-sizing to border-box.
 // https://developer.mozilla.org/en-US/docs/Web/CSS/box-sizing
@@ -38,10 +52,11 @@ body {
   width: 100%;
   font-family: system-ui, serif;
   font-size: 14px;
-  color: #142d55; /* = $color-text */
+  color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   display: flex;
+  background-color: var(--body-background-color);
 }
 
 .body_target_web {

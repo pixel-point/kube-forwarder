@@ -43,7 +43,7 @@ export default {
 
 .action {
   cursor: pointer;
-  color: $color-text;
+  color: var(--color-text);
   font-weight: 500;
   text-decoration: none;
 }
@@ -57,6 +57,6 @@ export default {
 }
 
 .action_disabled {
-  color: $color-text-tertiary;
+  color: var(--color-text-secondary);
 }
 </style>

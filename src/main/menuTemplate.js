@@ -1,6 +1,17 @@
+import { ipcMain } from 'electron'
+
 import { manuallyCheckForUpdates } from './appUpdater'
 
-export default function buildMenuTemplate(app) {
+export default function buildMenuTemplate(app, mainWindow) {
+  let theme = 'light'
+  ipcMain.on('onSettingChange', (event, { key, value }) => {
+    if (key === 'theme') theme = value
+  })
+
+  function toggleDarkTheme() {
+    mainWindow.webContents.send('setSetting', { key: 'theme', value: theme === 'light' ? 'dark' : 'light' })
+  }
+
   const template = [
     {
       label: 'Edit',
@@ -19,6 +30,7 @@ export default function buildMenuTemplate(app) {
     {
       label: 'View',
       submenu: [
+        { label: 'Toggle Dark Theme', click: toggleDarkTheme },
         { role: 'reload' },
         { role: 'forcereload' },
         process.env.NODE_ENV === 'development' && { role: 'toggledevtools' },

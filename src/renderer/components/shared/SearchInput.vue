@@ -31,7 +31,7 @@ export default {
     position: absolute;
     top: 10px;
     left: 13px;
-    color: $color-text-quaternary;
+    color: var(--color-text-quaternary);
     pointer-events: none;
   }
 
@@ -39,7 +39,7 @@ export default {
     position: absolute;
     top: 13px;
     right: 13px;
-    color: $color-text-quaternary;
+    color: var(--color-text-quaternary);
   }
 
   .base-input {
@@ -61,7 +61,7 @@ export default {
     }
 
     &:focus + .icon_magnifier {
-      color: $color-text-secondary;
+      color: var(--color-text-secondary);
     }
   }
 }

@@ -117,22 +117,22 @@ $font-sizes: (
 .button_theme_default {
   &.button_layout_text,
   &.button_layout_outline {
-    color: $color-text-quaternary;
+    color: var(--color-text-quaternary);
 
     @include hf {
-      color: $color-text-secondary;
+      color: var(--color-text-secondary);
     }
 
     &.button_loading:before {
-      border-color: $color-text-quaternary;
+      border-color: var(--color-text-quaternary);
     }
   }
 
   &.button_layout_outline {
-    border-color: $border-color;
+    border-color: var(--border-color);
 
     @include hf {
-      border-color: $color-text-tertiary;
+      border-color: var(--color-text-secondary);
     }
   }
 }

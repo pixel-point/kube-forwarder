@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-
 import { createPersistedState } from 'vuex-electron'
+import { ipcRenderer } from 'electron'
 
 import modules from './modules'
 import { isWebDemo } from '../lib/environment'
@@ -31,6 +31,13 @@ const store = new Vuex.Store({
       }
     }
   }
+})
+
+ipcRenderer.on('setSetting', (event, options) => {
+  store.dispatch('Settings/setSetting', options)
+})
+store.watch(state => state.Settings.theme, (value) => {
+  ipcRenderer.send('onSettingChange', { key: 'theme', value })
 })
 
 // Fake demo data
