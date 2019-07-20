@@ -1,7 +1,8 @@
-import { ExecAuth } from '@kubernetes/client-node/dist/exec_auth'
 import { execSync } from 'child_process'
-import { KubeConfig } from '@kubernetes/client-node'
+
+import { ExecAuth } from '@kubernetes/client-node/dist/exec_auth'
 import { CloudAuth } from '@kubernetes/client-node/dist/cloud_auth'
+import { KubeConfig } from '@kubernetes/client-node'
 
 // Use `child_process` instead of shelljs
 class PatchedExecAuth extends ExecAuth {
@@ -46,7 +47,7 @@ class PatchedExecAuth extends ExecAuth {
     // Patch starts here
     // =====================
 
-    const stdout = execSync(cmd, opts, { encoding: 'utf-8' })
+    const stdout = execSync(cmd, { ...opts, encoding: 'utf-8' })
     const result = { code: 0, stdout }
 
     // =====================
@@ -62,4 +63,49 @@ class PatchedExecAuth extends ExecAuth {
   }
 }
 
-KubeConfig.authenticators = [new CloudAuth(), new PatchedExecAuth()]
+// Use `child_process` instead of shelljs
+class PatchedCloudAuth extends CloudAuth {
+  updateAccessToken(config) {
+    if (!config['cmd-path']) {
+      throw new Error('Token is expired!')
+    }
+    const args = config['cmd-args']
+    // TODO: Cache to file?
+    // TODO: do this asynchronously
+    let result
+    try {
+      let cmd = config['cmd-path']
+      if (args) {
+        cmd = `"${cmd}" ${args}`
+      }
+
+      // =====================
+      // Patch starts here
+      // =====================
+
+      const stdout = execSync(cmd, { encoding: 'utf-8' })
+      result = { code: 0, stdout }
+
+      // =====================
+      // Patch ends here
+      // =====================
+
+      if (result.code !== 0) {
+        throw new Error(result.stderr)
+      }
+    } catch (err) {
+      throw new Error('Failed to refresh token: ' + err.message)
+    }
+    const output = result.stdout.toString()
+    const resultObj = JSON.parse(output)
+    const tokenPathKeyInConfig = config['token-key']
+    const expiryPathKeyInConfig = config['expiry-key']
+    // Format in file is {<query>}, so slice it out and add '$'
+    const tokenPathKey = '$' + tokenPathKeyInConfig.slice(1, -1)
+    const expiryPathKey = '$' + expiryPathKeyInConfig.slice(1, -1)
+    config['access-token'] = jsonpath.JSONPath(tokenPathKey, resultObj)
+    config.expiry = jsonpath.JSONPath(expiryPathKey, resultObj)
+  }
+}
+
+KubeConfig.authenticators = [new PatchedCloudAuth(), new PatchedExecAuth()]

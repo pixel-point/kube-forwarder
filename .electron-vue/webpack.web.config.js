@@ -105,7 +105,7 @@ let webConfig = {
       path.resolve(__dirname, 'web-stubs/default.js')
     ),
     new webpack.NormalModuleReplacementPlugin(
-      /(k8s-port-forwarding-patch)|(k8s-exec-auth-path)/,
+      /(k8s-port-forwarding-patch)|(k8s-shelljs-replace-patch)/,
       path.resolve(__dirname, 'web-stubs/default.js')
     ),
     new webpack.NormalModuleReplacementPlugin(/^electron$/, path.resolve(__dirname, 'web-stubs/electron.js')),
