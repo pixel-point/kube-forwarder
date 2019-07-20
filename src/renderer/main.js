@@ -9,6 +9,7 @@ import App from './App'
 import router from './router'
 import store from './store'
 import('./analytics')
+import './lib/k8s-exec-auth-path'
 /* eslint-enable import/first */
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))

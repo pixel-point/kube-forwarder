@@ -142,7 +142,7 @@ async function getPodName(kubeConfig, service) {
 }
 
 async function validatePodName(kubeConfig, namespace, podName) {
-  const coreApi = kubeConfig.makeApiClient(k8s.Core_v1Api)
+  const coreApi = kubeConfig.makeApiClient(k8s.CoreV1Api)
 
   try {
     await coreApi.readNamespacedPod(podName, namespace)
@@ -152,7 +152,7 @@ async function validatePodName(kubeConfig, namespace, podName) {
 }
 
 async function getPodNameFromDeployment(kubeConfig, namespace, deploymentName) {
-  const coreApi = kubeConfig.makeApiClient(k8s.Core_v1Api)
+  const coreApi = kubeConfig.makeApiClient(k8s.CoreV1Api)
   const extensionsApi = kubeConfig.makeApiClient(k8s.Extensions_v1beta1Api)
 
   let deployment
@@ -182,7 +182,7 @@ function stringifySelector(selector) {
 }
 
 async function getPodNameFromService(kubeConfig, namespace, serviceName) {
-  const coreApi = kubeConfig.makeApiClient(k8s.Core_v1Api)
+  const coreApi = kubeConfig.makeApiClient(k8s.CoreV1Api)
 
   let service
   try {

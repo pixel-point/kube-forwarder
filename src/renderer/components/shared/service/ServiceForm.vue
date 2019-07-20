@@ -58,7 +58,7 @@ import cloneDeep from 'clone-deep'
 import { mapActions } from 'vuex'
 import { required, minLength, integer, between } from 'vuelidate/lib/validators'
 import { validationMixin } from 'vuelidate'
-import { Core_v1Api, Extensions_v1beta1Api } from '@kubernetes/client-node' // eslint-disable-line camelcase
+import { CoreV1Api, Extensions_v1beta1Api } from '@kubernetes/client-node' // eslint-disable-line camelcase
 
 import * as resourceKinds from '../../../lib/constants/workload-types'
 import * as clusterHelper from '../../../lib/helpers/cluster'
@@ -148,7 +148,7 @@ export default {
     },
     coreApi() {
       try {
-        return clusterHelper.buildApiClient(this.cluster, Core_v1Api)
+        return clusterHelper.buildApiClient(this.cluster, CoreV1Api)
       } catch (e) {
         console.error(e)
         return null

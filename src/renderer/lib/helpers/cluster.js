@@ -1,6 +1,7 @@
-import { Core_v1Api, KubeConfig } from '@kubernetes/client-node' // eslint-disable-line camelcase
+import { CoreV1Api, KubeConfig } from '@kubernetes/client-node'
 
 import { k8nApiPrettyError } from './k8n-api-error'
+import { showMessageBox } from './ui'
 
 export async function checkConnection(kubeConfig, context = null) {
   if (!kubeConfig || typeof kubeConfig.makeApiClient !== 'function') return
@@ -13,10 +14,17 @@ export async function checkConnection(kubeConfig, context = null) {
   }
 
   try {
-    const api = kubeConfig.makeApiClient(Core_v1Api)
+    const api = kubeConfig.makeApiClient(CoreV1Api)
     await api.listNode()
   } catch (e) {
-    error = k8nApiPrettyError(e)
+    const commandNotFoundMatch = e.message.match(/\s([a-zA-Z0-9]+: command not found)/)
+
+    if (commandNotFoundMatch) {
+      await showMessageBox(`${commandNotFoundMatch[1]}.`)
+      error = e
+    } else {
+      error = k8nApiPrettyError(e)
+    }
   }
 
   kubeConfig.setCurrentContext(currentContext)
