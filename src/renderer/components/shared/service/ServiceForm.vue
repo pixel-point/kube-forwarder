@@ -58,7 +58,7 @@ import cloneDeep from 'clone-deep'
 import { mapActions } from 'vuex'
 import { required, minLength, integer, between } from 'vuelidate/lib/validators'
 import { validationMixin } from 'vuelidate'
-import { CoreV1Api, Extensions_v1beta1Api } from '@kubernetes/client-node' // eslint-disable-line camelcase
+import { CoreV1Api, ExtensionsV1beta1Api } from '@kubernetes/client-node' // eslint-disable-line camelcase
 
 import * as resourceKinds from '../../../lib/constants/workload-types'
 import * as clusterHelper from '../../../lib/helpers/cluster'
@@ -209,7 +209,7 @@ export default {
         const response = await coreApi.listNamespacedPod(namespace)
         return response.body.items.map(x => x.metadata.name)
       } else if (kind === resourceKinds.DEPLOYMENT) {
-        const extensionsApi = clusterHelper.buildApiClient(this.cluster, Extensions_v1beta1Api)
+        const extensionsApi = clusterHelper.buildApiClient(this.cluster, ExtensionsV1beta1Api)
         const response = await extensionsApi.listNamespacedDeployment(namespace)
         return response.body.items.map(x => x.metadata.name)
       } else if (kind === resourceKinds.SERVICE) {

@@ -153,7 +153,7 @@ async function validatePodName(kubeConfig, namespace, podName) {
 
 async function getPodNameFromDeployment(kubeConfig, namespace, deploymentName) {
   const coreApi = kubeConfig.makeApiClient(k8s.CoreV1Api)
-  const extensionsApi = kubeConfig.makeApiClient(k8s.Extensions_v1beta1Api)
+  const extensionsApi = kubeConfig.makeApiClient(k8s.ExtensionsV1beta1Api)
 
   let deployment
   try {
