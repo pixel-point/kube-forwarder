@@ -1,4 +1,5 @@
 import { execSync } from 'child_process'
+import * as jsonpath from 'jsonpath-plus'
 
 import { ExecAuth } from '@kubernetes/client-node/dist/exec_auth'
 import { CloudAuth } from '@kubernetes/client-node/dist/cloud_auth'

@@ -43,7 +43,7 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 @import "../../assets/styles/variables";
 
 .popup {
@@ -87,6 +87,8 @@ export default {
     line-height: 36px;
     display: block;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 
     transition: background-color $hover-transition-speed;
 

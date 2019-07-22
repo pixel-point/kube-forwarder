@@ -22,6 +22,7 @@ export function k8nApiPrettyError(error, messages = {}) {
   const messageKey = getMessageKey(error)
   const prettyError = new Error(buildMessage(error, messages, messageKey))
 
+  prettyError.parentError = error
   prettyError.details = error.message
 
   if (error.response || error.code) {

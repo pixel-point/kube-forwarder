@@ -45,7 +45,13 @@ Use import and export functionality to share bookmarked services with your team 
 
 Use port-forwarding without installing kubectl and avoid explanations to developers on how to use it
 
-## Functionality walkthrough
+## Optional dependencies
+
+* [Google Cloud SDK](https://cloud.google.com/sdk/)
+* [AWS CLI](https://docs.aws.amazon.com/cli/)
+
+## Functionality walk-through
+
 ### Add a cluster(s)
 
 Before you start forwarding interal resources to your local machine, you have to add cluster configuration. To do this we have 3 different options in the app:

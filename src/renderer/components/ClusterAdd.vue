@@ -161,8 +161,26 @@ export default {
       return { success: errors.length === 0, errors }
     },
     async confirmInvalidConnection(errors) {
-      const contextNames = errors.map(x => x.contextName).join(', ')
-      return showConfirmBox(`Failed to connect to ${contextNames} cluster(s). Do you want to continue saving?`)
+      const messages = errors.map(this.getConnectionErrorMessage)
+      const message = messages.concat(['Do you want to continue saving?']).join('\n\n')
+      return showConfirmBox(message)
+    },
+    getConnectionErrorMessage({ error, contextName }) {
+      const awsNotFoundMatch = error.details.match(/\s(aws: command not found)/)
+      if (awsNotFoundMatch) {
+        return `Failed to connect to ${contextName}: ${awsNotFoundMatch[1]}. ` +
+          'Please make sure you have installed AWS CLI. (https://docs.aws.amazon.com/cli/)'
+      }
+
+      const gcloudNotFoundMatch = error.details.match(/\W(gcloud: No such file or directory)/)
+      if (gcloudNotFoundMatch) {
+        return `Failed to connect to ${contextName}: ${gcloudNotFoundMatch[1]}. ` +
+          'Please make sure you have installed Google Cloud SDK. (https://cloud.google.com/sdk)'
+      }
+
+      console.error(error.parentError)
+
+      return `Failed to connect to ${contextName}: ${error.details}`
     }
   }
 }

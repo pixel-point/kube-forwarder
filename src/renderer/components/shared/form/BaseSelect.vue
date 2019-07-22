@@ -62,6 +62,7 @@ export default {
 .base-select {
   .base-input {
     width: 100%;
+    padding-right: 40px;
   }
 
   &.dropdown_opened {
