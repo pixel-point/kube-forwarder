@@ -16,6 +16,8 @@ export default function configureSentry(overrides = {}) {
   configureSentryDefault({
     ...overrides,
     Vue: null,
-    integrations: [enableVueIntegration && vueIntegration].filter(Boolean)
+    integrations(integrations) {
+      return [...integrations, enableVueIntegration && vueIntegration].filter(Boolean)
+    }
   })
 }

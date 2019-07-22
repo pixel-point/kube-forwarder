@@ -22,10 +22,17 @@ export function k8nApiPrettyError(error, messages = {}) {
   const messageKey = getMessageKey(error)
   const prettyError = new Error(buildMessage(error, messages, messageKey))
 
-  prettyError.parentError = error
   prettyError.details = error.message
 
-  if (error.response || error.code) {
+  if (
+    error.response ||
+    error.code || (
+      error.message && (
+        error.message.match(/\s(aws: command not found)/) ||
+        error.message.match(/\W(gcloud: No such file or directory)/)
+      )
+    )
+  ) {
     prettyError.sentryIgnore = true
   }
 

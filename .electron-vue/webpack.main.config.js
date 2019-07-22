@@ -61,8 +61,9 @@ if (process.env.NODE_ENV !== 'production') {
  * Adjust mainConfig for production settings
  */
 if (process.env.NODE_ENV === 'production') {
+  mainConfig.devtool = 'source-map'
+
   mainConfig.plugins.push(
-    // new BabiliWebpackPlugin(),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': '"production"',
       'process.env.SENTRY_DSN': `"${process.env.SENTRY_DSN}"`

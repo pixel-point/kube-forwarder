@@ -51,6 +51,7 @@ import { KubeConfig } from '@kubernetes/client-node'
 import yaml from 'js-yaml'
 import { mapActions } from 'vuex'
 import Vue from 'vue'
+import * as Sentry from '@sentry/electron'
 
 import Header from './shared/Header'
 import Button from './shared/Button'
@@ -161,18 +162,23 @@ export default {
       return { success: errors.length === 0, errors }
     },
     async confirmInvalidConnection(errors) {
-      const messages = errors.map(this.getConnectionErrorMessage)
+      const messages = errors.map(error => {
+        Sentry.addBreadcrumb({ message: error.details })
+        Sentry.captureException(error)
+        return this.getConnectionErrorMessage(error)
+      })
+
       const message = messages.concat(['Do you want to continue saving?']).join('\n\n')
       return showConfirmBox(message)
     },
     getConnectionErrorMessage({ error, contextName }) {
-      const awsNotFoundMatch = error.details.match(/\s(aws: command not found)/)
+      const awsNotFoundMatch = error.details && error.details.match(/\s(aws: command not found)/)
       if (awsNotFoundMatch) {
         return `Failed to connect to ${contextName}: ${awsNotFoundMatch[1]}. ` +
           'Please make sure you have installed AWS CLI. (https://docs.aws.amazon.com/cli/)'
       }
 
-      const gcloudNotFoundMatch = error.details.match(/\W(gcloud: No such file or directory)/)
+      const gcloudNotFoundMatch = error.details && error.details.match(/\W(gcloud: No such file or directory)/)
       if (gcloudNotFoundMatch) {
         return `Failed to connect to ${contextName}: ${gcloudNotFoundMatch[1]}. ` +
           'Please make sure you have installed Google Cloud SDK. (https://cloud.google.com/sdk)'

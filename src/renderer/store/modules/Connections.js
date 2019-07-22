@@ -240,10 +240,8 @@ let actions = {
 
       return { success, results }
     } catch (error) {
-      if (!error.sentryIgnore) {
-        Sentry.addBreadcrumb({ message: error.details })
-        Sentry.captureException(error)
-      }
+      Sentry.addBreadcrumb({ message: error.details })
+      Sentry.captureException(error)
       clearStates(commit, service)
       return { success: false, message: error.message, details: error.details }
     }
