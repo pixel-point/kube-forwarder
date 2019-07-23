@@ -22,7 +22,7 @@ export default function configureSentry(configOverrides = {}) {
       // Send errors only in production mode.
       if (process.env.NODE_ENV === 'production') return event
 
-      console.log('Sentry send:', event)
+      console.warn('Sentry send:', event)
       return null
     },
 

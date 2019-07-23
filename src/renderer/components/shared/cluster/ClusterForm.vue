@@ -125,7 +125,7 @@ export default {
       const error = await checkConnection(kubeConfig)
       if (error) {
         await showMessageBox('Connection failed', {
-          details: `${error.message}${error.details ? `\n${error.details}` : ''}`
+          details: `${error.message}${error.originError.message ? `\n${error.originError.message}` : ''}`
         })
       } else {
         await showMessageBox('Connection successful')

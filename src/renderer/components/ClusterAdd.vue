@@ -162,31 +162,34 @@ export default {
       return { success: errors.length === 0, errors }
     },
     async confirmInvalidConnection(errors) {
-      const messages = errors.map(error => {
-        Sentry.addBreadcrumb({ message: error.details })
+      const messages = errors.map(({ error, contextName }) => {
+        // TODO a breadcrumb for originError
         Sentry.captureException(error)
-        return this.getConnectionErrorMessage(error)
+        return this.getConnectionErrorMessage(error, contextName)
       })
 
       const message = messages.concat(['Do you want to continue saving?']).join('\n\n')
       return showConfirmBox(message)
     },
-    getConnectionErrorMessage({ error, contextName }) {
-      const awsNotFoundMatch = error.details && error.details.match(/\s(aws: command not found)/)
-      if (awsNotFoundMatch) {
-        return `Failed to connect to ${contextName}: ${awsNotFoundMatch[1]}. ` +
-          'Please make sure you have installed AWS CLI. (https://docs.aws.amazon.com/cli/)'
+    getConnectionErrorMessage(error, contextName) {
+      const { originError } = error
+
+      if (originError && typeof originError.message === 'string') {
+        const awsNotFoundMatch = originError.message.match(/\s(aws: command not found)/)
+        if (awsNotFoundMatch) {
+          return `Failed to connect to ${contextName}: ${awsNotFoundMatch[1]}. ` +
+            'Please make sure you have installed AWS CLI. (https://docs.aws.amazon.com/cli/)'
+        }
+
+        const gcloudNotFoundMatch = originError.message.match(/\W(gcloud: No such file or directory)/)
+        if (gcloudNotFoundMatch) {
+          return `Failed to connect to ${contextName}: ${gcloudNotFoundMatch[1]}. ` +
+            'Please make sure you have installed Google Cloud SDK. (https://cloud.google.com/sdk)'
+        }
       }
 
-      const gcloudNotFoundMatch = error.details && error.details.match(/\W(gcloud: No such file or directory)/)
-      if (gcloudNotFoundMatch) {
-        return `Failed to connect to ${contextName}: ${gcloudNotFoundMatch[1]}. ` +
-          'Please make sure you have installed Google Cloud SDK. (https://cloud.google.com/sdk)'
-      }
-
-      console.error(error.parentError)
-
-      return `Failed to connect to ${contextName}: ${error.details}`
+      const originMessagePart = `${error.originError.message ? `, ${error.originError.message}` : ''}`
+      return `Failed to connect to ${contextName}: ${error.message}${originMessagePart}`
     }
   }
 }

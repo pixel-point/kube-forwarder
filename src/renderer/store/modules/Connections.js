@@ -240,10 +240,10 @@ let actions = {
 
       return { success, results }
     } catch (error) {
-      Sentry.addBreadcrumb({ message: error.details })
+      // TODO a breadcrumb for originError
       Sentry.captureException(error)
       clearStates(commit, service)
-      return { success: false, message: error.message, details: error.details }
+      return { success: false, message: error.message, details: error.originError.details }
     }
   },
 

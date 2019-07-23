@@ -1,18 +1,26 @@
 const postfixes = {
   notFound: 'not found.',
+  forbidden: 'forbidden.',
   default: 'can\'t be fetched.'
 }
 
 function buildMessage(error, messages, messageKey) {
+  // Return custom messages if exists
   if (messages[messageKey]) return messages[messageKey]
   if (messages._object) return `${messages._object} ${postfixes[messageKey]}`
-  if (error.body) return error.body.message
+
+  // Return error message from body.
+  if (error.body && error.body.message) return error.body.message
+  if (error.response && error.response.body && error.response.body.message) return error.response.body.message
+
+  // Return default messages
   return postfixes[messageKey]
 }
 
 function getMessageKey(error) {
-  if (error.response && error.response.statusCode === 404) {
-    return 'notFound'
+  if (error.response) {
+    if (error.response.statusCode === 404) return 'notFound'
+    if (error.response.statusCode === 403) return 'forbidden'
   }
 
   return 'default'
@@ -21,8 +29,7 @@ function getMessageKey(error) {
 export function k8nApiPrettyError(error, messages = {}) {
   const messageKey = getMessageKey(error)
   const prettyError = new Error(buildMessage(error, messages, messageKey))
-
-  prettyError.details = error.message
+  prettyError.originError = error
 
   if (
     error.response ||

@@ -8,16 +8,13 @@
 <script>
 import packageJs from '../../../../package'
 import { showMessageBox } from '../../lib/helpers/ui'
-import { isWebDemo } from '../../lib/environment'
+import * as Sentry from '@sentry/electron'
 
 export default {
   name: 'Toolbar',
   computed: {
     version: function() {
       return process.env.NODE_ENV === 'test' ? '0.0.0' : packageJs.versionString
-    },
-    isWebDemo() {
-      return isWebDemo
     }
   },
   methods: {

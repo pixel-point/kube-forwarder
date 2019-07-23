@@ -67,7 +67,7 @@ const router = new Router({
 
 router.afterEach((to, from) => {
   analytics.send('screenview', { cd: to.name })
-  Sentry.addBreadcrumb({ type: 'navigation', data: { from: from.path, to: to.path } })
+  Sentry.addBreadcrumb({ category: 'navigation', data: { from: from.path, to: to.path } })
 
   // todo Move it in the right place.
   if (from.name === 'Cluster Add') {
