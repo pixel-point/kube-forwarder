@@ -5,6 +5,9 @@ import configureSentry from './configure-sentry'
 configureSentry({ Vue })
 
 /* eslint-disable import/first */
+import fixPath from 'fix-path'
+fixPath()
+
 import App from './App'
 import router from './router'
 import store from './store'
