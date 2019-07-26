@@ -101,7 +101,7 @@ let webConfig = {
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.NormalModuleReplacementPlugin(
-      /^(fs)|(net)|(@kubernetes\/client-node)|(promise-fs)|(@sentry\/electron)|(vuex-electron)$/,
+      /^(fs)|(net)|(@kubernetes\/client-node)|(promise-fs)|(@sentry\/electron)|(vuex-electron)|(child_process)$/,
       path.resolve(__dirname, 'web-stubs/default.js')
     ),
     new webpack.NormalModuleReplacementPlugin(
