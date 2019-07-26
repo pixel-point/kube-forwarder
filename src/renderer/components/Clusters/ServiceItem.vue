@@ -111,12 +111,15 @@ export default {
       else this.showBlockedReason()
     },
     async startService() {
-      const result = await this.$store.dispatch('Connections/createConnection', this.service)
+      const { success, error, results } = await this.$store.dispatch('Connections/createConnection', this.service)
 
-      if (!result.success) {
-        if (result.message) return showMessageBox(result.message, { details: result.details })
-        if (result.results) {
-          const messages = result.results.filter(x => !x.success)
+      if (!success) {
+        if (error) {
+          return showMessageBox(error.message, { detail: error.originError && error.originError.message })
+        }
+
+        if (results) {
+          const messages = results.filter(x => !x.success)
             .map(x => `Failed to forward port ${x.forward.localPort} to ${x.forward.remotePort}  - ${x.error}`)
 
           showMessageBox(messages.join(';\n'))

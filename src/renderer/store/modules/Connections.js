@@ -5,7 +5,7 @@ import killable from 'killable'
 import * as Sentry from '@sentry/electron'
 
 import { patchForward } from '../../lib/k8s-port-forwarding-patch'
-import * as workloadTypes from '../../lib/constants/workload-types'
+import * as resourceKinds from '../../lib/constants/workload-types'
 import { createToolset } from '../helpers/validations'
 import * as connectionStates from '../../lib/constants/connection-states'
 import { k8nApiPrettyError } from '../../lib/helpers/k8n-api-error'
@@ -67,36 +67,35 @@ function killServer(commit, port) {
   }
 }
 
-// function getPodName(kservice)
-
-async function startForward(commit, k8sForward, service, forward, podName) {
-  const listenPort = forward.localPort
+async function startForward(commit, k8sForward, service, target) {
   const server = net.createServer(function(socket) {
-    k8sForward.portForward(service.namespace, podName, [forward.remotePort], socket, null, socket, 3)
+    k8sForward.portForward(target.namespace, target.podName, [target.remotePort], socket, null, socket, 3)
     k8sForward.disconnectOnErr = false
   })
 
   killable(server)
   return new Promise((resolve) => {
+    const serviceString = `Service ${getServiceLabel(service)}(${service.id})`
+
     server.on('error', (error) => {
       if (server.listening) {
-        killServer(commit, listenPort)
+        killServer(commit, target.localPort)
       } else {
         server.kill()
         const prettyError = netServerPrettyError(error)
-        console.info(`Error while forwarding Service ${getServiceLabel(service)}(${service.id}): ${prettyError.message}`)
-        resolve({ success: false, error: prettyError, service, forward })
+        console.info(`Error while forwarding ${serviceString}: ${prettyError.message}`)
+        resolve({ success: false, error: prettyError })
       }
     })
 
     server.on('listening', () => {
-      servers[listenPort] = server
-      commit('SET', { port: listenPort, serviceId: service.id, state: connectionStates.CONNECTED })
-      console.info(`Service ${getServiceLabel(service)}(${service.id}) is forwarding port ${listenPort} to ${podName}:${forward.remotePort}`)
-      resolve({ success: true, service, forward })
+      servers[target.localPort] = server
+      commit('SET', { port: target.localPort, serviceId: service.id, state: connectionStates.CONNECTED })
+      console.info(`${serviceString} is forwarding port ${target.localPort} to ${target.podName}:${target.remotePort}`)
+      resolve({ success: true })
     })
 
-    server.listen(listenPort, '127.0.0.1')
+    server.listen(target.localPort, '127.0.0.1')
   })
 }
 
@@ -125,50 +124,97 @@ function prepareK8sToolsWithService(rootState, service) {
   return prepareK8sToolsWithCluster(cluster)
 }
 
-async function getPodName(kubeConfig, service) {
-  const { workloadType, workloadName } = service
+async function loadResource(kubeConfig, service) {
+  const { workloadType: resourceKind, workloadName: resourceName, namespace } = service
 
-  switch (workloadType) {
-    case workloadTypes.POD:
-      await validatePodName(kubeConfig, service.namespace, workloadName)
-      return workloadName
-    case workloadTypes.DEPLOYMENT:
-      return getPodNameFromDeployment(kubeConfig, service.namespace, workloadName)
-    case workloadTypes.SERVICE:
-      return getPodNameFromService(kubeConfig, service.namespace, workloadName)
+  switch (resourceKind) {
+    case resourceKinds.POD:
+      return loadPod(kubeConfig, namespace, resourceName)
+
+    case resourceKinds.DEPLOYMENT:
+      return loadDeployment(kubeConfig, namespace, resourceName)
+
+    case resourceKinds.SERVICE:
+      return loadService(kubeConfig, namespace, resourceName)
+
     default:
-      throw new Error(`Unacceptable workloadType=${workloadType}`)
+      throw new Error(`Unacceptable resourceKind=${resourceKind}`)
   }
 }
 
-async function validatePodName(kubeConfig, namespace, podName) {
+async function loadPod(kubeConfig, namespace, podName) {
   const coreApi = kubeConfig.makeApiClient(k8s.CoreV1Api)
 
   try {
-    await coreApi.readNamespacedPod(podName, namespace)
+    return (await coreApi.readNamespacedPod(podName, namespace)).body
   } catch (error) {
     throw k8nApiPrettyError(error, { _object: `Pod "${podName}"` })
   }
 }
 
-async function getPodNameFromDeployment(kubeConfig, namespace, deploymentName) {
-  const coreApi = kubeConfig.makeApiClient(k8s.CoreV1Api)
+async function loadDeployment(kubeConfig, namespace, deploymentName) {
   const extensionsApi = kubeConfig.makeApiClient(k8s.ExtensionsV1beta1Api)
 
-  let deployment
   try {
-    deployment = (await extensionsApi.readNamespacedDeployment(deploymentName, namespace)).body
+    return (await extensionsApi.readNamespacedDeployment(deploymentName, namespace)).body
   } catch (error) {
     throw k8nApiPrettyError(error, { _object: `Deployment "${deploymentName}"` })
   }
+}
 
-  const { matchLabels } = deployment.spec.selector
+async function loadService(kubeConfig, namespace, serviceName) {
+  const coreApi = kubeConfig.makeApiClient(k8s.CoreV1Api)
+
+  try {
+    return (await coreApi.readNamespacedService(serviceName, namespace)).body
+  } catch (error) {
+    throw k8nApiPrettyError(error, { _object: `Service "${serviceName}"` })
+  }
+}
+
+async function getTarget(kubeConfig, resource, forward) {
+  const { name, namespace } = resource.metadata
+
+  switch (resource.kind) {
+    case 'Pod':
+      return { namespace, ...forward, podName: name }
+    case 'Deployment': {
+      const podName = await getPodNameFromDeployment(kubeConfig, resource)
+      return { namespace, ...forward, podName }
+    }
+    case 'Service': {
+      const podName = await getPodNameFromService(kubeConfig, resource)
+      const remotePort = mapServicePort(resource, forward.remotePort)
+      return { namespace, localPort: forward.localPort, remotePort, podName }
+    }
+    default:
+      throw new Error(`Unacceptable resource.kind=${resource.kind}`)
+  }
+}
+
+async function getPodNameFromDeployment(kubeConfig, deployment) {
+  const coreApi = kubeConfig.makeApiClient(k8s.CoreV1Api)
+
+  const { metadata: { namespace, name }, spec: { selector: { matchLabels } } } = deployment
   const matchLabelKey = Object.keys(matchLabels)[0]
   const labelSelector = `${matchLabelKey}=${matchLabels[matchLabelKey]}`
 
   const { body: podsBody } = await coreApi.listNamespacedPod(namespace, null, null, null, null, labelSelector)
   const podName = podsBody.items.length && podsBody.items[0].metadata.name
-  if (!podName) throw new Error(`There are no pods in '${deploymentName}' deployment.`)
+  if (!podName) throw buildSentryIgnoredError(`There are no pods in '${name}' deployment.`)
+
+  return podName
+}
+
+async function getPodNameFromService(kubeConfig, service) {
+  const coreApi = kubeConfig.makeApiClient(k8s.CoreV1Api)
+
+  const { metadata: { name, namespace }, spec: { selector } } = service
+  if (!selector) throw buildSentryIgnoredError(`Service '${name}' does not have a selector.`)
+
+  const { body: pods } = await coreApi.listNamespacedPod(namespace, null, null, null, null, stringifySelector(selector))
+  const podName = pods.items.length && pods.items[0].metadata.name
+  if (!podName) throw buildSentryIgnoredError(`There are no pods in '${name}' service.`)
 
   return podName
 }
@@ -181,22 +227,12 @@ function stringifySelector(selector) {
   return strings.join(',')
 }
 
-async function getPodNameFromService(kubeConfig, namespace, serviceName) {
-  const coreApi = kubeConfig.makeApiClient(k8s.CoreV1Api)
-
-  let service
-  try {
-    service = (await coreApi.readNamespacedService(serviceName, namespace)).body
-  } catch (error) {
-    throw k8nApiPrettyError(error, { _object: `Service "${serviceName}"` })
+function mapServicePort(service, port) {
+  for (const servicePort of service.spec.ports) {
+    if (servicePort.port === port) return servicePort.targetPort
   }
 
-  const selector = stringifySelector(service.spec.selector)
-  const { body: pods } = await coreApi.listNamespacedPod(namespace, null, null, null, null, selector)
-  const podName = pods.items.length && pods.items[0].metadata.name
-  if (!podName) throw new Error(`There are no pods in '${serviceName}' service.`)
-
-  return podName
+  throw buildSentryIgnoredError(`Service "${service.metadata.name}" does not have a service port ${port}`)
 }
 
 function createConnectingStates(commit, service) {
@@ -226,15 +262,17 @@ let actions = {
       createConnectingStates(commit, service)
 
       const { kubeConfig, k8sPortForward } = prepareK8sToolsWithService(rootState, service)
-      const podName = await getPodName(kubeConfig, service)
-      const results = await Promise.all(service.forwards.map(forward =>
-        startForward(commit, k8sPortForward, service, forward, podName)
-      ))
+      const resource = await loadResource(kubeConfig, service)
+      const results = await Promise.all(service.forwards.map(async forward => {
+        const target = await getTarget(kubeConfig, resource, forward)
+        const result = await startForward(commit, k8sPortForward, service, target)
+        return { ...result, service, forward, target }
+      }))
 
       const success = !results.find(x => !x.success)
       if (!success) {
         for (const result of results) {
-          killServer(commit, result.forward.localPort)
+          killServer(commit, result.target.localPort)
         }
       }
 
@@ -243,7 +281,7 @@ let actions = {
       // TODO a breadcrumb for originError
       Sentry.captureException(error)
       clearStates(commit, service)
-      return { success: false, message: error.message, details: error.originError.details }
+      return { success: false, error }
     }
   },
 
