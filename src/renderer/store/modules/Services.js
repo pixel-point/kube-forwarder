@@ -15,7 +15,7 @@ const state = {
 //   workloadType and workloadName could be renamed to kind and name.
 //   Names should be changes due to new kind: 'Service'
 //   I don't do renaming, since current configs at users and exports will be broken without proper migration
-//   I could be good to accumulate more changes to do and do them in the v2 of config.
+//   I could be good to accumulate more changes to do and do them in the v3 of config.
 export const serviceSchema = {
   type: 'object',
   required: ['id', 'clusterId', 'namespace', 'workloadType', 'workloadName', 'forwards'],
@@ -68,9 +68,21 @@ const actions = {
   }
 }
 
+function cleanup(state, globalState) {
+  // Remove services without a cluster
+  for (const serviceId of Object.keys(state.items)) {
+    const item = state.items[serviceId]
+
+    if (!globalState.Clusters.items[item.clusterId]) {
+      delete state.items[serviceId]
+    }
+  }
+}
+
 export default {
   namespaced: true,
   state,
   mutations,
-  actions
+  actions,
+  cleanup
 }

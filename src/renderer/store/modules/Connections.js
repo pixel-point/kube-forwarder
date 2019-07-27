@@ -11,6 +11,7 @@ import * as connectionStates from '../../lib/constants/connection-states'
 import { k8nApiPrettyError } from '../../lib/helpers/k8n-api-error'
 import { netServerPrettyError } from '../../lib/helpers/net-server-error'
 import { getServiceLabel } from '../../lib/helpers/service'
+import { buildKubeConfig } from '../../lib/helpers/cluster'
 import { isWebDemo } from '../../lib/environment'
 import { buildSentryIgnoredError } from '../../lib/errors'
 
@@ -100,10 +101,10 @@ async function startForward(commit, k8sForward, service, target) {
 }
 
 function prepareK8sToolsWithCluster(cluster) {
-  const kubeConfig = new k8s.KubeConfig()
+  let kubeConfig
 
   try {
-    kubeConfig.loadFromString(cluster.config)
+    kubeConfig = buildKubeConfig(cluster.config)
   } catch (error) {
     const message = typeof error.message === 'string'
       ? `\nError message:\n---\n${error.message.substr(0, 1000)}`
@@ -232,7 +233,12 @@ function mapServicePort(service, port) {
     if (servicePort.port === port) return servicePort.targetPort
   }
 
-  throw buildSentryIgnoredError(`Service "${service.metadata.name}" does not have a service port ${port}`)
+  throw buildSentryIgnoredError(
+    `Service "${
+      service.metadata.name
+    }" does not have a service port ${port}. Available ports: ${
+      service.spec.ports.map(x => x.port).join(', ')
+    }`)
 }
 
 function createConnectingStates(commit, service) {

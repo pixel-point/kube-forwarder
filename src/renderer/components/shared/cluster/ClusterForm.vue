@@ -4,12 +4,34 @@
       <BaseInput v-model.trim="$v.attributes.name.$model" />
     </ControlGroup>
 
+    <ControlGroup :attribute="$v.attributes.config.storingMethod">
+      <RadioButtonGroup v-model="$v.attributes.config.storingMethod.$model"
+                        theme="primary"
+                        :options="configStoringMethodsOptions" />
+    </ControlGroup>
+
+    <ControlGroup>
+      <Button theme="primary" size="s" @click="handleOpenFile">Open a file</Button>
+    </ControlGroup>
+
     <ControlGroup
+      v-if="attributes.config.storingMethod === configStoringMethods.CONTENT"
       label="Config file"
       hint="Get this from ~/.kube/config or your cloud provider"
-      :attribute="$v.attributes.config"
+      :attribute="$v.attributes.config.content"
     >
-      <BaseTextArea v-model.trim="$v.attributes.config.$model" />
+      <BaseTextArea v-model.trim="$v.attributes.config.content.$model" />
+    </ControlGroup>
+    <ControlGroup
+      v-if="attributes.config.storingMethod === configStoringMethods.PATH"
+      label="Path"
+      :attribute="$v.attributes.config.path"
+    >
+      <BaseInput v-model.trim="$v.attributes.config.path.$model" />
+    </ControlGroup>
+
+    <ControlGroup label="Current context" :attribute="$v.attributes.config.currentContext">
+      <BaseInput v-model.trim="$v.attributes.config.currentContext.$model" />
     </ControlGroup>
 
     <div class="control-actions">
@@ -30,19 +52,22 @@ import cloneDeep from 'clone-deep'
 import { mapActions } from 'vuex'
 import { required } from 'vuelidate/lib/validators'
 import { validationMixin } from 'vuelidate'
-import { KubeConfig } from '@kubernetes/client-node'
+import { promises as fs } from 'fs'
 
 import BaseForm from '../form/BaseForm'
 import BaseInput from '../form/BaseInput'
 import BaseTextArea from '../form/BaseTextArea'
 import Button from '../Button'
 import ControlGroup from '../form/ControlGroup'
-import { checkConnection } from '../../../lib/helpers/cluster'
-import { showMessageBox } from '../../../lib/helpers/ui'
+import { checkConnection, buildKubeConfig } from '../../../lib/helpers/cluster'
+import { showMessageBox, showOpenDialog } from '../../../lib/helpers/ui'
+import RadioButtonGroup from '../RadioButtonGroup'
+import * as configStoringMethods from '../../../lib/constants/config-storing-methods'
 
 export default {
   name: 'ClusterForm',
   components: {
+    RadioButtonGroup,
     BaseInput,
     BaseForm,
     BaseTextArea,
@@ -66,10 +91,23 @@ export default {
       }
     }
   },
-  validations: {
-    attributes: {
-      name: { required },
-      config: { required }
+  validations() {
+    const config = {
+      storingMethod: { required },
+      currentContext: { required },
+      path: {},
+      content: {}
+    }
+
+    const storingMethod = this.attributes.config.storingMethod
+    if (storingMethod === configStoringMethods.PATH) config.path.required = required
+    if (storingMethod === configStoringMethods.CONTENT) config.content.required = required
+
+    return {
+      attributes: {
+        name: { required },
+        config
+      }
     }
   },
   computed: {
@@ -81,12 +119,22 @@ export default {
     },
     isNew() {
       return !this.clusterId
-    }
+    },
+    configStoringMethodsOptions() {
+      return [
+        [configStoringMethods.PATH, 'Path'],
+        [configStoringMethods.CONTENT, 'Content']
+      ]
+    },
+    configStoringMethods: () => configStoringMethods
   },
   methods: {
     ...mapActions('Clusters', ['createCluster', 'updateCluster']),
     buildCluster() {
-      return { name: '', config: '' }
+      return {
+        name: '',
+        config: { storingMethod: configStoringMethods.PATH, path: '', content: '', currentContext: '' }
+      }
     },
     async handleSubmit() {
       this.$v.$touch()
@@ -112,9 +160,9 @@ export default {
     async handleCheckConnection() {
       if (this.checkingConnection) return
 
-      const kubeConfig = new KubeConfig()
+      let kubeConfig
       try {
-        kubeConfig.loadFromString(this.attributes.config)
+        kubeConfig = buildKubeConfig(this.attributes.config)
       } catch (error) {
         showMessageBox('Config is invalid', { details: error.message })
         return
@@ -132,6 +180,16 @@ export default {
       }
 
       this.checkingConnection = false
+    },
+    async handleOpenFile() {
+      const filePaths = await showOpenDialog({ properties: ['openFile'] })
+      if (!filePaths) return
+
+      if (this.attributes.config.storingMethod === configStoringMethods.PATH) {
+        this.attributes.config.path = filePaths[0]
+      } else if (this.attributes.config.storingMethod === configStoringMethods.CONTENT) {
+        this.attributes.config.content = await fs.readFile(filePaths[0], { encoding: 'utf8' })
+      }
     }
   }
 }

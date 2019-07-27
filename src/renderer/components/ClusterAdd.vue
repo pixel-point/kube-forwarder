@@ -1,19 +1,23 @@
 <template>
   <div class="page clusters-add">
     <Header :back-path="backPath" />
-    <div class="page__block clusters-add__contexts-block">
-      <template v-if="contexts.length">
-        <span v-if="manualConfig">
+    <div class="page__block clusters-add__configs-block">
+      <template v-if="configs.length">
+        <span v-if="filesOpened">
           We have detected the following clusters in the submitted config.
           Please choose clusters you want to add:
         </span>
         <span v-else>We have detected existing <b>~/.kube/config</b> file with the following clusters:</span>
-        <div class="clusters-add__contexts">
-          <div v-for="context in contexts" :key="context.name" class="clusters-add__context">
-            <BaseCheckbox v-model="checkedContextsIndex[context.name]">
-              <b>{{ context.cluster }}</b>
-              <span v-if="nonUniqClusters[context.cluster]">(user: <b>{{ context.user }}</b>)</span>
-            </BaseCheckbox>
+        <div class="clusters-add__configs">
+          <div v-for="config in configs" :key="config.filePath">
+            <div v-if="configs.length > 1" class="clusters-add__file-path">{{ config.filePath }}</div>
+
+            <div v-for="context in config.contexts" :key="context.name" class="clusters-add__context">
+              <BaseCheckbox v-model="config.checkedContextsIndex[context.name]">
+                <b>{{ context.cluster }}</b>
+                <span v-if="config.nonUniqClusters[context.cluster]">(user: <b>{{ context.user }}</b>)</span>
+              </BaseCheckbox>
+            </div>
           </div>
         </div>
 
@@ -29,14 +33,16 @@
       </template>
     </div>
 
-    <div v-if="!manualConfig" class="page__blocks-row">
+    <div class="page__blocks-row">
       <div class="page__block clusters-add__option">
-        Add cluster manually by inserting <b>~/.kube/config</b>
-        <Button layout="outline" theme="primary" to="/clusters/new?back=/clusters/add">ADD MANUALLY</Button>
+        <div>Add config manually</div>
+        <Button layout="outline" theme="primary" @click="handleOpenFile">OPEN A FILE(S)</Button>
+        or
+        <Button layout="outline" theme="primary" to="/clusters/new">USING A FORM</Button>
       </div>
 
       <div class="page__block clusters-add__option">
-        Restore from <b>Kube Forwarder JSON</b>
+        <div>Restore from <b>Kube Forwarder JSON</b></div>
         <Button layout="outline" theme="primary" to="/clusters/import?back=/clusters/add">RESTORE FROM JSON</Button>
       </div>
     </div>
@@ -46,18 +52,16 @@
 <script>
 import { remote } from 'electron'
 import * as path from 'path'
-import { promises as fs } from 'fs'
 import { KubeConfig } from '@kubernetes/client-node'
-import yaml from 'js-yaml'
 import { mapActions } from 'vuex'
-import Vue from 'vue'
 import * as Sentry from '@sentry/electron'
 
 import Header from './shared/Header'
 import Button from './shared/Button'
 import BaseCheckbox from './shared/form/BaseCheckbox'
 import { checkConnection } from '../lib/helpers/cluster'
-import { showConfirmBox } from '../lib/helpers/ui'
+import { showConfirmBox, showOpenDialog } from '../lib/helpers/ui'
+import * as configStoringMethods from '../lib/constants/config-storing-methods'
 
 const { app } = remote
 
@@ -69,9 +73,14 @@ export default {
   },
   data() {
     return {
-      contexts: [],
-      checkedContextsIndex: {},
-      saving: false
+      filesOpened: false,
+      saving: false,
+      configs: [
+        // contexts,
+        // filePath,
+        // checkedContextsIndex,
+        // nonUniqClusters
+      ]
     }
   },
   computed: {
@@ -79,13 +88,43 @@ export default {
       return '/'
     },
     isAnySelected() {
-      return this.selectedContexts.length > 0
+      return Boolean(this.configs.find(x => Object.values(x.checkedContextsIndex).includes(true)))
+    }
+  },
+  async mounted() {
+    const kubeConfigDefaultPath = path.join(app.getPath('home'), '.kube/config')
+    try {
+      this.addConfig(kubeConfigDefaultPath)
+    } catch (error) {
+      console.log(error)
+    }
+  },
+  methods: {
+    ...mapActions('Clusters', ['createCluster']),
+    addConfig(filePath) {
+      const kubeConfig = new KubeConfig()
+      kubeConfig.loadFromFile(filePath)
+
+      const contexts = kubeConfig.contexts
+      const checkedContextsIndex = {}
+
+      for (const context of contexts) {
+        checkedContextsIndex[context.name] = false
+      }
+
+      this.configs.push({
+        filePath,
+        kubeConfig,
+        contexts,
+        checkedContextsIndex,
+        nonUniqClusters: this.buildNonUniqClusters(contexts)
+      })
     },
-    // returns the index of context.names whos clusters occur al least twice.
-    nonUniqClusters() {
+    // buildNonUniqClusters returns the index of context.names whos clusters occur al least twice.
+    buildNonUniqClusters(contexts) {
       const index = {}
       const result = {}
-      for (const context of this.contexts) {
+      for (const context of contexts) {
         if (index[context.cluster]) {
           result[context.cluster] = true
         } else {
@@ -95,67 +134,48 @@ export default {
 
       return result
     },
-    manualConfig() {
-      return this.$store.state.manualClusterConfig
-    },
-    selectedContexts() {
-      return this.contexts.filter(context => this.checkedContextsIndex[context.name])
-    }
-  },
-  async mounted() {
-    const configString = await this.getConfigString()
-
-    const kubeConfig = new KubeConfig()
-    let configObject
-    try {
-      kubeConfig.loadFromString(configString)
-      configObject = yaml.safeLoad(configString)
-    } catch (error) {
-      return
-    }
-
-    this.kubeConfig = kubeConfig // Shouldn't be a part of the data.
-    this.configObject = configObject
-    this.contexts = kubeConfig.contexts
-    for (const context of this.contexts) {
-      Vue.set(this.checkedContextsIndex, context.name, false)
-    }
-  },
-  methods: {
-    ...mapActions('Clusters', ['createCluster']),
-    async getConfigString() {
-      if (this.manualConfig) return this.manualConfig
-
-      const kubeConfigDefaultPath = path.join(app.getPath('home'), '.kube/config')
-      return fs.readFile(kubeConfigDefaultPath, { encoding: 'utf8' }).catch(() => '')
-    },
     async handleSave() {
-      if (!this.kubeConfig) return
       if (this.saving) return
       this.saving = true
 
-      const connectionResult = await this.checkConnectionToContexts(this.selectedContexts)
+      const selectedPairs = []
+      for (const config of this.configs) {
+        for (const context of config.contexts) {
+          if (config.checkedContextsIndex[context.name]) {
+            selectedPairs.push({ config, context })
+          }
+        }
+      }
+
+      const connectionResult = await this.checkConnectionToPairs(selectedPairs)
       const continueSaving = connectionResult.success || await this.confirmInvalidConnection(connectionResult.errors)
 
       if (continueSaving) {
-        this.saveSelected()
+        this.savePairs(selectedPairs)
         this.$router.push('/')
       }
 
       this.saving = false
     },
-    saveSelected() {
-      for (const context of this.selectedContexts) {
-        this.configObject['current-context'] = context.name
-        const name = this.nonUniqClusters[context.cluster] ? `${context.cluster} — ${context.user}` : context.cluster
-        this.createCluster({ name, config: yaml.safeDump(this.configObject) })
+    savePairs(pairs) {
+      for (const { config, context } of pairs) {
+        const name = config.nonUniqClusters[context.cluster] ? `${context.cluster} — ${context.user}` : context.cluster
+
+        this.createCluster({
+          name,
+          config: {
+            storingMethod: configStoringMethods.PATH,
+            path: config.filePath,
+            currentContext: context.name
+          }
+        })
       }
     },
-    async checkConnectionToContexts(contexts) {
+    async checkConnectionToPairs(pairs) {
       const errors = []
 
-      for (const context of contexts) {
-        const error = await checkConnection(this.kubeConfig, context.name)
+      for (const { config, context } of pairs) {
+        const error = await checkConnection(config.kubeConfig, context.name)
         if (error) errors.push({ error, contextName: context.name })
       }
 
@@ -190,6 +210,17 @@ export default {
 
       const originMessagePart = `${error.originError.message ? `, ${error.originError.message}` : ''}`
       return `Failed to connect to ${contextName}: ${error.message}${originMessagePart}`
+    },
+    async handleOpenFile() {
+      const filePaths = await showOpenDialog({ properties: ['openFile', 'multiSelections'] })
+
+      if (filePaths) {
+        this.filesOpened = true
+        this.configs = []
+        for (const filePath of filePaths) {
+          this.addConfig(filePath)
+        }
+      }
     }
   }
 }
@@ -197,18 +228,16 @@ export default {
 </script>
 
 <style lang="scss">
-.clusters-add__contexts-block {
+.clusters-add__configs-block {
   margin-bottom: 20px;
 }
 
-.clusters-add__contexts {
+.clusters-add__configs {
   margin: 30px 0;
 }
 
-.clusters-add__option {
-  .button {
-    margin-top: 30px
-  }
+.clusters-add__file-path {
+  margin: 30px 0 10px;
 }
 
 .clusters-add__context {
@@ -222,6 +251,12 @@ export default {
   & + .clusters-add__context {
     margin-top: 10px;
     word-break: break-all;
+  }
+}
+
+.clusters-add__option {
+  .button {
+    margin-top: 30px
   }
 }
 </style>

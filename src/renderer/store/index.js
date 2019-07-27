@@ -1,54 +1,52 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-
 import { createPersistedState } from 'vuex-electron'
 
 import modules from './modules'
-import { isWebDemo } from '../lib/environment'
-import { importCluster } from '../lib/export'
+import migrate from './migrate'
+import cleanup from './cleanup'
+import isVersion1 from './helpers/is-version-1'
 
 Vue.use(Vuex)
 
 const persistedModuleNames = []
-const noPersistedModuleNames = []
 
 Object.keys(modules).forEach(moduleName => {
-  const isPersisted = modules[moduleName].persisted !== false;
-  (isPersisted ? persistedModuleNames : noPersistedModuleNames).push(moduleName)
+  const isPersisted = modules[moduleName].persisted !== false
+  if (isPersisted) persistedModuleNames.push(moduleName)
 })
 
+const persistedKeys = ['version', ...persistedModuleNames]
+
 const store = new Vuex.Store({
+  state: {
+    version: 2
+  },
   modules,
   plugins: [
-    !process.env.IS_WEB && createPersistedState({ paths: persistedModuleNames })
+    !process.env.IS_WEB && createPersistedState()
   ].filter(Boolean),
   strict: process.env.NODE_ENV !== 'production',
   mutations: {
     CLEANUP(state) {
-      Vue.delete(state, 'manualClusterConfig')
-      for (const moduleName of noPersistedModuleNames) {
-        state[moduleName] = modules[moduleName].state
-      }
+      cleanup(state, persistedModuleNames, persistedKeys)
+    },
+    MIGRATE(state) {
+      migrate(state)
+    },
+    SET_VERSION(state, { version }) {
+      state.version = version
     }
   }
 })
 
-// Fake demo data
-if (isWebDemo) {
-  const [cluster, services] = importCluster(require('../../../static/cluster-Pixel Point.kpf-export'))
+console.log(store.state)
 
-  store.dispatch('Clusters/createCluster', cluster).then(async (result) => {
-    const { item } = result
-    const results = await Promise.all(services.map(service => (
-      store.dispatch('Services/createService', { ...service, clusterId: item.id })
-    )))
-
-    if (results[1]) {
-      store.dispatch('Connections/createConnection', results[1].item)
-    }
-  })
+if (isVersion1(store.state)) {
+  store.commit('SET_VERSION', { version: 1 })
 }
 
+store.commit('MIGRATE')
 store.commit('CLEANUP')
 
 export default store

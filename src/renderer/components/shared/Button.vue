@@ -15,6 +15,7 @@ export default {
   props: {
     to: { type: String, default: null },
     href: { type: String, default: null },
+    active: { type: Boolean, default: false },
     type: { type: String, default: 'button' },
     loading: { type: Boolean, default: false },
     disabled: { type: Boolean, default: false },
@@ -37,6 +38,7 @@ export default {
       return {
         button: true,
         button_loading: this.loading,
+        button_active: this.active,
         button_disabled: this.disabled || this.disabledStyle,
         [`button_layout_${this.layout}`]: true,
         [`button_theme_${this.theme}`]: true,
@@ -119,7 +121,7 @@ $font-sizes: (
   &.button_layout_outline {
     color: $color-text-quaternary;
 
-    @include hf {
+    &:hover, &.button_active {
       color: $color-text-secondary;
     }
 
@@ -131,7 +133,7 @@ $font-sizes: (
   &.button_layout_outline {
     border-color: $border-color;
 
-    @include hf {
+    &:hover, &.button_active {
       border-color: $color-text-tertiary;
     }
   }
@@ -148,7 +150,7 @@ $font-sizes: (
     &.button_layout_filled {
       background-color: $theme-color;
 
-      @include hf {
+      &:hover, &.button_active {
         background-color: mix($theme-color, #000, 90%);
       }
     }
@@ -165,7 +167,7 @@ $font-sizes: (
     &.button_layout_outline {
       border-color: rgba($theme-color, 0.5);
 
-      @include hf {
+      &:hover, &.button_active {
         background-color: rgba($theme-color, $button-outline-hover-bg-opacity);
       }
     }

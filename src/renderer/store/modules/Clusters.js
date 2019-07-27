@@ -2,6 +2,7 @@ import uuidv1 from 'uuid/v1'
 
 import { createToolset, commitIfValid } from '../helpers/validations'
 import { SET, DELETE } from '../helpers/mutations'
+import * as configStoringMethods from '../../lib/constants/config-storing-methods'
 
 const state = {
   items: {}
@@ -14,8 +15,27 @@ export const clusterSchema = {
   properties: {
     id: { type: 'string' },
     name: { type: 'string' },
-    config: { type: 'string' },
-    folded: { type: 'boolean' }
+    folded: { type: 'boolean' },
+    config: {
+      type: 'object',
+      required: ['storingMethod', 'currentContext'],
+      properties: {
+        storingMethod: { type: 'string', enum: configStoringMethods.default },
+        path: { type: 'string' },
+        content: { type: 'string' },
+        currentContext: { type: 'string' }
+      },
+      oneOf: [
+        {
+          properties: { storingMethod: { const: configStoringMethods.PATH } },
+          required: ['path']
+        },
+        {
+          properties: { storingMethod: { const: configStoringMethods.CONTENT } },
+          required: ['content']
+        }
+      ]
+    }
   }
 }
 const { validate, pick } = createToolset(clusterSchema)
