@@ -7,6 +7,8 @@ import migrate from './migrate'
 import cleanup from './cleanup'
 import isVersion1 from './helpers/is-version-1'
 
+export const CURRENT_STATE_VERSION = 2
+
 Vue.use(Vuex)
 
 const persistedModuleNames = []
@@ -20,7 +22,7 @@ const persistedKeys = ['version', ...persistedModuleNames]
 
 const store = new Vuex.Store({
   state: {
-    version: 2
+    version: CURRENT_STATE_VERSION
   },
   modules,
   plugins: [
@@ -39,8 +41,6 @@ const store = new Vuex.Store({
     }
   }
 })
-
-console.log(store.state)
 
 if (isVersion1(store.state)) {
   store.commit('SET_VERSION', { version: 1 })

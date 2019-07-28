@@ -22,6 +22,7 @@
     >
       <BaseTextArea v-model.trim="$v.attributes.config.content.$model" />
     </ControlGroup>
+
     <ControlGroup
       v-if="attributes.config.storingMethod === configStoringMethods.PATH"
       label="Path"
@@ -53,6 +54,8 @@ import { mapActions } from 'vuex'
 import { required } from 'vuelidate/lib/validators'
 import { validationMixin } from 'vuelidate'
 import { promises as fs } from 'fs'
+import yaml from 'js-yaml'
+import deepmerge from 'deepmerge'
 
 import BaseForm from '../form/BaseForm'
 import BaseInput from '../form/BaseInput'
@@ -81,14 +84,14 @@ export default {
     message: { type: String, default: '' }
   },
   data() {
+    // `deepmerge` is required to merge attributes.cluster.config
     return {
       error: null,
       checkingConnection: false,
-      attributes: {
+      attributes: deepmerge({
         ...this.buildCluster(),
-        clusterId: this.clusterId,
-        ...cloneDeep(this.initialAttributes)
-      }
+        clusterId: this.clusterId
+      }, cloneDeep(this.initialAttributes))
     }
   },
   validations() {
@@ -133,7 +136,7 @@ export default {
     buildCluster() {
       return {
         name: '',
-        config: { storingMethod: configStoringMethods.PATH, path: '', content: '', currentContext: '' }
+        config: { storingMethod: configStoringMethods.CONTENT, path: '', content: '', currentContext: '' }
       }
     },
     async handleSubmit() {
@@ -188,7 +191,9 @@ export default {
       if (this.attributes.config.storingMethod === configStoringMethods.PATH) {
         this.attributes.config.path = filePaths[0]
       } else if (this.attributes.config.storingMethod === configStoringMethods.CONTENT) {
-        this.attributes.config.content = await fs.readFile(filePaths[0], { encoding: 'utf8' })
+        const content = await fs.readFile(filePaths[0], { encoding: 'utf8' })
+        this.attributes.config.content = content
+        this.attributes.config.currentContext = yaml.safeLoad(content)['current-context']
       }
     }
   }

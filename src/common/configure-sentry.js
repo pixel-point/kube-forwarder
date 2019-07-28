@@ -5,6 +5,8 @@ import { Breadcrumbs } from '@sentry/browser/esm/integrations'
 import packageJson from '../../package'
 
 export default function configureSentry(configOverrides = {}) {
+  if (!process.env.SENTRY_DSN) return
+
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
     defaultIntegrations: false,

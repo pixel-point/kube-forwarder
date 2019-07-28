@@ -37,8 +37,7 @@
       <div class="page__block clusters-add__option">
         <div>Add config manually</div>
         <Button layout="outline" theme="primary" @click="handleOpenFile">OPEN A FILE(S)</Button>
-        or
-        <Button layout="outline" theme="primary" to="/clusters/new">USING A FORM</Button>
+        <Button layout="outline" theme="primary" to="/clusters/new?back=/clusters/add">PASTE CONFIG</Button>
       </div>
 
       <div class="page__block clusters-add__option">

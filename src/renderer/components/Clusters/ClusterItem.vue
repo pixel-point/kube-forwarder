@@ -7,7 +7,7 @@
       <IconArrowDropdown v-if="cluster.folded" />
       <Dropdown v-else :popup-props="{ offsetHorizontal: 1 }">
         <template v-slot:trigger="triggerSlotProps">
-          <Button class="cluster-item__action-more" layout="text" @click="triggerSlotProps.toggle" >
+          <Button class="cluster-item__action-more" layout="text" @click="triggerSlotProps.toggle">
             <IconDotes />
           </Button>
         </template>
@@ -38,6 +38,8 @@
 import { mapActions } from 'vuex'
 import { exportCluster, saveObjectToJsonFile } from '../../lib/export'
 import { showSaveDialog, showErrorBox, showMessageBox, showConfirmBox } from '../../lib/helpers/ui'
+import { CURRENT_STATE_VERSION } from '../../store'
+import * as Sentry from '@sentry/electron'
 
 import Dropdown from '../shared/Dropdown'
 import IconDotes from '../shared/icons/IconDotes'
@@ -104,8 +106,20 @@ export default {
       })
 
       if (buttonIndex === 0) {
-        const objectToExport = exportCluster(this.$store.state, this.cluster.id, { includeConfig: checkboxChecked })
-        const filename = await showSaveDialog({ defaultName: `cluster-${this.cluster.name}.kpf-export.json` })
+        let objectToExport
+
+        try {
+          objectToExport = await exportCluster(this.$store.state, this.cluster.id, {
+            includeConfig: checkboxChecked
+          })
+        } catch (error) {
+          Sentry.captureException(error)
+          showErrorBox(error.message)
+          return
+        }
+
+        const defaultName = `cluster-${this.cluster.name}.kpf-export.v${CURRENT_STATE_VERSION}.json`
+        const filename = await showSaveDialog({ defaultName })
 
         if (filename) {
           try {

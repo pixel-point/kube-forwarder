@@ -49,8 +49,7 @@ export default {
         this.importing = false
         return
       } catch (error) {
-        console.error(error)
-        showErrorBox(`Sorry, an error occurred while saving the file. Raw error message: ${error.message}`)
+        showErrorBox(error.message)
       }
     }
     this.$router.push(this.backPath)

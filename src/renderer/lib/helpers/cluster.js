@@ -8,14 +8,14 @@ export function buildKubeConfig(clusterConfig) {
   const kubeConfig = new KubeConfig()
 
   if (clusterConfig.storingMethod === configStoringMethods.PATH) {
-    console.log('pa')
     kubeConfig.loadFromFile(clusterConfig.path)
   } else if (clusterConfig.storingMethod === configStoringMethods.CONTENT) {
-    console.log('co')
     kubeConfig.loadFromString(clusterConfig.content)
   } else {
     throw new Error(`storingMethod "${clusterConfig.storingMethod}" is invalid.`)
   }
+
+  kubeConfig.setCurrentContext(clusterConfig.currentContext)
 
   return kubeConfig
 }

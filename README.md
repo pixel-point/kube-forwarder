@@ -199,7 +199,9 @@ will build packages for Windows and Linux and upload them to [releases](https://
 4) Run `npm run release` on a Mac computer to build `.dmg` target. 
 It will be automatically pushed to releases at Github.
 5) Go to [Releases](https://github.com/pixel-point/kube-forwarder/releases) in the repository. 
-Make sure that the created draft is OK and release it (Edit -> Release). 
+Make sure that the created draft is OK and release it (Edit -> Release).
+6) Run `cask-repair kube-forwarder` to update the cask version.
+([https://github.com/Homebrew/homebrew-cask/blob/master/CONTRIBUTING.md#updating-a-cask](About cask-repair))  
 
 Notes: 
 1) `.dmg` target is added to release by your mac computer. 
