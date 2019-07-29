@@ -1,7 +1,7 @@
 <template>
   <div class="autocomplete-input">
     <BaseInput v-bind="$attrs" :value="value" v-on="listeners" />
-    <Popup v-if="focused" :position="'bottom'" :align="'both'">
+    <Popup v-if="focused && options.length > 0" :position="'bottom'" :align="'both'">
       <div v-if="loading" class="autocomplete-input__content">
         <Loader size="s" />
       </div>
@@ -41,7 +41,7 @@ export default {
   },
   computed: {
     matchedOptions() {
-      return this.options.filter(x => x.length !== this.value.length && x.startsWith(this.value))
+      return this.options.filter(x => x.startsWith(this.value))
     },
     listeners() {
       return {
@@ -73,6 +73,7 @@ export default {
 @import "../../../assets/styles/variables";
 
 .autocomplete-input {
+  font-size: $font-size-base;
   position: relative;
 
   .base-input {

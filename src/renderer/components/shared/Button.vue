@@ -77,6 +77,14 @@ $font-sizes: (
   "l": $font-size-large,
 );
 
+.buttons {
+  font-size: 0;
+
+  .button + .button {
+    margin-left: 10px;
+  }
+}
+
 .button {
   background: none;
   display: inline-block;

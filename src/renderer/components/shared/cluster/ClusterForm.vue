@@ -4,14 +4,16 @@
       <BaseInput v-model.trim="$v.attributes.name.$model" />
     </ControlGroup>
 
-    <ControlGroup :attribute="$v.attributes.config.storingMethod">
-      <RadioButtonGroup v-model="$v.attributes.config.storingMethod.$model"
-                        theme="primary"
-                        :options="configStoringMethodsOptions" />
-    </ControlGroup>
-
-    <ControlGroup>
-      <Button theme="primary" size="s" @click="handleOpenFile">Open a file</Button>
+    <ControlGroup
+      label="Set destination to your kube config or paste it as a text"
+      :attribute="$v.attributes.config.storingMethod"
+    >
+      <BaseRadioButtons
+        v-model="$v.attributes.config.storingMethod.$model"
+        name="clusterStoringMethod"
+        direction="column"
+        :options="configStoringMethodsOptions"
+      />
     </ControlGroup>
 
     <ControlGroup
@@ -20,6 +22,7 @@
       hint="Get this from ~/.kube/config or your cloud provider"
       :attribute="$v.attributes.config.content"
     >
+      <Button theme="primary" size="s" @click="handleOpenFile(configStoringMethods.CONTENT)">Copy from a file</Button>
       <BaseTextArea v-model.trim="$v.attributes.config.content.$model" />
     </ControlGroup>
 
@@ -28,11 +31,12 @@
       label="Path"
       :attribute="$v.attributes.config.path"
     >
+      <Button theme="primary" size="s" @click="handleOpenFile(configStoringMethods.PATH)">Select a file</Button>
       <BaseInput v-model.trim="$v.attributes.config.path.$model" />
     </ControlGroup>
 
     <ControlGroup label="Current context" :attribute="$v.attributes.config.currentContext">
-      <BaseInput v-model.trim="$v.attributes.config.currentContext.$model" />
+      <AutocompleteInput v-model.trim="$v.attributes.config.currentContext.$model" :options="contextOptions"/>
     </ControlGroup>
 
     <div class="control-actions">
@@ -54,24 +58,26 @@ import { mapActions } from 'vuex'
 import { required } from 'vuelidate/lib/validators'
 import { validationMixin } from 'vuelidate'
 import { promises as fs } from 'fs'
-import yaml from 'js-yaml'
 import deepmerge from 'deepmerge'
+import { KubeConfig } from '@kubernetes/client-node'
 
 import BaseForm from '../form/BaseForm'
 import BaseInput from '../form/BaseInput'
+import AutocompleteInput from '../form/AutocompleteInput'
 import BaseTextArea from '../form/BaseTextArea'
 import Button from '../Button'
 import ControlGroup from '../form/ControlGroup'
 import { checkConnection, buildKubeConfig } from '../../../lib/helpers/cluster'
-import { showMessageBox, showOpenDialog } from '../../../lib/helpers/ui'
-import RadioButtonGroup from '../RadioButtonGroup'
+import { showMessageBox, showOpenDialog, showConfirmBox } from '../../../lib/helpers/ui'
+import BaseRadioButtons from '../form/BaseRadioButtons'
 import * as configStoringMethods from '../../../lib/constants/config-storing-methods'
 
 export default {
   name: 'ClusterForm',
   components: {
-    RadioButtonGroup,
+    BaseRadioButtons,
     BaseInput,
+    AutocompleteInput,
     BaseForm,
     BaseTextArea,
     Button,
@@ -88,6 +94,7 @@ export default {
     return {
       error: null,
       checkingConnection: false,
+      contexts: [],
       attributes: deepmerge({
         ...this.buildCluster(),
         clusterId: this.clusterId
@@ -125,11 +132,14 @@ export default {
     },
     configStoringMethodsOptions() {
       return [
-        [configStoringMethods.PATH, 'Path'],
-        [configStoringMethods.CONTENT, 'Content']
+        [configStoringMethods.PATH, 'Set a path'],
+        [configStoringMethods.CONTENT, 'Paste as a text']
       ]
     },
-    configStoringMethods: () => configStoringMethods
+    configStoringMethods: () => configStoringMethods,
+    contextOptions() {
+      return this.contexts.map(x => x.name)
+    }
   },
   methods: {
     ...mapActions('Clusters', ['createCluster', 'updateCluster']),
@@ -184,16 +194,30 @@ export default {
 
       this.checkingConnection = false
     },
-    async handleOpenFile() {
+    async handleOpenFile(method) {
       const filePaths = await showOpenDialog({ properties: ['openFile'] })
       if (!filePaths) return
 
-      if (this.attributes.config.storingMethod === configStoringMethods.PATH) {
-        this.attributes.config.path = filePaths[0]
-      } else if (this.attributes.config.storingMethod === configStoringMethods.CONTENT) {
-        const content = await fs.readFile(filePaths[0], { encoding: 'utf8' })
-        this.attributes.config.content = content
-        this.attributes.config.currentContext = yaml.safeLoad(content)['current-context']
+      const content = await fs.readFile(filePaths[0], { encoding: 'utf8' })
+      let kubeConfig = new KubeConfig()
+      try {
+        kubeConfig.loadFromString(content)
+      } catch (error) {
+        kubeConfig = null
+        const result = await showConfirmBox(
+          `The files contains invalid config. \nError ${error.message}.\n\n Do you want to continue?`
+        )
+        if (!result) return
+      }
+
+      if (method === configStoringMethods.PATH) this.attributes.config.path = filePaths[0]
+      if (method === configStoringMethods.CONTENT) this.attributes.config.content = content
+
+      if (kubeConfig) {
+        this.attributes.config.currentContext = kubeConfig.getCurrentContext()
+        this.contexts = kubeConfig.contexts
+      } else {
+        this.contexts = []
       }
     }
   }
@@ -211,6 +235,11 @@ export default {
     .button + .button {
       margin-left: 10px;
     }
+  }
+
+  .button + .base-textarea,
+  .button + .base-input {
+    margin-top: 4px;
   }
 }
 </style>

@@ -35,14 +35,18 @@
 
     <div class="page__blocks-row">
       <div class="page__block clusters-add__option">
-        <div>Add config manually</div>
-        <Button layout="outline" theme="primary" @click="handleOpenFile">OPEN A FILE(S)</Button>
-        <Button layout="outline" theme="primary" to="/clusters/new?back=/clusters/add">PASTE CONFIG</Button>
+        <div>Add Kubernetes config manually</div>
+        <div class="buttons">
+          <Button layout="outline" theme="primary" @click="handleOpenFile">OPEN A FILE(S)</Button>
+          <Button layout="outline" theme="primary" to="/clusters/new?back=/clusters/add">PASTE AS A TEXT</Button>
+        </div>
       </div>
 
       <div class="page__block clusters-add__option">
         <div>Restore from <b>Kube Forwarder JSON</b></div>
-        <Button layout="outline" theme="primary" to="/clusters/import?back=/clusters/add">RESTORE FROM JSON</Button>
+        <div class="buttons">
+          <Button layout="outline" theme="primary" to="/clusters/import?back=/clusters/add">RESTORE FROM JSON</Button>
+        </div>
       </div>
     </div>
   </div>
@@ -254,7 +258,7 @@ export default {
 }
 
 .clusters-add__option {
-  .button {
+  .buttons {
     margin-top: 30px
   }
 }
