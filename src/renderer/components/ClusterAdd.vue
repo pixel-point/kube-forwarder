@@ -1,7 +1,7 @@
 <template>
   <div class="page clusters-add">
     <Header :back-path="backPath" />
-    <div class="page__block clusters-add__configs-block">
+    <div v-if="filesOpened || defaultDetected" class="page__block clusters-add__configs-block">
       <template v-if="configs.length">
         <span v-if="filesOpened">
           We have detected the following clusters in the
@@ -16,7 +16,7 @@
             <div v-if="configs.length > 1" class="clusters-add__file-path">{{ config.filePath }}</div>
 
             <b v-if="config.error">
-              Sorry, the file does not contain a valid config.
+              Sorry, an error occurred while opening the file.
               <br />
               Error: {{ config.error }}
             </b>
@@ -86,6 +86,7 @@ export default {
   },
   data() {
     return {
+      defaultDetected: false,
       filesOpened: false,
       saving: false,
       configs: [
@@ -106,11 +107,8 @@ export default {
   },
   async mounted() {
     const kubeConfigDefaultPath = path.join(app.getPath('home'), '.kube/config')
-    try {
-      this.addConfig(kubeConfigDefaultPath)
-    } catch (error) {
-      console.log(error)
-    }
+    this.addConfig(kubeConfigDefaultPath)
+    this.defaultDetected = !this.configs[0].error
   },
   methods: {
     ...mapActions('Clusters', ['createCluster']),
