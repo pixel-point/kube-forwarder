@@ -86,7 +86,8 @@ which will be used to connect to a resource. Let's see an example of a problem t
     1) If the user tries to forward the resource in Kube Forwarder again, most likely there will be an error
     since a connection will be established with `remote-cluster`, not `local-cluster` as the user expected,
     and `remote-cluster` couldn't have `postgres` resource.
-So, to avoid the error we should store the current context in a separate field. 
+    
+    So, to avoid the error we should store the current context in a separate field. 
 
 <a target="_blank" href="https://user-images.githubusercontent.com/2697570/60754775-58a4ca80-9fe6-11e9-8d67-d15a1423b506.png"><img width="320" alt="Screenshot 2019-07-06 at 12 04 45" src="https://user-images.githubusercontent.com/2697570/60754775-58a4ca80-9fe6-11e9-8d67-d15a1423b506.png"></a>
 
@@ -218,22 +219,23 @@ npm run test:cypress:open
 
 ## Release guide
 
-1) Be sure that you created `.env.production` and filled it in the right way.
-2) Update the version in `package.json`.
-3) Push to `release` branch. [Drone(pixel-point/kube-forwarder)](https://drone.pixelpoint.io/pixel-point/kube-forwarder/)
-will build packages for Windows and Linux and upload them to [releases](https://github.com/pixel-point/kube-forwarder/releases)
-4) Run `npm run release` on a Mac computer to build `.dmg` target. 
-It will be automatically pushed to releases at Github.
-5) Go to [Releases](https://github.com/pixel-point/kube-forwarder/releases) in the repository. 
+### Configure environment
+
+Also, this steps could be used to configure CI environment.
+
+1) Copy `.env.example` to `.env.production` and fill variables.
+
+### Release steps
+
+1) Update the version in `package.json` and Push to `release` branch.
+1) Run `npm run release` on a Mac computer to build packages.  They will be automatically pushed to releases at Github.
+1) Go to [Releases](https://github.com/pixel-point/kube-forwarder/releases) in the repository. 
 Make sure that the created draft is OK and release it (Edit -> Release).
-6) Run `cask-repair kube-forwarder` to update the cask version.
+1) Run `cask-repair kube-forwarder` to update the cask version.
 ([https://github.com/Homebrew/homebrew-cask/blob/master/CONTRIBUTING.md#updating-a-cask](About cask-repair))  
 
 Notes: 
-1) `.dmg` target is added to release by your mac computer. 
-`.AppImage` and `.exe` have to be added to the release by drone CI.
-2) A release tag (for example: `v1.0.3`) will be added automatically 
-by Github when you release your draft.
+1) A release tag (for example: `v1.0.3`) will be added to GIT automatically by Github when you release your draft.
 
 ## Development tips
 

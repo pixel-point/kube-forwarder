@@ -8,7 +8,6 @@
 <script>
 import packageJs from '../../../../package'
 import { showMessageBox } from '../../lib/helpers/ui'
-import * as Sentry from '@sentry/electron'
 
 export default {
   name: 'Toolbar',

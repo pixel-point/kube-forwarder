@@ -3,13 +3,14 @@
 process.env.BABEL_ENV = 'renderer'
 
 const path = require('path')
-const { dependencies } = require('../package.json')
 const webpack = require('webpack')
-
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const { VueLoaderPlugin } = require('vue-loader')
+
+const { dependencies } = require('../package.json')
+const sentryWebpackPlugin = require('./plugins/sentry-webpack')
 
 /**
  * List of node_modules to include in webpack bundle
@@ -157,7 +158,8 @@ if (process.env.NODE_ENV !== 'production') {
 if (process.env.NODE_ENV === 'production') {
   rendererConfig.devtool = 'source-map'
 
-  rendererConfig.plugins.push(
+  rendererConfig.plugins = [
+    ...rendererConfig.plugins,
     new CopyWebpackPlugin([
       {
         from: path.join(__dirname, '../static'),
@@ -172,8 +174,9 @@ if (process.env.NODE_ENV === 'production') {
     }),
     new webpack.LoaderOptionsPlugin({
       minimize: true
-    })
-  )
+    }),
+    process.env.RELEASE === 'true' ? sentryWebpackPlugin : null
+  ].filter(Boolean)
 }
 
 module.exports = rendererConfig

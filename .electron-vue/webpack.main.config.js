@@ -3,17 +3,17 @@
 process.env.BABEL_ENV = 'main'
 
 const path = require('path')
-const { dependencies } = require('../package.json')
 const webpack = require('webpack')
 
-const BabiliWebpackPlugin = require('babili-webpack-plugin')
+const packageJson = require('../package.json')
+const sentryWebpackPlugin = require('./plugins/sentry-webpack')
 
 let mainConfig = {
   entry: {
     main: path.join(__dirname, '../src/main/index.js')
   },
   externals: [
-    ...Object.keys(dependencies || {})
+    ...Object.keys(packageJson.dependencies || {})
   ],
   module: {
     rules: [
@@ -63,12 +63,14 @@ if (process.env.NODE_ENV !== 'production') {
 if (process.env.NODE_ENV === 'production') {
   mainConfig.devtool = 'source-map'
 
-  mainConfig.plugins.push(
+  mainConfig.plugins = [
+    ...mainConfig.plugins,
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': '"production"',
       'process.env.SENTRY_DSN': `"${process.env.SENTRY_DSN}"`
-    })
-  )
+    }),
+    process.env.RELEASE === 'true' ? sentryWebpackPlugin : null
+  ].filter(Boolean)
 }
 
 module.exports = mainConfig
