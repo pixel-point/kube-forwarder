@@ -54,13 +54,39 @@ Use port-forwarding without installing kubectl and avoid explanations to develop
 
 ### Add a cluster(s)
 
-Before you start forwarding interal resources to your local machine, you have to add cluster configuration. To do this we have 3 different options in the app:
+Before you start forwarding internal resources to your local machine, you have to add cluster configuration. 
+To do this we have 3 different options in the app:
 
-- Auto-detection of ~/.kube/config file and parsing settings from it
-- Manual adding of Kubernetes config
-- Import of the JSON file that could be generated via Kube Forwarder export functionality
+1) Auto-detection of ~/.kube/config file and parsing settings from it
+1) Manual adding of Kubernetes config by selecting a file(s)
+1) Manual adding of Kubernetes config by pasting a text
+1) Import of the JSON file that could be generated via Kube Forwarder export functionality
 
-When you add a new cluster via auto-detection or manually, we could parse config and if there are multiple contexts inside we will suggest you to add multiple clusters to the app. Few examples of yaml files we expect to have you could find [there](https://github.com/pixel-point/kube-forwarder/issues/7)
+When you add a new cluster via auto-detection (option 1) or manually using a file(a) selection (option 2), we could parse 
+configs and if there are multiple contexts inside we will suggest you to add multiple clusters to the app. 
+Few examples of yaml files we expect to have you could find [there](https://github.com/pixel-point/kube-forwarder/issues/7)
+
+Also, you could add a cluster by filling a form manually (option 3). The form has the following fields:
+* Name - the name of a cluster withing Kube Forwarder app.
+* Storing method (Set destination to your kube config or paste it as a text) - the method of storing a config It has two options:
+    * `Set a path` - storing a path to the config file. It will be read every time when you forwarding a port. It allows
+    a user to don't do any changes in Kube Forwarder's settings when a third-party app updates the config file. 
+    For example, when `azure-cli` updates an access token (#13).
+    * `Paste as a text` - storing a config just as a yml text.
+* Path (if storing method is `Set a path`) - the path to a config file.
+* Content (if storing method is `Paste as a text`) - Yml config as a text.
+* Current Context (if storing method is `Set a path`) - When you use `Set a path`, you must select a context from a file
+which will be used to connect to a resource. Let's see an example of a problem that the field solves.
+    1) Let's say we don't have `Current context` field.
+    1) A user has a config file with two contexts: `local-cluster` and `remote-cluster`. 
+    `current-context` in the yml file is `local-cluster`.
+    1) The user configured a cluster in Kube Forwarder with `Set a path` option.
+    1) The user created a resource `postgres` and successfully forwarded ports for some time.
+    1) Then the user executed `kubectl config use-context remote-cluster`
+    1) If the user tries to forward the resource in Kube Forwarder again, most likely there will be an error
+    since a connection will be established with `remote-cluster`, not `local-cluster` as the user expected,
+    and `remote-cluster` couldn't have `postgres` resource.
+So, to avoid the error we should store the current context in a separate field. 
 
 <a target="_blank" href="https://user-images.githubusercontent.com/2697570/60754775-58a4ca80-9fe6-11e9-8d67-d15a1423b506.png"><img width="320" alt="Screenshot 2019-07-06 at 12 04 45" src="https://user-images.githubusercontent.com/2697570/60754775-58a4ca80-9fe6-11e9-8d67-d15a1423b506.png"></a>
 

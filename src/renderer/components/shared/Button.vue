@@ -59,7 +59,6 @@ export default {
 <style lang="scss">
 @import "../../assets/styles/mixins";
 
-$border-width: 1px;
 $sizes: s m l;
 $heights: (
   "s": 30px,

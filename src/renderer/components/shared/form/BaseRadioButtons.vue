@@ -38,7 +38,7 @@ export default {
 
 .base-radio-buttons__option {
   display: inline-block;
-  margin-right: 70px;
+  margin-right: 40px;
 
   input {
     width: 0;

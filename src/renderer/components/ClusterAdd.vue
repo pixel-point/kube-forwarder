@@ -4,13 +4,22 @@
     <div class="page__block clusters-add__configs-block">
       <template v-if="configs.length">
         <span v-if="filesOpened">
-          We have detected the following clusters in the submitted config.
+          We have detected the following clusters in the
+          <span v-if="configs.length > 1">submitted configs</span>
+          <b v-else>{{ configs[0].filePath }}</b>.
           Please choose clusters you want to add:
         </span>
         <span v-else>We have detected existing <b>~/.kube/config</b> file with the following clusters:</span>
+
         <div class="clusters-add__configs">
-          <div v-for="config in configs" :key="config.filePath">
+          <div v-for="config in configs" :key="config.filePath" class="clusters-add__config">
             <div v-if="configs.length > 1" class="clusters-add__file-path">{{ config.filePath }}</div>
+
+            <b v-if="config.error">
+              Sorry, the file does not contain a valid config.
+              <br />
+              Error: {{ config.error }}
+            </b>
 
             <div v-for="context in config.contexts" :key="context.name" class="clusters-add__context">
               <BaseCheckbox v-model="config.checkedContextsIndex[context.name]">
@@ -29,7 +38,8 @@
       </template>
 
       <template v-else>
-        We haven't found a valid <b>~/.kube/config</b> file. Please choose one of options below.
+        <div>Please, open a file first.</div>
+        <Button layout="outline" theme="primary" @click="handleOpenFile">OPEN A FILE(S)</Button>
       </template>
     </div>
 
@@ -106,7 +116,12 @@ export default {
     ...mapActions('Clusters', ['createCluster']),
     addConfig(filePath) {
       const kubeConfig = new KubeConfig()
-      kubeConfig.loadFromFile(filePath)
+      try {
+        kubeConfig.loadFromFile(filePath)
+      } catch (error) {
+        this.configs.push({ filePath, error, contexts: [], checkedContextsIndex: {} })
+        return
+      }
 
       const contexts = kubeConfig.contexts
       const checkedContextsIndex = {}

@@ -18,26 +18,33 @@
 
     <ControlGroup
       v-if="attributes.config.storingMethod === configStoringMethods.CONTENT"
+      class="cluster-form__control-group-content"
       label="Config file"
       hint="Get this from ~/.kube/config or your cloud provider"
       :attribute="$v.attributes.config.content"
     >
-      <Button theme="primary" size="s" @click="handleOpenFile(configStoringMethods.CONTENT)">Copy from a file</Button>
       <BaseTextArea v-model.trim="$v.attributes.config.content.$model" />
+      <Button theme="primary" size="s" layout="outline" @click="handleOpenFile(configStoringMethods.CONTENT)">
+        Copy from a file
+      </Button>
     </ControlGroup>
 
-    <ControlGroup
-      v-if="attributes.config.storingMethod === configStoringMethods.PATH"
-      label="Path"
-      :attribute="$v.attributes.config.path"
-    >
-      <Button theme="primary" size="s" @click="handleOpenFile(configStoringMethods.PATH)">Select a file</Button>
-      <BaseInput v-model.trim="$v.attributes.config.path.$model" />
-    </ControlGroup>
+    <template v-if="attributes.config.storingMethod === configStoringMethods.PATH">
+      <ControlGroup
+        class="cluster-form__control-group-path"
+        label="Path"
+        :attribute="$v.attributes.config.path"
+      >
+        <Button theme="primary" size="m" layout="outline" @click="handleOpenFile(configStoringMethods.PATH)">
+          Select a file
+        </Button>
+        <BaseInput v-model.trim="$v.attributes.config.path.$model" />
+      </ControlGroup>
 
-    <ControlGroup label="Current context" :attribute="$v.attributes.config.currentContext">
-      <AutocompleteInput v-model.trim="$v.attributes.config.currentContext.$model" :options="contextOptions"/>
-    </ControlGroup>
+      <ControlGroup label="Current context" :attribute="$v.attributes.config.currentContext">
+        <AutocompleteInput v-model.trim="$v.attributes.config.currentContext.$model" :options="contextOptions"/>
+      </ControlGroup>
+    </template>
 
     <div class="control-actions">
       <Button theme="danger" layout="outline" :to="backPath">Cancel</Button>
@@ -68,9 +75,10 @@ import BaseTextArea from '../form/BaseTextArea'
 import Button from '../Button'
 import ControlGroup from '../form/ControlGroup'
 import { checkConnection, buildKubeConfig } from '../../../lib/helpers/cluster'
-import { showMessageBox, showOpenDialog, showConfirmBox } from '../../../lib/helpers/ui'
+import { showMessageBox, showOpenDialog, showConfirmBox, showErrorBox } from '../../../lib/helpers/ui'
 import BaseRadioButtons from '../form/BaseRadioButtons'
 import * as configStoringMethods from '../../../lib/constants/config-storing-methods'
+import { size } from '../../../lib/constants'
 
 export default {
   name: 'ClusterForm',
@@ -104,13 +112,16 @@ export default {
   validations() {
     const config = {
       storingMethod: { required },
-      currentContext: { required },
+      currentContext: {},
       path: {},
       content: {}
     }
 
     const storingMethod = this.attributes.config.storingMethod
-    if (storingMethod === configStoringMethods.PATH) config.path.required = required
+    if (storingMethod === configStoringMethods.PATH) {
+      config.path.required = required
+      config.currentContext.required = required
+    }
     if (storingMethod === configStoringMethods.CONTENT) config.content.required = required
 
     return {
@@ -198,26 +209,34 @@ export default {
       const filePaths = await showOpenDialog({ properties: ['openFile'] })
       if (!filePaths) return
 
+      const fileStats = await fs.stat(filePaths[0])
+      if (fileStats.size > size.MBYTE) return showErrorBox('Sorry, the file is too large (> 1MB)')
+
       const content = await fs.readFile(filePaths[0], { encoding: 'utf8' })
-      let kubeConfig = new KubeConfig()
-      try {
-        kubeConfig.loadFromString(content)
-      } catch (error) {
-        kubeConfig = null
-        const result = await showConfirmBox(
-          `The files contains invalid config. \nError ${error.message}.\n\n Do you want to continue?`
-        )
-        if (!result) return
+
+      if (method === configStoringMethods.CONTENT) {
+        this.attributes.config.content = content
       }
 
-      if (method === configStoringMethods.PATH) this.attributes.config.path = filePaths[0]
-      if (method === configStoringMethods.CONTENT) this.attributes.config.content = content
+      if (method === configStoringMethods.PATH) {
+        let kubeConfig = new KubeConfig()
+        try {
+          kubeConfig.loadFromString(content)
+        } catch (error) {
+          kubeConfig = null
+          const result = await showConfirmBox(
+            `The files contains invalid config. \nError ${error.message}.\n\n Do you want to continue?`
+          )
+          if (!result) return
+        }
 
-      if (kubeConfig) {
-        this.attributes.config.currentContext = kubeConfig.getCurrentContext()
-        this.contexts = kubeConfig.contexts
-      } else {
-        this.contexts = []
+        this.attributes.config.path = filePaths[0]
+        if (kubeConfig) {
+          this.attributes.config.currentContext = kubeConfig.getCurrentContext()
+          this.contexts = kubeConfig.contexts
+        } else {
+          this.contexts = []
+        }
       }
     }
   }
@@ -225,6 +244,8 @@ export default {
 </script>
 
 <style lang="scss">
+@import '../../../assets/styles/variables';
+
 .cluster-form {
   .controls > .base-textarea {
     height: 193px;
@@ -233,13 +254,31 @@ export default {
 
   .control-actions {
     .button + .button {
-      margin-left: 10px;
+      margin-left: $spacer-sm;
     }
   }
 
-  .button + .base-textarea,
-  .button + .base-input {
-    margin-top: 4px;
+  .base-radio-buttons {
+    margin-top: $spacer-sm;
+  }
+}
+
+.cluster-form__control-group-content {
+  .button {
+    margin-top: $spacer-xs;
+  }
+}
+
+.cluster-form__control-group-path {
+  .controls {
+    display: flex;
+    align-items: center;
+  }
+
+  .button {
+    margin-right: $spacer-sm;
+    height: 40px;
+    line-height: 40px - $border-width * 2;
   }
 }
 </style>

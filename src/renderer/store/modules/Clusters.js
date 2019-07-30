@@ -18,7 +18,8 @@ export const clusterSchema = {
     folded: { type: 'boolean' },
     config: {
       type: 'object',
-      required: ['storingMethod', 'currentContext'],
+      required: ['storingMethod'],
+      additionalProperties: false,
       properties: {
         storingMethod: { type: 'string', enum: configStoringMethods.default },
         path: { type: 'string' },
@@ -28,7 +29,7 @@ export const clusterSchema = {
       oneOf: [
         {
           properties: { storingMethod: { const: configStoringMethods.PATH } },
-          required: ['path']
+          required: ['path', 'currentContext']
         },
         {
           properties: { storingMethod: { const: configStoringMethods.CONTENT } },

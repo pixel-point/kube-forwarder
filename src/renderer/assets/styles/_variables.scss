@@ -29,9 +29,14 @@ $font-size-base: 14px;
 $font-size-big: 15px;
 $font-size-large: 17px;
 
+$border-width: 1px;
 $border-radius: 2px;
 $border-color: rgba($color-text, 0.1);
-$border: 1px solid $border-color;
+$border: $border-width solid $border-color;
+
+$spacer: 20px;
+$spacer-sm: $spacer / 2;
+$spacer-xs: $spacer / 2;
 
 $button-outline-hover-bg-opacity: 0.1;
 
