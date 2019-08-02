@@ -39,7 +39,7 @@
 
       <template v-else>
         <div>Please, open a file first.</div>
-        <Button layout="outline" theme="primary" @click="handleOpenFile">OPEN A FILE(S)</Button>
+        <Button layout="outline" theme="primary" @click="handleOpenFile">OPEN FILE(S)</Button>
       </template>
     </div>
 
@@ -47,8 +47,8 @@
       <div class="page__block clusters-add__option">
         <div>Add Kubernetes config manually</div>
         <div class="buttons">
-          <Button layout="outline" theme="primary" @click="handleOpenFile">OPEN A FILE(S)</Button>
-          <Button layout="outline" theme="primary" to="/clusters/new?back=/clusters/add">PASTE AS A TEXT</Button>
+          <Button layout="outline" theme="primary" @click="handleOpenFile">OPEN FILE(S)</Button>
+          <Button layout="outline" theme="primary" to="/clusters/new?back=/clusters/add">PASTE CONFIG</Button>
         </div>
       </div>
 
