@@ -184,9 +184,9 @@ async function getTarget(kubeConfig, resource, forward) {
       return { namespace, ...forward, podName }
     }
     case 'Service': {
-      const podName = await getPodNameFromService(kubeConfig, resource)
-      const remotePort = mapServicePort(resource, forward.remotePort)
-      return { namespace, localPort: forward.localPort, remotePort, podName }
+      const pod = await getPodFromService(kubeConfig, resource)
+      const remotePort = mapServicePort(resource, forward.remotePort, pod)
+      return { namespace, localPort: forward.localPort, remotePort, podName: pod.metadata.name }
     }
     default:
       throw new Error(`Unacceptable resource.kind=${resource.kind}`)
@@ -207,17 +207,17 @@ async function getPodNameFromDeployment(kubeConfig, deployment) {
   return podName
 }
 
-async function getPodNameFromService(kubeConfig, service) {
+async function getPodFromService(kubeConfig, service) {
   const coreApi = kubeConfig.makeApiClient(k8s.CoreV1Api)
 
   const { metadata: { name, namespace }, spec: { selector } } = service
   if (!selector) throw buildSentryIgnoredError(`Service '${name}' does not have a selector.`)
 
   const { body: pods } = await coreApi.listNamespacedPod(namespace, null, null, null, null, stringifySelector(selector))
-  const podName = pods.items.length && pods.items[0].metadata.name
-  if (!podName) throw buildSentryIgnoredError(`There are no pods in '${name}' service.`)
+  const pod = pods.items.length && pods.items[0]
+  if (!pod) throw buildSentryIgnoredError(`There are no pods in '${name}' service.`)
 
-  return podName
+  return pod
 }
 
 function stringifySelector(selector) {
@@ -228,9 +228,24 @@ function stringifySelector(selector) {
   return strings.join(',')
 }
 
-function mapServicePort(service, port) {
+function mapServicePort(service, port, pod) {
+  let targetPort = null
+
   for (const servicePort of service.spec.ports) {
-    if (servicePort.port === port) return servicePort.targetPort
+    if (servicePort.port === port) {
+      targetPort = servicePort.targetPort
+      break
+    }
+  }
+
+  if (typeof targetPort === 'number') {
+    return targetPort
+  } else if (typeof targetPort === 'string') {
+    for (const container of pod.spec.containers) {
+      for (const containerPort of container.ports) {
+        if (containerPort.name === targetPort) return containerPort.containerPort
+      }
+    }
   }
 
   throw buildSentryIgnoredError(
