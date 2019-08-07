@@ -13,7 +13,7 @@ export default {
   name: 'Toolbar',
   computed: {
     version: function() {
-      return process.env.NODE_ENV === 'test' ? '0.0.0' : packageJs.versionString
+      return process.env.NODE_ENV === 'test' ? '0.0.0' : packageJs.version
     }
   },
   methods: {

@@ -3,7 +3,7 @@ import querystring from 'querystring'
 import { WebSocketHandler } from '@kubernetes/client-node/dist/web-socket-handler'
 import WebSocket from 'isomorphic-ws'
 
-WebSocketHandler.restartableHandleStandardInput = async function (createWS, stdin, streamNum = 0) {
+WebSocketHandler.restartableHandleStandardInput = function (createWS, stdin, streamNum = 0) {
   const tryLimit = 3;
   let queue = Promise.resolve()
   let ws = null
@@ -19,17 +19,24 @@ WebSocketHandler.restartableHandleStandardInput = async function (createWS, stdi
     }
 
     let i = 0;
-    for (; i < tryLimit; ++i) {
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(buff);
-        break;
-      } else {
-        ws = await createWS()
+
+    try {
+      for (; i < tryLimit; ++i) {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(buff);
+          break;
+        } else {
+          ws = await createWS()
+        }
       }
+    } catch (e) {
+      // TODO: Сonsider to log network errors.
+      console.error(e)
+      stdin.end()
     }
 
     if (i >= tryLimit) {
-      throw new Error("can't send data to ws")
+      stdin.end()
     }
   }
 
@@ -45,7 +52,7 @@ WebSocketHandler.restartableHandleStandardInput = async function (createWS, stdi
 }
 
 export function patchForward (forward) {
-  forward.portForward = async function (namespace, podName, targetPorts, output, err, input) {
+  forward.portForward = function (namespace, podName, targetPorts, output, err, input) {
     if (targetPorts.length === 0) {
       throw new Error('You must provide at least one port to forward to.')
     }
@@ -85,7 +92,7 @@ export function patchForward (forward) {
       })
     }
 
-    await WebSocketHandler.restartableHandleStandardInput(createWebSocket, input, 0)
+    WebSocketHandler.restartableHandleStandardInput(createWebSocket, input, 0)
   }
 }
 /* eslint-enable */
