@@ -59,4 +59,20 @@ td, th {
 b {
   font-weight: 600;
 }
+
+.link {
+  text-decoration: none;
+  color: $color-primary;
+  position: relative;
+
+  &:after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: rgba($color-primary, 0.5);
+  }
+}
 </style>

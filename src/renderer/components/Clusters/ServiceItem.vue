@@ -10,8 +10,16 @@
         <span>From <span class="service-item__namespace">{{ service.namespace }}</span> namespace exposed to</span>
         <span class="service-item__ports">
           <span v-for="(forward, index) in forwards" :key="forward.id" class="service-item__port">
-            <b>{{ forward.localPort }}</b><span v-if="index !== forwards.length - 1"
-                                                class="service-item__port-divider" />
+            <a
+              v-if="portHttp[forward.localPort]"
+              href="#"
+              class="service-item__port-number link"
+              @click="(e) => openHttpPort(e, forward.localPort)"
+            >{{ forward.localPort }}</a>
+            <span v-else class="service-item__port-number">{{ forward.localPort }}</span><span
+              v-if="index !== forwards.length - 1"
+              class="service-item__port-divider"
+            />
           </span>
         </span>
         <span>port{{ forwards.length > 1 ? 's' : '' }}</span>
@@ -52,6 +60,8 @@
 </template>
 
 <script>
+import { remote as electron } from 'electron'
+
 import { CONNECTED } from '../../lib/constants/connection-states'
 import { showMessageBox, showConfirmBox } from '../../lib/helpers/ui'
 import { getServiceLabel } from '../../lib/helpers/service'
@@ -83,6 +93,13 @@ export default {
     },
     portStates() {
       return this.forwards.map(forward => this.$store.state.Connections[forward.localPort] || {})
+    },
+    portHttp() {
+      const result = {}
+      for (const state of this.portStates) {
+        result[state.port] = state.serviceId === this.service.id && state.flags.http
+      }
+      return result
     },
     serviceState() {
       const isFree = this.portStates.every(state => !state.serviceId)
@@ -157,6 +174,10 @@ export default {
     },
     servicePath(postfix = '') {
       return `/clusters/${this.service.clusterId}/services/${this.service.id}${postfix}`
+    },
+    openHttpPort(e, port) {
+      e.preventDefault()
+      electron.shell.openExternal(`http://localhost:${port}`)
     }
   }
 }
@@ -204,9 +225,14 @@ export default {
 
 .service-item__description {
   color: $color-text-tertiary;
+}
 
-  b {
-    color: $color-text
+.service-item__port-number {
+  color: $color-text;
+  font-weight: 500;
+
+  &.link {
+    color: $color-primary;
   }
 }
 

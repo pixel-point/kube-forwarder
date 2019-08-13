@@ -37,6 +37,7 @@ function createWindow() {
     titleBarStyle: 'hiddenInset',
     resizable: process.env.NODE_ENV === 'development',
     webPreferences: {
+      webSecurity: false,
       nodeIntegration: true
     }
   })

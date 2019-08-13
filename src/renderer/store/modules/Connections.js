@@ -12,33 +12,50 @@ import { k8nApiPrettyError } from '../../lib/helpers/k8n-api-error'
 import { netServerPrettyError } from '../../lib/helpers/net-server-error'
 import { getServiceLabel } from '../../lib/helpers/service'
 import { buildKubeConfig } from '../../lib/helpers/cluster'
-import { isWebDemo } from '../../lib/environment'
 import { buildSentryIgnoredError } from '../../lib/errors'
 
+// Schema of an item
 const { validate } = createToolset({
   type: 'object',
-  required: ['port', 'serviceId', 'state'],
+  required: ['port', 'serviceId', 'state', 'flags'],
   properties: {
     port: { type: 'integer', minimum: 0, maximum: 65535 },
     serviceId: { type: 'string' },
-    state: { type: 'string', enum: Object.values(connectionStates) }
+    state: { type: 'string', enum: Object.values(connectionStates) },
+    flags: {
+      type: 'object',
+      required: ['http'],
+      properties: {
+        http: { type: 'boolean' }
+      }
+    }
   }
 })
 
-const state = {
-  // <port>: { port, serviceId, state }
-  // state - one of 'connected', 'connecting'
-}
+// See the schema above
+const state = {}
 
 const mutations = {
-  SET(state, item) {
+  SET(state, payloadedItem) {
+    const item = { flags: { http: false }, ...payloadedItem }
+
     const valid = validate(item)
     if (valid) Vue.set(state, item.port, item)
     else throw new Error(JSON.stringify(validate.errors))
   },
+
+  SET_FLAG(state, { port, flagName, flagValue }) {
+    if (!port) throw new Error('port must present')
+    if (!flagName) throw new Error('port must present')
+
+    if (state[port]) {
+      Vue.set(state[port].flags, flagName, flagValue)
+    }
+  },
+
   DELETE(state, port) {
     if (!port) throw new Error('port must present')
-    Vue.set(state, port)
+    Vue.delete(state, port)
   }
 }
 
@@ -75,7 +92,8 @@ async function startForward(commit, k8sForward, service, target) {
   })
 
   killable(server)
-  return new Promise((resolve) => {
+
+  const resultPromise = new Promise((resolve) => {
     const serviceString = `Service ${getServiceLabel(service)}(${service.id})`
 
     server.on('error', (error) => {
@@ -89,15 +107,31 @@ async function startForward(commit, k8sForward, service, target) {
       }
     })
 
-    server.on('listening', () => {
+    server.listen(target.localPort, '127.0.0.1', () => {
       servers[target.localPort] = server
       commit('SET', { port: target.localPort, serviceId: service.id, state: connectionStates.CONNECTED })
       console.info(`${serviceString} is forwarding port ${target.localPort} to ${target.podName}:${target.remotePort}`)
       resolve({ success: true })
     })
-
-    server.listen(target.localPort, '127.0.0.1')
   })
+
+  resultPromise.then(result => result.success && updateFlags(commit, target))
+
+  return resultPromise
+}
+
+function updateFlags(commit, target) {
+  updateHttpFlag(commit, target)
+}
+
+async function updateHttpFlag(commit, target) {
+  const controller = new AbortController()
+  setTimeout(() => controller.abort(), 5000)
+
+  try {
+    await fetch(`http://localhost:${target.localPort}`, { signal: controller.signal, method: 'OPTIONS' })
+    commit('SET_FLAG', { port: target.localPort, flagName: 'http', flagValue: true })
+  } catch (e) {}
 }
 
 function prepareK8sToolsWithCluster(cluster) {
@@ -309,21 +343,6 @@ let actions = {
   deleteConnection({ commit }, service) {
     for (const forward of service.forwards) {
       killServer(commit, forward.localPort)
-    }
-  }
-}
-
-if (isWebDemo) {
-  actions = {
-    createConnection({ commit }, service) {
-      service.forwards.map(forward =>
-        commit('SET', { port: forward.localPort, serviceId: service.id, state: connectionStates.CONNECTED })
-      )
-    },
-    deleteConnection({ commit }, service) {
-      service.forwards.map(forward =>
-        commit('DELETE', forward.localPort)
-      )
     }
   }
 }
