@@ -1,5 +1,5 @@
 <template>
-  <div :class="{ page: true, clusters: true, clusters_empty: clustersCount === 0, 'clusters_not-found': !filteredClusterIds.length }">
+  <div :class="className">
     <template v-if="clustersCount">
       <Header>
         <SearchInput v-model="query" size="s" />
@@ -75,6 +75,14 @@ export default {
     }
   },
   computed: {
+    className() {
+      return {
+        page: true,
+        clusters: true,
+        clusters_empty: this.clustersCount === 0,
+        'clusters_not-found': !this.filteredClusterIds.length
+      }
+    },
     clustersToRender() {
       return this.filteredClusterIds
         .map(id => this.clustersById[id])

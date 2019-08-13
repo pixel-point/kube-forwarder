@@ -98,7 +98,9 @@ $font-sizes: (
   // border exists always to prevent twitches
   border: $border-width solid transparent;
 
-  transition: background-color $hover-transition-speed, color $hover-transition-speed, border-color $hover-transition-speed;
+  transition: background-color $hover-transition-speed,
+    color $hover-transition-speed,
+    border-color $hover-transition-speed;
 
   & > span + svg,
   & > svg + span {

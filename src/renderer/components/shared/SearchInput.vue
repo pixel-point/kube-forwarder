@@ -21,6 +21,7 @@ export default {
 }
 </script>
 
+<!-- eslint-disable max-len -->
 <style lang="scss">
 @import "../../assets/styles/variables";
 
@@ -66,3 +67,4 @@ export default {
   }
 }
 </style>
+<!-- eslint-enable max-len -->

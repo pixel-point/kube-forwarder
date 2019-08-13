@@ -1,3 +1,4 @@
+<!-- eslint-disable max-len -->
 <template>
   <svg v-if="thin" width="9" height="15" xmlns="http://www.w3.org/2000/svg" :class="className">
     <path
@@ -15,6 +16,7 @@
     />
   </svg>
 </template>
+<!-- eslint-enable max-len -->
 
 <script>
 const TOS = ['top', 'bottom', 'left', 'right']

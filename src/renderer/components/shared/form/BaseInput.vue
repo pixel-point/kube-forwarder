@@ -16,7 +16,7 @@ export default {
     value: { type: null, default: undefined },
     size: { type: String, default: 'm', validator: val => ['s', 'm'].includes(val) },
     inline: { type: Boolean, default: false },
-    invalid: { type: Boolean, default: false },
+    invalid: { type: Boolean, default: false }
   },
   computed: {
     className() {
