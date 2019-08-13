@@ -91,6 +91,18 @@ export default {
       newForward: this.getEmptyForward()
     }
   },
+  watch: {
+    'newForward.localPort': function(next, prev) {
+      if (next && prev !== next) {
+        this.newForward.remotePort = next
+      }
+    },
+    'newForward.remotePort': function(next, prev) {
+      if (next && prev !== next) {
+        this.newForward.localPort = next
+      }
+    }
+  },
   methods: {
     getEmptyForward() {
       return { localPort: null, remotePort: null, id: uuidv1() }
