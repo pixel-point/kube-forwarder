@@ -3,7 +3,7 @@ import querystring from 'querystring'
 import { WebSocketHandler } from '@kubernetes/client-node/dist/web-socket-handler'
 import WebSocket from 'isomorphic-ws'
 
-WebSocketHandler.restartableHandleStandardInput = function (createWS, stdin, streamNum = 0) {
+WebSocketHandler.restartableHandleStandardInput = async function (createWS, stdin, streamNum = 0) {
   const tryLimit = 3;
   let queue = Promise.resolve()
   let ws = null
@@ -49,6 +49,13 @@ WebSocketHandler.restartableHandleStandardInput = function (createWS, stdin, str
       ws.close();
     }
   });
+
+  // It's important to open connection immediately (even without data) for some apps (for example: mariadb)
+  try {
+    ws = await createWS()
+  } catch (e) {
+    console.error(e)
+  }
 }
 
 export function patchForward (forward) {
@@ -72,7 +79,7 @@ export function patchForward (forward) {
         needsToReadPortNumber[index * 2 + 1] = true
       })
 
-      return await this.handler.connect(path, null, (streamNum, buff) => {
+      return this.handler.connect(path, null, (streamNum, buff) => {
         if (streamNum >= targetPorts.length * 2) {
           return !this.disconnectOnErr
         }
