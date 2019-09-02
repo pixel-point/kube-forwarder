@@ -19,7 +19,7 @@
   <a href="https://kube-forwarder.pixelpoint.io">Visit a Website</a> · 
   <a href="https://github.com/pixel-point/kube-forwarder/releases/latest/download/kube-forwarder.dmg">Download for macOS</a> · 
   <a href="https://github.com/pixel-point/kube-forwarder/releases/latest/download/kube-forwarder.exe">Download for Windows</a> · 
-  <a href="https://github.com/pixel-point/kube-forwarder/releases/latest/download/kube-forwarder.zip">Download for Linux</a>
+  <a href="https://github.com/pixel-point/kube-forwarder/releases/latest/download/kube-forwarder.AppImage">Download for Linux</a>
   ·
   <a href="#install-with-homebrew">Install with Homebrew</a>
 </h4>
