@@ -8,9 +8,6 @@
   <a href="https://electronjs.org/">
     <img src="https://img.shields.io/badge/Vue-v2.6.10-brightgreen.svg" alt="vue version">
   </a>
-  <a href="https://drone.pixelpoint.io/pixel-point/kube-forwarder">
-    <img src="https://drone.pixelpoint.io/api/badges/pixel-point/kube-forwarder/status.svg" alt="build status">
-  </a>
 </p>
 
 <h1 align="center"> Kube Forwarder</h1>
