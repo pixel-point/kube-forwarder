@@ -75,7 +75,7 @@ function killServer(commit, port) {
   }
 
   if (server) {
-    server.kill(onClose())
+    server.kill(onClose)
 
     // if there wasn't connections, server closed immediately without emitting callback
     // so I have to call callback manually
