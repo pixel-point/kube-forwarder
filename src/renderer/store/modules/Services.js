@@ -34,6 +34,7 @@ export const serviceSchema = {
         required: ['id', 'localPort', 'remotePort'],
         properties: {
           id: { type: 'string' },
+          localAddress: { type: 'string' },
           localPort: { type: 'integer', minimum: 0, maximum: 65535 },
           remotePort: { type: 'integer', minimum: 0, maximum: 65535 }
         }

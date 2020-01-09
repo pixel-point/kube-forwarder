@@ -33,7 +33,7 @@ export function buildService(overrides = {}, bCluster = buildCluster) {
     workloadType: 'pod',
     workloadName: 'workloadName',
     forwards: [
-      { id: generateForwardId(), localPort: 3000, remotePort: 4000 }
+      { id: generateForwardId(), localAddress: '', localPort: 3000, remotePort: 4000 }
     ],
     ...overrides
   }

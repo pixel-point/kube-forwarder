@@ -1,7 +1,7 @@
 <template>
   <div class="service-item">
     <div :class="`service-item__status service-item__status_state_${serviceState}`">
-      <Hint showOn="hover" :offset="-7.5">{{ serviceState === 'connected' ? 'Running' : 'Stopped' }}</Hint>
+      <Hint show-on="hover" :offset="-7.5">{{ serviceState === 'connected' ? 'Running' : 'Stopped' }}</Hint>
     </div>
 
     <div class="service-item__content">
@@ -14,9 +14,12 @@
               v-if="portHttp[forward.localPort]"
               href="#"
               class="service-item__port-number link"
-              @click="(e) => openHttpPort(e, forward.localPort)"
-            >{{ forward.localPort }}</a>
-            <span v-else class="service-item__port-number">{{ forward.localPort }}</span><span
+              @click="(e) => openHttpPort(e, forward.localPort, forward.localAddress)"
+            >{{ forward.localAddress || 'localhost' }}:{{ forward.localPort }}</a>
+            <span
+              v-else
+              class="service-item__port-number"
+            >{{ forward.localAddress || 'localhost' }}:{{ forward.localPort }}</span><span
               v-if="index !== forwards.length - 1"
               class="service-item__port-divider"
             />
@@ -92,7 +95,8 @@ export default {
       return this.service.forwards
     },
     portStates() {
-      return this.forwards.map(forward => this.$store.state.Connections[forward.localPort] || {})
+      return this.forwards.map(
+        forward => this.$store.state.Connections[[forward.localAddress, forward.localPort].join(':')] || {})
     },
     portHttp() {
       const result = {}
@@ -137,7 +141,13 @@ export default {
 
         if (results) {
           const messages = results.filter(x => !x.success)
-            .map(x => `Failed to forward port ${x.forward.localPort} to ${x.forward.remotePort}  - ${x.error}`)
+            .map(x => [
+              'Failed to forward',
+              [x.forward.localAddress || 'localhost', x.forward.localPort].join(':'),
+              'to',
+              x.forward.remotePort,
+              '-',
+              x.error].join(' '))
 
           showMessageBox(messages.join(';\n'))
         }
@@ -175,9 +185,9 @@ export default {
     servicePath(postfix = '') {
       return `/clusters/${this.service.clusterId}/services/${this.service.id}${postfix}`
     },
-    openHttpPort(e, port) {
+    openHttpPort(e, port, address) {
       e.preventDefault()
-      electron.shell.openExternal(`http://localhost:${port}`)
+      electron.shell.openExternal(`http://${address || 'localhost'}:${port}`)
     }
   }
 }

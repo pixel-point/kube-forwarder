@@ -100,6 +100,7 @@ export default {
         required,
         minLength: minLength(1),
         $each: {
+          localAddress: { type: String, default: '' },
           localPort: { required, integer, between: between(0, 65535) },
           remotePort: { required, integer, between: between(0, 65535) }
         }

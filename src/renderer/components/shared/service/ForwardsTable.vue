@@ -2,6 +2,9 @@
   <table class="table forwards-table">
     <tbody>
       <tr>
+        <td class="forwards-table__column-header forwards-table__column-header_name_local-address">
+          Local Address
+        </td>
         <td class="forwards-table__column-header forwards-table__column-header_name_local-port">
           Local Port
           <IconArrowDropdown thin to="right" class="forwards-table__arrow-column-divider" />
@@ -14,6 +17,15 @@
         :key="forwardAttribute.$model.id"
         class="forwards-table__column"
       >
+        <td class="forwards-table__column forwards-table__column_name_local-address">
+          <BaseInput
+            v-model.number="forwardAttribute.localAddress.$model"
+            inline
+            type="string"
+            size="s"
+            :invalid="forwardAttribute.localAddress.$error"
+          />
+        </td>
         <td class="forwards-table__column forwards-table__column_name_local-port">
           <BaseInput
             v-model.number="forwardAttribute.localPort.$model"
@@ -40,6 +52,15 @@
       </tr>
 
       <tr :key="newForward.id">
+        <td class="forwards-table__column forwards-table__column_name_local-address">
+          <BaseInput
+            v-model.number="newForward.localAddress"
+            inline
+            type="string"
+            size="s"
+            @blur="create"
+          />
+        </td>
         <td class="forwards-table__column forwards-table__column_name_local-port">
           <BaseInput
             v-model.number="newForward.localPort"
@@ -83,7 +104,7 @@ export default {
     event: 'change'
   },
   props: {
-    value: { type: Array, default: () => [] }, // [{ localPort: 123, remotePort: 345, id: <uuid> }]
+    value: { type: Array, default: () => [] }, // [{ localAddress: '', localPort: 123, remotePort: 345, id: <uuid> }]
     attribute: { type: Object, default: null }
   },
   data() {
@@ -105,7 +126,7 @@ export default {
   },
   methods: {
     getEmptyForward() {
-      return { localPort: null, remotePort: null, id: uuidv1() }
+      return { localAddress: '', localPort: null, remotePort: null, id: uuidv1() }
     },
     create() {
       if (this.newForward.remotePort || this.newForward.localPort) {
@@ -129,6 +150,12 @@ export default {
 .forwards-table {
   .forwards-table__column {
     text-align: center;
+  }
+
+  .forwards-table__column-header_name_local-address {
+    border-right: none;
+    width: 341px;
+    position: relative;
   }
 
   .forwards-table__column-header_name_local-port {
