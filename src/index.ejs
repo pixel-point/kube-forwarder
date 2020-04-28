@@ -13,7 +13,7 @@
   <body>
     <div id="app"></div>
     <!-- Set `__static` path to static files in production -->
-    <% if (!process.browser) { %>
+    <% if (!(typeof process === 'object' && process.browser)) { %>
       <script>
         if (process.env.NODE_ENV !== 'development') window.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
       </script>
