@@ -104,7 +104,17 @@ We ask you to fill the form with the following fields:
 
 **Alias** - alternative name of the resource that will be displayed on the homepage(optional)
 
-**Port Forwarding** - Fill two fields. Local port - port from your local machine where the resource will be forwarded. Resource port - port of the resource from the Kubernetes cluster 
+**Port Forwarding** 
+ 
+- **Local port** - port from your local machine where the resource will be forwarded.  Note that ports <= 1024 are
+  restricted to user `root`
+- **Resource port** - port of the resource from the Kubernetes cluster 
+
+**Use Custom Local Address** - Check this and put an IP address or hostname into the text field to
+use a different listen address. Putting each service on its own address avoids sharing/collisions between 
+services on cookies and port number.  Specify a loopback address like `127.0.x.x` or add entries to your 
+hosts file like `127.0.1.1 dashboard.production.kbf` and put the assigned name in this column.  If blank or
+unchecked, `localhost` / `127.0.0.1` will be used.
 
 <a target="_blank" href="https://user-images.githubusercontent.com/2697570/60754738-e207cd00-9fe5-11e9-95b3-8f4704ca3dce.png"><img width="320" alt="Port Forwarding Form" src="https://user-images.githubusercontent.com/2697570/60754738-e207cd00-9fe5-11e9-95b3-8f4704ca3dce.png"></a>
 

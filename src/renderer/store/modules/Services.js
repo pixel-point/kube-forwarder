@@ -38,7 +38,8 @@ export const serviceSchema = {
           remotePort: { type: 'integer', minimum: 0, maximum: 65535 }
         }
       }
-    }
+    },
+    localAddress: { type: 'string' }
   }
 }
 const { validate, pick } = createToolset(serviceSchema)

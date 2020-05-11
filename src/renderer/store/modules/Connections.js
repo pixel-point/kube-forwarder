@@ -40,36 +40,37 @@ const mutations = {
     const item = { flags: { http: false }, ...payloadedItem }
 
     const valid = validate(item)
-    if (valid) Vue.set(state, item.port, item)
+    if (valid) Vue.set(state, [item.address, item.port].join(':'), item)
     else throw new Error(JSON.stringify(validate.errors))
   },
 
-  SET_FLAG(state, { port, flagName, flagValue }) {
-    if (!port) throw new Error('port must present')
-    if (!flagName) throw new Error('port must present')
-
-    if (state[port]) {
-      Vue.set(state[port].flags, flagName, flagValue)
+  SET_FLAG(state, { address, port, flagName, flagValue }) {
+    if (!port) throw new Error('port must be present')
+    if (!flagName) throw new Error('flagName must be present')
+    const key = [address, port].join(':')
+    if (state[key]) {
+      Vue.set(state[key].flags, flagName, flagValue)
     }
   },
 
-  DELETE(state, port) {
+  DELETE(state, { address, port }) {
     if (!port) throw new Error('port must present')
-    Vue.delete(state, port)
+    Vue.delete(state, [address, port].join(':'))
   }
 }
 
 const servers = {}
 
-function killServer(commit, port) {
+function killServer(commit, address, port) {
   let called = false
-  const server = servers[port]
+  const serverKey = [address, port].join(':')
+  const server = servers[serverKey]
 
   const onClose = () => {
     if (!called) {
-      console.info(`Port ${port} have freed`)
-      commit('DELETE', port)
-      delete servers[port]
+      console.info(`Port ${serverKey} have freed`)
+      commit('DELETE', { address, port })
+      delete servers[serverKey]
       called = true
     }
   }
@@ -95,10 +96,11 @@ async function startForward(commit, k8sForward, service, target) {
 
   const resultPromise = new Promise((resolve) => {
     const serviceString = `Service ${getServiceLabel(service)}(${service.id})`
+    const localAddress = service.localAddress || 'localhost'
 
     server.on('error', (error) => {
       if (server.listening) {
-        killServer(commit, target.localPort)
+        killServer(commit, localAddress, target.localPort)
       } else {
         server.kill()
         const prettyError = netServerPrettyError(error)
@@ -107,30 +109,38 @@ async function startForward(commit, k8sForward, service, target) {
       }
     })
 
-    server.listen(target.localPort, '127.0.0.1', () => {
-      servers[target.localPort] = server
-      commit('SET', { port: target.localPort, serviceId: service.id, state: connectionStates.CONNECTED })
-      console.info(`${serviceString} is forwarding port ${target.localPort} to ${target.podName}:${target.remotePort}`)
+    server.listen(target.localPort, localAddress, () => {
+      const serverKey = [localAddress, target.localPort].join(':')
+      servers[serverKey] = server
+      commit('SET', {
+        address: localAddress,
+        port: target.localPort,
+        serviceId: service.id,
+        state: connectionStates.CONNECTED
+      })
       resolve({ success: true })
     })
   })
 
-  resultPromise.then(result => result.success && updateFlags(commit, target))
+  resultPromise.then(result => result.success && updateFlags(commit, service, target))
 
   return resultPromise
 }
 
-function updateFlags(commit, target) {
-  updateHttpFlag(commit, target)
+function updateFlags(commit, service, target) {
+  return updateHttpFlag(commit, service, target)
 }
 
-async function updateHttpFlag(commit, target) {
+async function updateHttpFlag(commit, service, target) {
   const controller = new AbortController()
   setTimeout(() => controller.abort(), 5000)
 
   try {
-    await fetch(`http://localhost:${target.localPort}`, { signal: controller.signal, method: 'OPTIONS' })
-    commit('SET_FLAG', { port: target.localPort, flagName: 'http', flagValue: true })
+    const localAddress = service.localAddress || 'localhost'
+    await fetch(
+      `http://${localAddress}:${target.localPort}`,
+      { signal: controller.signal, method: 'OPTIONS' })
+    commit('SET_FLAG', { address: localAddress, port: target.localPort, flagName: 'http', flagValue: true })
   } catch (e) {}
 }
 
@@ -220,7 +230,8 @@ async function getTarget(kubeConfig, resource, forward) {
     case 'Service': {
       const pod = await getPodFromService(kubeConfig, resource)
       const remotePort = mapServicePort(resource, forward.remotePort, pod)
-      return { namespace, localPort: forward.localPort, remotePort, podName: pod.metadata.name }
+      const localPort = forward.localPort
+      return { namespace, localPort, remotePort, podName: pod.metadata.name }
     }
     default:
       throw new Error(`Unacceptable resource.kind=${resource.kind}`)
@@ -292,20 +303,23 @@ function mapServicePort(service, port, pod) {
 
 function createConnectingStates(commit, service) {
   for (const forward of service.forwards) {
-    commit('SET', { port: forward.localPort, serviceId: service.id, state: connectionStates.CONNECTING })
+    const address = service.localAddress || 'localhost'
+    const port = forward.localPort
+    commit('SET', { address, port, serviceId: service.id, state: connectionStates.CONNECTING })
   }
 }
 
 function clearStates(commit, service) {
   for (const forward of service.forwards) {
-    commit('DELETE', forward.localPort)
+    commit('DELETE', { address: service.localAddress || 'localhost', port: forward.localPort })
   }
 }
 
 function validateThatRequiredPortsFree(state, service) {
+  const localAddress = service.localAddress || 'localhost';
   for (const forward of service.forwards) {
-    if (state[forward.localPort]) {
-      throw buildSentryIgnoredError(`Port ${forward.localPort} is busy.`)
+    if (state[[localAddress, forward.localPort].join(':')]) {
+      throw buildSentryIgnoredError(`Port ${localAddress}:${forward.localPort} is busy.`)
     }
   }
 }
@@ -327,7 +341,7 @@ let actions = {
       const success = !results.find(x => !x.success)
       if (!success) {
         for (const result of results) {
-          killServer(commit, result.target.localPort)
+          killServer(commit, result.service.localAddress || 'localhost', result.target.localPort)
         }
       }
 
@@ -342,7 +356,7 @@ let actions = {
 
   deleteConnection({ commit }, service) {
     for (const forward of service.forwards) {
-      killServer(commit, forward.localPort)
+      killServer(commit, service.localAddress || 'localhost', forward.localPort)
     }
   }
 }

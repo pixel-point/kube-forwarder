@@ -8,6 +8,8 @@
       <div class="service-item__title">{{ getServiceLabel(service) }}</div>
       <div class="service-item__description">
         <span>From <span class="service-item__namespace">{{ service.namespace }}</span> namespace exposed to</span>
+        <span v-if="service.localAddress" class="service-item__address">{{ service.localAddress }}</span>
+        <span>port{{ forwards.length > 1 ? 's' : '' }}</span>
         <span class="service-item__ports">
           <span v-for="(forward, index) in forwards" :key="forward.id" class="service-item__port">
             <a
@@ -22,7 +24,6 @@
             />
           </span>
         </span>
-        <span>port{{ forwards.length > 1 ? 's' : '' }}</span>
       </div>
     </div>
 
@@ -92,7 +93,10 @@ export default {
       return this.service.forwards
     },
     portStates() {
-      return this.forwards.map(forward => this.$store.state.Connections[forward.localPort] || {})
+      return this.forwards.map(
+        forward =>
+          this.$store.state.Connections[[this.service.localAddress || 'localhost', forward.localPort].join(':')] || {}
+      )
     },
     portHttp() {
       const result = {}
@@ -177,7 +181,7 @@ export default {
     },
     openHttpPort(e, port) {
       e.preventDefault()
-      electron.shell.openExternal(`http://localhost:${port}`)
+      electron.shell.openExternal(`http://${this.service.localAddress || 'localhost'}:${port}`)
     }
   }
 }
@@ -227,7 +231,7 @@ export default {
   color: $color-text-tertiary;
 }
 
-.service-item__port-number {
+.service-item__port-number, .service-item__address {
   color: $color-text;
   font-weight: 500;
 

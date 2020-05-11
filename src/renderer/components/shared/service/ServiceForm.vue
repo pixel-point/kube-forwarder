@@ -42,6 +42,20 @@
       <ControlGroup label="Ports Forwarding">
         <ForwardsTable v-model="attributes.forwards" :attribute="$v.attributes.forwards" />
       </ControlGroup>
+
+      <ControlGroup label="">
+        <BaseCheckbox :value="attributes.localAddress != null"
+                      @input="toggleCustomLocalAddress"
+        >
+          Use custom local address
+        </BaseCheckbox>
+      </ControlGroup>
+
+      <ControlGroup v-if="attributes.localAddress != null" label="">
+        <BaseInput v-model="$v.attributes.localAddress.$model"
+                   placeholder="localhost"
+        />
+      </ControlGroup>
     </fieldset>
 
     <div class="control-actions">
@@ -63,6 +77,7 @@ import { CoreV1Api, ExtensionsV1beta1Api } from '@kubernetes/client-node' // esl
 import * as resourceKinds from '../../../lib/constants/workload-types'
 import * as clusterHelper from '../../../lib/helpers/cluster'
 
+import BaseCheckbox from '../form/BaseCheckbox'
 import BaseForm from '../form/BaseForm'
 import BaseInput from '../form/BaseInput'
 import BaseSelect from '../form/BaseSelect'
@@ -74,6 +89,7 @@ import AutocompleteInput from '../form/AutocompleteInput'
 export default {
   components: {
     AutocompleteInput,
+    BaseCheckbox,
     ControlGroup,
     BaseInput,
     BaseForm,
@@ -103,7 +119,8 @@ export default {
           localPort: { required, integer, between: between(0, 65535) },
           remotePort: { required, integer, between: between(0, 65535) }
         }
-      }
+      },
+      localAddress: {}
     }
   },
   data() {
@@ -168,7 +185,8 @@ export default {
         namespace: '',
         workloadType: null,
         workloadName: '',
-        forwards: []
+        forwards: [],
+        localAddress: null
       }
     },
     async handleNamespaceFocus() {
@@ -229,6 +247,9 @@ export default {
           this.error = JSON.stringify(result.errors)
         }
       })
+    },
+    toggleCustomLocalAddress() {
+      this.attributes.localAddress = this.attributes.localAddress == null ? '' : null
     }
   }
 }
