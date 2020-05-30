@@ -52,7 +52,13 @@ WebSocketHandler.restartableHandleStandardInput = async function (createWS, stdi
 
   // It's important to open connection immediately (even without data) for some apps (for example: mariadb)
   try {
-    ws = await createWS()
+    let initialWS = await createWS()
+    if (!ws) {
+      ws = initialWS
+    } else {
+      // Connection has already been created in processData, so it should not be overwritten.
+      initialWS.close()
+    }
   } catch (e) {
     console.error(e)
   }
