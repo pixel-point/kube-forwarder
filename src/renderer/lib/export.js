@@ -17,7 +17,7 @@ export async function readObjectFromJsonFile(filename) {
 }
 
 const clusterFields = ['name']
-const serviceFields = ['alias', 'namespace', 'workloadType', 'workloadName', 'forwards']
+const serviceFields = ['alias', 'namespace', 'workloadType', 'workloadName', 'forwards', 'localAddress']
 
 export async function exportCluster(state, clusterId, options = {}) {
   const { includeConfig = false } = options
