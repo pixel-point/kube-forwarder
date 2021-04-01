@@ -13,16 +13,16 @@
 <h1 align="center"> Kube Forwarder</h1>
 <h3 align="center">Easy to use Kubernetes port forwarding manager</h3>
 <h4 align="center">
-  <a href="https://kube-forwarder.pixelpoint.io">Visit a Website</a> · 
-  <a href="https://github.com/pixel-point/kube-forwarder/releases/latest/download/kube-forwarder.dmg">Download for macOS</a> · 
-  <a href="https://github.com/pixel-point/kube-forwarder/releases/latest/download/kube-forwarder.exe">Download for Windows</a> · 
+  <a href="https://kube-forwarder.pixelpoint.io">Visit a Website</a> ·
+  <a href="https://github.com/pixel-point/kube-forwarder/releases/latest/download/kube-forwarder.dmg">Download for macOS</a> ·
+  <a href="https://github.com/pixel-point/kube-forwarder/releases/latest/download/kube-forwarder.exe">Download for Windows</a> ·
   <a href="https://github.com/pixel-point/kube-forwarder/releases/latest/download/kube-forwarder.AppImage">Download for Linux</a>
   ·
   <a href="#install-with-homebrew">Install with Homebrew</a>
 </h4>
 
 
-![Clusters Page](https://user-images.githubusercontent.com/2697570/60103100-524d5d80-975f-11e9-84ab-bcc962be0bb7.png) 
+![Clusters Page](https://user-images.githubusercontent.com/2697570/60103100-524d5d80-975f-11e9-84ab-bcc962be0bb7.png)
 
 ## Features
 
@@ -51,7 +51,7 @@ Use port-forwarding without installing kubectl and avoid explanations to develop
 
 ### Add a cluster(s)
 
-Before you start forwarding internal resources to your local machine, you have to add cluster configuration. 
+Before you start forwarding internal resources to your local machine, you have to add cluster configuration.
 To do this we have 3 different options in the app:
 
 1) Auto-detection of ~/.kube/config file and parsing settings from it
@@ -59,15 +59,15 @@ To do this we have 3 different options in the app:
 1) Manual adding of Kubernetes config by pasting a text
 1) Import of the JSON file that could be generated via Kube Forwarder export functionality
 
-When you add a new cluster via auto-detection (option 1) or manually using a file(a) selection (option 2), we could parse 
-configs and if there are multiple contexts inside we will suggest you to add multiple clusters to the app. 
+When you add a new cluster via auto-detection (option 1) or manually using a file(a) selection (option 2), we could parse
+configs and if there are multiple contexts inside we will suggest you to add multiple clusters to the app.
 Few examples of yaml files we expect to have you could find [there](https://github.com/pixel-point/kube-forwarder/issues/7)
 
 Also, you could add a cluster by filling a form manually (option 3). The form has the following fields:
 * Name - the name of a cluster withing Kube Forwarder app.
 * Storing method (Set destination to your kube config or paste it as a text) - the method of storing a config It has two options:
     * `Set a path` - storing a path to the config file. It will be read every time when you forwarding a port. It allows
-    a user to don't do any changes in Kube Forwarder's settings when a third-party app updates the config file. 
+    a user to don't do any changes in Kube Forwarder's settings when a third-party app updates the config file.
     For example, when `azure-cli` updates an access token (#13).
     * `Paste as a text` - storing a config just as a yml text.
 * Path (if storing method is `Set a path`) - the path to a config file.
@@ -75,7 +75,7 @@ Also, you could add a cluster by filling a form manually (option 3). The form ha
 * Current Context (if storing method is `Set a path`) - When you use `Set a path`, you must select a context from a file
 which will be used to connect to a resource. Let's see an example of a problem that the field solves.
     1) Let's say we don't have `Current context` field.
-    1) A user has a config file with two contexts: `local-cluster` and `remote-cluster`. 
+    1) A user has a config file with two contexts: `local-cluster` and `remote-cluster`.
     `current-context` in the yml file is `local-cluster`.
     1) The user configured a cluster in Kube Forwarder with `Set a path` option.
     1) The user created a resource `postgres` and successfully forwarded ports for some time.
@@ -83,14 +83,14 @@ which will be used to connect to a resource. Let's see an example of a problem t
     1) If the user tries to forward the resource in Kube Forwarder again, most likely there will be an error
     since a connection will be established with `remote-cluster`, not `local-cluster` as the user expected,
     and `remote-cluster` couldn't have `postgres` resource.
-    
-    So, to avoid the error we should store the current context in a separate field. 
+
+    So, to avoid the error we should store the current context in a separate field.
 
 <a target="_blank" href="https://user-images.githubusercontent.com/2697570/60754775-58a4ca80-9fe6-11e9-8d67-d15a1423b506.png"><img width="320" alt="Screenshot 2019-07-06 at 12 04 45" src="https://user-images.githubusercontent.com/2697570/60754775-58a4ca80-9fe6-11e9-8d67-d15a1423b506.png"></a>
 
 ### Add a resource
 
-Kube Forwarder supports forwarding of all types of resources that supported by `kubectl` – Pod, Deployment, Service. 
+Kube Forwarder supports forwarding of all types of resources that supported by `kubectl` – Pod, Deployment, Service.
 
 We ask you to fill the form with the following fields:
 
@@ -104,21 +104,21 @@ We ask you to fill the form with the following fields:
 
 **Alias** - alternative name of the resource that will be displayed on the homepage(optional)
 
-**Port Forwarding** 
- 
+**Port Forwarding**
+
 - **Local port** - port from your local machine where the resource will be forwarded.  Note that ports <= 1024 are
   restricted to user `root`
-- **Resource port** - port of the resource from the Kubernetes cluster 
+- **Resource port** - port of the resource from the Kubernetes cluster
 
 **Use Custom Local Address** - Check this and put an IP address or hostname into the text field to
-use a different listen address. Putting each service on its own address avoids sharing/collisions between 
-services on cookies and port number.  Specify a loopback address like `127.0.x.x` or add entries to your 
+use a different listen address. Putting each service on its own address avoids sharing/collisions between
+services on cookies and port number.  Specify a loopback address like `127.0.x.x` or add entries to your
 hosts file like `127.0.1.1 dashboard.production.kbf` and put the assigned name in this column.  If blank or
 unchecked, `localhost` / `127.0.0.1` will be used.
 
 <a target="_blank" href="https://user-images.githubusercontent.com/2697570/60754738-e207cd00-9fe5-11e9-95b3-8f4704ca3dce.png"><img width="320" alt="Port Forwarding Form" src="https://user-images.githubusercontent.com/2697570/60754738-e207cd00-9fe5-11e9-95b3-8f4704ca3dce.png"></a>
 
-### Import/Export 
+### Import/Export
 
 Kube Forwarder allows you export cluster configuration in JSON that you could use to share with your team members or for the backup purpose. You could easily store it on Github. When you export cluster, you could export it with or without confidential information.
 
@@ -134,8 +134,8 @@ brew cask install kube-forwarder
 
 We encourage you to contribute to Kube Forwarder!
 
-We expect contributors to abide by our underlying [code of conduct](./.github/CODE_OF_CONDUCT.md). 
-All conversations and discussions on GitHub (issues, pull requests) 
+We expect contributors to abide by our underlying [code of conduct](./.github/CODE_OF_CONDUCT.md).
+All conversations and discussions on GitHub (issues, pull requests)
 must be respectful and harassment-free.
 
 This project was generated with [electron-vue](https://github.com/SimulatedGREG/electron-vue)@[8fae476](https://github.com/SimulatedGREG/electron-vue/tree/8fae4763e9d225d3691b627e83b9e09b56f6c935) using [vue-cli](https://github.com/vuejs/vue-cli). Documentation about the original structure can be found [here](https://simulatedgreg.gitbooks.io/electron-vue/content/index.html).
@@ -200,7 +200,7 @@ npm run build:dist
 npm run build:target -- --win
 ```
 
-A built version will be appear in `build` directory. 
+A built version will be appear in `build` directory.
 
 ## Running the tests
 
@@ -224,6 +224,14 @@ npm run test:cypress:onhost
 npm run test:cypress:open
 ```
 
+## Troubleshooting
+
+Q) Node Sass could not find a binding for your current environment: OS X 64-bit with Node.js 12.x
+A) `npm rebuild node-sass`
+
+Q) Error: spawn .../kube-forwarder/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron ENOENT
+A) Reinstall node_modules: `rm -rf node_modules && npm i`
+
 ## Release guide
 
 ### Configure environment
@@ -236,18 +244,18 @@ Also, this steps could be used to configure CI environment.
 
 1) Update the version in `package.json` and Push to `release` branch.
 1) Run `npm run release` on a Mac computer to build packages.  They will be automatically pushed to releases at Github.
-1) Go to [Releases](https://github.com/pixel-point/kube-forwarder/releases) in the repository. 
+1) Go to [Releases](https://github.com/pixel-point/kube-forwarder/releases) in the repository.
 Make sure that the created draft is OK and release it (Edit -> Release).
 1) Run `cask-repair kube-forwarder` to update the cask version.
-([https://github.com/Homebrew/homebrew-cask/blob/master/CONTRIBUTING.md#updating-a-cask](About cask-repair))  
+([https://github.com/Homebrew/homebrew-cask/blob/master/CONTRIBUTING.md#updating-a-cask](About cask-repair))
 
-Notes: 
+Notes:
 1) A release tag (for example: `v1.0.3`) will be added to GIT automatically by Github when you release your draft.
 
 ## Development tips
 
 Use `tiffutil -cathidpicheck bg.png bg@2x.png -out bg.tiff` to build a tiff
-background for .DMG 
+background for .DMG
 
 ## Supported by
 <table>
@@ -258,7 +266,7 @@ background for .DMG
     <td valign="middle"><a href="https://sentry.io/"><img width="200px" src="https://user-images.githubusercontent.com/2697570/60827162-dd8f1000-a1af-11e9-9536-0bba6c71778c.png"/></a></td>
     </tbody>
 </table>
- 
+
 
 ## License
 
