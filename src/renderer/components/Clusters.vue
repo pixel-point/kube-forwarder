@@ -20,6 +20,8 @@
                   <Action @click="unfoldAll(slotProps.close)">Show All Clusters</Action>
                 </li>
                 <li v-else><Action @click="foldAll(slotProps.close)">Collapse All Clusters</Action></li>
+                <li><Action @click="startAll">Start all</Action></li>
+                <li><Action @click="stopAll">Stop all</Action></li>
               </ul>
             </template>
           </Dropdown>
@@ -145,7 +147,19 @@ export default {
       this.clustersToRender.forEach(cluster => {
         this.updateCluster({ id: cluster.id, folded })
       })
-    }
+    },
+    startAll() {
+      const services = Object.values(this.$store.state.Services.items)
+      services.forEach(service => {
+        this.$store.dispatch('Connections/createConnection', service)
+      })
+    },
+    stopAll() {
+      const services = Object.values(this.$store.state.Services.items)
+      services.forEach(service => {
+        this.$store.dispatch('Connections/deleteConnection', service)
+      })
+    },
   }
 }
 </script>

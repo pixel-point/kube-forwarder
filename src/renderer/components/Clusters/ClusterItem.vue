@@ -16,6 +16,8 @@
           <li><Action :to="createServicePath">Add a Resource</Action></li>
           <li><Action :to="editPath">Edit</Action></li>
           <li><Action @click="exportCluster">Export</Action></li>
+          <li><Action @click="startAll">Start all</Action></li>
+          <li><Action @click="stopAll">Stop all</Action></li>
           <li><Action @click="handleFold">Collapse</Action></li>
           <li><Action theme="danger" @click="handleDelete">Delete</Action></li>
         </ul>
@@ -130,6 +132,16 @@ export default {
           }
         }
       }
+    },
+    startAll() {
+      this.services.forEach(service => {
+        this.$store.dispatch('Connections/createConnection', service)
+      })
+    },
+    stopAll() {
+      this.services.forEach(service => {
+        this.$store.dispatch('Connections/deleteConnection', service)
+      })
     }
   }
 }
