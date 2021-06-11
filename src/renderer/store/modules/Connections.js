@@ -198,10 +198,10 @@ async function loadPod(kubeConfig, namespace, podName) {
 }
 
 async function loadDeployment(kubeConfig, namespace, deploymentName) {
-  const extensionsApi = kubeConfig.makeApiClient(k8s.CoreV1Api)
+  const coreApi = kubeConfig.makeApiClient(k8s.CoreV1Api)
 
   try {
-    return (await extensionsApi.readNamespacedDeployment(deploymentName, namespace)).body
+    return (await coreApi.readNamespacedDeployment(deploymentName, namespace)).body
   } catch (error) {
     throw k8nApiPrettyError(error, { _object: `Deployment "${deploymentName}"` })
   }
