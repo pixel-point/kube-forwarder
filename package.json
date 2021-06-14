@@ -1,6 +1,6 @@
 {
   "name": "kube-forwarder",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "author": "Pixel Point <info@pixelpoint.io>",
   "homepage": "https://kube-forwarder.poxelpoint.io",
   "description": "A tool for managing port forwarding configs for kubernetes clusters",
@@ -82,7 +82,7 @@
     }
   },
   "dependencies": {
-    "@kubernetes/client-node": "0.10.2",
+    "@kubernetes/client-node": "0.14.3",
     "@sentry/electron": "^0.17.3",
     "@sentry/integrations": "^5.3.1",
     "clone-deep": "^4.0.1",
