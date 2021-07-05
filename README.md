@@ -127,7 +127,7 @@ Kube Forwarder allows you export cluster configuration in JSON that you could us
 ### Install with Homebrew
 
 ```
-brew cask install kube-forwarder
+brew install kube-forwarder
 ```
 
 ## Contributing
