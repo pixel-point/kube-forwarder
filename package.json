@@ -1,6 +1,6 @@
 {
   "name": "kube-forwarder",
-  "version": "1.5.2",
+  "version": "1.5.1",
   "author": "Pixel Point <info@pixelpoint.io>",
   "homepage": "https://kube-forwarder.poxelpoint.io",
   "description": "A tool for managing port forwarding configs for kubernetes clusters",
