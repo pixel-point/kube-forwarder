@@ -1,3 +1,4 @@
+@use "sass:math";
 $button-themes: primary danger secondary;
 
 $color-text: #142d55;
@@ -35,8 +36,8 @@ $border-color: rgba($color-text, 0.1);
 $border: $border-width solid $border-color;
 
 $spacer: 20px;
-$spacer-sm: $spacer / 2;
-$spacer-xs: $spacer / 2;
+$spacer-sm: math.div($spacer, 2);
+$spacer-xs: math.div($spacer, 2);
 
 $button-outline-hover-bg-opacity: 0.1;
 

@@ -14,7 +14,7 @@
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "build:web": "cross-env BUILD_TARGET=web node .electron-vue/build.js",
     "upload": "./upload.sh",
-    "release": "RELEASE=true npm run build -- -- -p always --mac --linux --win",
+    "release": "RELEASE=true npm run build -- -- -p always --mac --linux --win --universal",
     "dev": "BUILD=DEV-VERSION node .electron-vue/dev-runner.js",
     "web": "BUILD=WEB-VERSION node .electron-vue/web-runner.js",
     "e2e": "npm run pack && mocha test/e2e",
@@ -32,12 +32,21 @@
   "build": {
     "productName": "Kube Forwarder",
     "appId": "com.pixelpoint.kube-forwarder",
-    "artifactName": "kube-forwarder.${ext}",
+    "artifactName": "kube-forwarder-${version}-${os}-${arch}.${ext}",
     "directories": {
       "output": "build"
     },
     "files": [
       "dist/electron/**/*"
+    ],
+    "extraFiles": [
+      {
+        "from": "src/main/app-icon-tray.png",
+        "to": "resources",
+        "filter": [
+          "**/*"
+        ]
+      }
     ],
     "dmg": {
       "background": "src/bg.tiff",
@@ -81,16 +90,17 @@
       ]
     }
   },
+
   "dependencies": {
     "@kubernetes/client-node": "0.10.2",
-    "@sentry/electron": "^0.17.3",
+    "@sentry/electron": "^2.2.0",
     "@sentry/integrations": "^5.3.1",
     "clone-deep": "^4.0.1",
     "deepmerge": "^4.0.0",
     "dotenv-safe": "^6.1.0",
     "electron-ga": "^1.0.6",
     "electron-store": "^3.2.0",
-    "electron-updater": "^4.0.6",
+    "electron-updater": "^4.5.2",
     "killable": "^1.0.1",
     "lodash": "^4.17.15",
     "shell-path": "^2.1.0",
@@ -117,7 +127,7 @@
     "cfonts": "^2.1.2",
     "chai": "^4.1.2",
     "chalk": "^2.4.1",
-    "copy-webpack-plugin": "^4.5.1",
+    "copy-webpack-plugin": "^4.6.0",
     "cross-env": "^5.1.6",
     "css-loader": "^2.1.1",
     "cypress": "^3.4.0",
@@ -125,7 +135,7 @@
     "del": "^3.0.0",
     "devtron": "^1.4.0",
     "electron": "12.0.2",
-    "electron-builder": "20.41.0",
+    "electron-builder": "^24.6.4",
     "electron-debug": "^3.0.0",
     "electron-devtools-installer": "^2.2.4",
     "eslint": "^5.16.0",
@@ -154,10 +164,10 @@
     "mocha": "^5.2.0",
     "multispinner": "^0.2.1",
     "node-loader": "^0.6.0",
-    "node-sass": "^4.12.0",
+    "node-sass": "npm:sass@^1.69.5",
     "require-dir": "^1.0.0",
     "sass-loader": "^7.0.3",
-    "spectron": "^3.8.0",
+    "spectron": "^14.0.0",
     "style-loader": "^0.21.0",
     "url-loader": "^1.0.1",
     "vue-html-loader": "^1.2.4",
