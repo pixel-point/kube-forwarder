@@ -72,7 +72,7 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "hcavarsan",
+      "owner": "pixel-point",
       "repo": "kube-forwarder"
     },
     "mac": {
