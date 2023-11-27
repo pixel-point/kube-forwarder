@@ -1,6 +1,6 @@
 {
   "name": "kube-forwarder",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "author": "Pixel Point <info@pixelpoint.io>",
   "homepage": "https://kube-forwarder.poxelpoint.io",
   "description": "A tool for managing port forwarding configs for kubernetes clusters",
@@ -14,7 +14,7 @@
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "build:web": "cross-env BUILD_TARGET=web node .electron-vue/build.js",
     "upload": "./upload.sh",
-    "release": "RELEASE=true npm run build -- -- -p always --mac --linux --win --universal",
+    "release": "RELEASE=true npm run build -- -- -p always --mac --linux --win",
     "dev": "BUILD=DEV-VERSION node .electron-vue/dev-runner.js",
     "web": "BUILD=WEB-VERSION node .electron-vue/web-runner.js",
     "e2e": "npm run pack && mocha test/e2e",
@@ -72,13 +72,19 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "pixel-point",
+      "owner": "hcavarsan",
       "repo": "kube-forwarder"
     },
     "mac": {
       "target": [
-        "dmg",
-        "zip"
+        {
+          "target": "dmg",
+          "arch": ["universal", "arm64", "x64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["universal", "arm64", "x64"]
+        }
       ]
     },
     "win": {

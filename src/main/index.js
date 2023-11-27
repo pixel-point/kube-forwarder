@@ -22,9 +22,7 @@ let trayWindow;
 
 let imgPath;
 let image;
-let mainTray;
 let tray;
-let mainWindow;
 
 if (process.env.NODE_ENV !== "development") {
   global.__static = path.join(__dirname, "/static").replace(/\\/g, "\\\\");
@@ -67,7 +65,6 @@ const winURL =
     
     app.on("ready", () => {
       tray = new Tray(image);
-      createWindow(); // Create the main window when the app is ready
     
       const contextMenu = Menu.buildFromTemplate([
         {
@@ -131,8 +128,4 @@ const winURL =
       }
     });
     
-    app.on("activate", () => {
-      if (mainWindow === null) {
-        createWindow();
-      }
-    });
+  
