@@ -1,4 +1,3 @@
-
 export function netServerPrettyError(error) {
   if (error.code === 'EADDRINUSE') {
     return new Error(`Port ${error.port} already in use`)

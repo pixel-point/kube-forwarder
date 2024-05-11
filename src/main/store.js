@@ -10,7 +10,7 @@ const schema = {
 const electronStore = new ElectronStore({ schema })
 const store = {}
 
-for (const key of Object.keys(schema)) {
+Object.keys(schema).forEach((key) => {
   Object.defineProperty(store, key, {
     get() {
       return electronStore.get(key)
@@ -19,6 +19,6 @@ for (const key of Object.keys(schema)) {
       electronStore.set(key, value)
     }
   })
-}
+})
 
 export default store

@@ -65,7 +65,7 @@
 </template>
 
 <script>
-import uuidv1 from 'uuid'
+import { v1 as uuidv1 } from 'uuid'
 
 import BaseInput from '../form/BaseInput'
 import IconArrowDropdown from '../icons/IconArrowDropdown'

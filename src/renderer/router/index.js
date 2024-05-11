@@ -1,9 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import * as Sentry from '@sentry/electron'
 
 import store from '../store'
-import analytics from '../analytics'
 
 Vue.use(Router)
 
@@ -66,9 +64,6 @@ const router = new Router({
 })
 
 router.afterEach((to, from) => {
-  analytics.send('screenview', { cd: to.name })
-  Sentry.addBreadcrumb({ category: 'navigation', data: { from: from.path, to: to.path } })
-
   // todo Move it in the right place.
   if (from.name === 'Cluster Add') {
     delete store.state.manualClusterConfig

@@ -23,8 +23,8 @@ export default {
       return {
         'base-input': true,
         [`base-input_size_${this.size}`]: true,
-        [`base-input_inline`]: this.inline,
-        [`base-input_invalid`]: this.invalid
+        'base-input_inline': this.inline,
+        'base-input_invalid': this.invalid
       }
     }
   }

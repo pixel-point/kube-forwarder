@@ -1,4 +1,4 @@
-import uuidv1 from 'uuid/v1'
+import { v1 as uuidv1 } from 'uuid'
 
 import { createToolset, commitIfValid } from '../helpers/validations'
 import { SET, DELETE } from '../helpers/mutations'

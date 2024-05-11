@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import yaml from 'js-yaml'
 
 const migrations = [

@@ -17,7 +17,7 @@
 
             <b v-if="config.error">
               Sorry, an error occurred while opening the file.
-              <br />
+              <br>
               Error: {{ config.error }}
             </b>
 
@@ -63,11 +63,11 @@
 </template>
 
 <script>
-import { remote } from 'electron'
+/* eslint-disable no-unused-vars */
+import * as remote from '@electron/remote'
 import * as path from 'path'
 import { KubeConfig } from '@kubernetes/client-node'
 import { mapActions } from 'vuex'
-import * as Sentry from '@sentry/electron'
 
 import Header from './shared/Header'
 import Button from './shared/Button'
@@ -136,7 +136,6 @@ export default {
         nonUniqClusters: this.buildNonUniqClusters(contexts)
       })
     },
-    // buildNonUniqClusters returns the index of context.names whos clusters occur al least twice.
     buildNonUniqClusters(contexts) {
       const index = {}
       const result = {}
@@ -199,8 +198,6 @@ export default {
     },
     async confirmInvalidConnection(errors) {
       const messages = errors.map(({ error, contextName }) => {
-        // TODO a breadcrumb for originError
-        Sentry.captureException(error)
         return this.getConnectionErrorMessage(error, contextName)
       })
 
@@ -240,7 +237,6 @@ export default {
     }
   }
 }
-
 </script>
 
 <style lang="scss">

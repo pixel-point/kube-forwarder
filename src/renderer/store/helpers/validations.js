@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import Ajv from 'ajv'
 
 const ajv = new Ajv()

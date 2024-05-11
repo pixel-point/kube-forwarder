@@ -6,7 +6,7 @@
 
       <IconArrowDropdown v-if="cluster.folded" />
       <Dropdown v-else :popup-props="{ offsetHorizontal: 1 }">
-        <template v-slot:trigger="triggerSlotProps">
+        <template #trigger="triggerSlotProps">
           <Button class="cluster-item__action-more" layout="text" @click="triggerSlotProps.toggle">
             <IconDotes />
           </Button>
@@ -39,8 +39,6 @@ import { mapActions } from 'vuex'
 import { exportCluster, saveObjectToJsonFile } from '../../lib/export'
 import { showSaveDialog, showErrorBox, showMessageBox, showConfirmBox } from '../../lib/helpers/ui'
 import { CURRENT_STATE_VERSION } from '../../store'
-import * as Sentry from '@sentry/electron'
-
 import Dropdown from '../shared/Dropdown'
 import IconDotes from '../shared/icons/IconDotes'
 import ServiceItem from './ServiceItem'
@@ -113,7 +111,6 @@ export default {
             includeConfig: checkboxChecked
           })
         } catch (error) {
-          Sentry.captureException(error)
           showErrorBox(error.message)
           return
         }

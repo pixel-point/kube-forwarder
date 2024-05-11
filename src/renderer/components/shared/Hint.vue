@@ -1,7 +1,7 @@
 <template>
-  <div class="hint" :class="{ [`align-${align}`]: true, [`position-${position}`]: true }" v-show="show" :style="style">
-    <div class="triangle" :style="triangleStyle"></div>
-    <slot></slot>
+  <div v-show="show" class="hint" :class="{ [`align-${align}`]: true, [`position-${position}`]: true }" :style="style">
+    <div class="triangle" :style="triangleStyle" />
+    <slot />
   </div>
 </template>
 

@@ -1,4 +1,4 @@
-const { dialog, app } = require('electron').remote
+const { dialog, app } = require('@electron/remote')
 
 // @param options.details
 export async function showMessageBox(message, options = {}) {
@@ -7,13 +7,13 @@ export async function showMessageBox(message, options = {}) {
   const buttons = options.buttons ? options.buttons.slice(0) : ['OK']
   if (details) buttons.push(detailsLabel)
 
-  const args = await dialog.showMessageBox({ title: 'Message', message, buttons, ...options });
-  const {checkboxChecked, response: index} = args;
+  const args = await dialog.showMessageBox({ title: 'Message', message, buttons, ...options })
+  const { checkboxChecked, response: index } = args
   if (details && index === buttons.indexOf(detailsLabel)) {
     return showMessageBox(details)
   }
 
-  return [index, checkboxChecked];
+  return [index, checkboxChecked]
 }
 
 export async function showConfirmBox(message, options = {}) {
@@ -32,8 +32,8 @@ export function showErrorBox(message, title = 'Error') {
 
 export async function showSaveDialog(options = {}) {
   const defaultPath = options.defaultName ? `${app.getPath('documents')}/${options.defaultName}` : undefined
-  const {filePath} = await dialog.showSaveDialog({ defaultPath, ...options });
-  return filePath;
+  const { filePath } = await dialog.showSaveDialog({ defaultPath, ...options })
+  return filePath
 }
 
 export function showOpenDialog(options = {}) {

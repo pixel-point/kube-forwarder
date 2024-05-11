@@ -27,7 +27,7 @@ export default {
         'control-group': true,
         'control-group_error': this.attribute && this.attribute.$error,
         [`control-group_size_${this.size}`]: true,
-        [`control-group_disabled`]: this.disabled
+        'control-group_disabled': this.disabled
       }
     },
     slotProps() {

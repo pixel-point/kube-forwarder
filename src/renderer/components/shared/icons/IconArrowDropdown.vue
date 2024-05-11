@@ -29,9 +29,9 @@ export default {
   computed: {
     className() {
       return {
-        'icon': true,
+        icon: true,
         'icon_arrow-dropdown': true,
-        'icon_thin': this.thin,
+        icon_thin: this.thin,
         [`icon_to_${this.to}`]: true
       }
     }

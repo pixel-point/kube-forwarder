@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { createPersistedState } from 'vuex-electron'
+import { createPersistedState } from 'electron-vuex'
 
 import modules from './modules'
 import migrate from './migrate'

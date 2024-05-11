@@ -1,8 +1,8 @@
+/* eslint-disable no-unused-vars */
 import Vue from 'vue'
 import * as k8s from '@kubernetes/client-node'
 import * as net from 'net'
 import killable from 'killable'
-import * as Sentry from '@sentry/electron'
 
 import { patchForward } from '../../lib/k8s-port-forwarding-patch'
 import * as resourceKinds from '../../lib/constants/workload-types'
@@ -12,7 +12,7 @@ import { k8nApiPrettyError } from '../../lib/helpers/k8n-api-error'
 import { netServerPrettyError } from '../../lib/helpers/net-server-error'
 import { getServiceLabel } from '../../lib/helpers/service'
 import { buildKubeConfig } from '../../lib/helpers/cluster'
-import { buildSentryIgnoredError } from '../../lib/errors'
+import { buildError } from '../../lib/errors'
 
 // Schema of an item
 const { validate } = createToolset({
@@ -153,7 +153,7 @@ function prepareK8sToolsWithCluster(cluster) {
     const message = typeof error.message === 'string'
       ? `\nError message:\n---\n${error.message.substr(0, 1000)}`
       : null
-    throw buildSentryIgnoredError(`Cluster config is invalid.${message}`)
+    throw buildError(`Cluster config is invalid.${message}`)
   }
 
   const k8sPortForward = new k8s.PortForward(kubeConfig)
@@ -247,7 +247,7 @@ async function getPodNameFromDeployment(kubeConfig, deployment) {
 
   const { body: podsBody } = await coreApi.listNamespacedPod(namespace, null, null, null, null, labelSelector)
   const podName = podsBody.items.length && podsBody.items[0].metadata.name
-  if (!podName) throw buildSentryIgnoredError(`There are no pods in '${name}' deployment.`)
+  if (!podName) throw buildError(`There are no pods in '${name}' deployment.`)
 
   return podName
 }
@@ -256,11 +256,11 @@ async function getPodFromService(kubeConfig, service) {
   const coreApi = kubeConfig.makeApiClient(k8s.CoreV1Api)
 
   const { metadata: { name, namespace }, spec: { selector } } = service
-  if (!selector) throw buildSentryIgnoredError(`Service '${name}' does not have a selector.`)
+  if (!selector) throw buildError(`Service '${name}' does not have a selector.`)
 
   const { body: pods } = await coreApi.listNamespacedPod(namespace, null, null, null, null, stringifySelector(selector))
   const pod = pods.items.length && pods.items[0]
-  if (!pod) throw buildSentryIgnoredError(`There are no pods in '${name}' service.`)
+  if (!pod) throw buildError(`There are no pods in '${name}' service.`)
 
   return pod
 }
@@ -293,7 +293,7 @@ function mapServicePort(service, port, pod) {
     }
   }
 
-  throw buildSentryIgnoredError(
+  throw buildError(
     `Service "${
       service.metadata.name
     }" does not have a service port ${port}. Available ports: ${
@@ -316,15 +316,15 @@ function clearStates(commit, service) {
 }
 
 function validateThatRequiredPortsFree(state, service) {
-  const localAddress = service.localAddress || 'localhost';
+  const localAddress = service.localAddress || 'localhost'
   for (const forward of service.forwards) {
     if (state[[localAddress, forward.localPort].join(':')]) {
-      throw buildSentryIgnoredError(`Port ${localAddress}:${forward.localPort} is busy.`)
+      throw buildError(`Port ${localAddress}:${forward.localPort} is busy.`)
     }
   }
 }
 
-let actions = {
+const actions = {
   async createConnection({ commit, state, rootState }, service) {
     try {
       validateThatRequiredPortsFree(state, service)
@@ -347,8 +347,6 @@ let actions = {
 
       return { success, results }
     } catch (error) {
-      // TODO a breadcrumb for originError
-      Sentry.captureException(error)
       clearStates(commit, service)
       return { success: false, error }
     }

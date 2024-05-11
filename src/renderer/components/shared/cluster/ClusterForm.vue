@@ -42,7 +42,7 @@
       </ControlGroup>
 
       <ControlGroup label="Current context" :attribute="$v.attributes.config.currentContext">
-        <AutocompleteInput v-model.trim="$v.attributes.config.currentContext.$model" :options="contextOptions"/>
+        <AutocompleteInput v-model.trim="$v.attributes.config.currentContext.$model" :options="contextOptions" />
       </ControlGroup>
     </template>
 

@@ -1,16 +1,17 @@
 'use strict'
-
-// require Sentry as soon as possible
-import configureSentry from '../common/configure-sentry'
-configureSentry()
-
 /* eslint-disable import/first */
 import { app, BrowserWindow, Menu } from 'electron'
 import os from 'os'
-
+import path from 'path'
 import buildMenuTemplate from './menuTemplate'
 import { checkForUpdates } from './appUpdater'
 import store from './store'
+import * as remoteMain from '@electron/remote/main'
+remoteMain.initialize()
+import debug from 'electron-debug'
+if (process.env.NODE_ENV === 'development') {
+  debug()
+}
 /* eslint-enable import/first */
 
 /**
@@ -18,18 +19,15 @@ import store from './store'
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
  */
 if (process.env.NODE_ENV !== 'development') {
-  global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
+  global.__static = path.join(__dirname, 'static').replace(/\\/g, '\\\\')
 }
 
 let mainWindow
 const winURL = process.env.NODE_ENV === 'development'
-  ? `http://localhost:9080`
-  : `file://${__dirname}/index.html`
+  ? 'http://localhost:8080'
+  : `file://${path.join(__dirname, 'index.html')}`
 
 function createWindow() {
-  /**
-   * Initial window options
-   */
   mainWindow = new BrowserWindow({
     height: os.platform() === 'win32' ? 562 : 542,
     useContentSize: true,
@@ -37,8 +35,12 @@ function createWindow() {
     titleBarStyle: 'hiddenInset',
     resizable: process.env.NODE_ENV === 'development',
     webPreferences: {
-      webSecurity: false,
-      nodeIntegration: true
+      plugins: true,
+      nodeIntegration: true,
+      contextIsolation: false,
+      backgroundThrottling: false,
+      nativeWindowOpen: false,
+      webSecurity: false
     }
   })
 
@@ -47,6 +49,13 @@ function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null
   })
+
+  remoteMain.enable(mainWindow.webContents)
+
+  // Open DevTools only in development mode
+  if (process.env.NODE_ENV === 'development') {
+    mainWindow.webContents.openDevTools()
+  }
 
   const menuTemplate = buildMenuTemplate(app)
   const menu = Menu.buildFromTemplate(menuTemplate)

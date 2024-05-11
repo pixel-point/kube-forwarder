@@ -6,12 +6,12 @@ module.exports = function(api) {
     'env': {
       'test': {
         'presets': [
-          ['@babel/preset-env', { 'targets': { 'node': 10 } }]
+          ['@babel/preset-env', { 'targets': { 'node': 20 } }]
         ]
       },
       'main': {
         'presets': [
-          ['@babel/preset-env', { 'targets': { 'node': 10 } }]
+          ['@babel/preset-env', { 'targets': { 'node': 20 } }]
         ]
       },
       'renderer': {

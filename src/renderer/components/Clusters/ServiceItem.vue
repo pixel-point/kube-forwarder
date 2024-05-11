@@ -1,7 +1,7 @@
 <template>
   <div class="service-item">
     <div :class="`service-item__status service-item__status_state_${serviceState}`">
-      <Hint showOn="hover" :offset="-7.5">{{ serviceState === 'connected' ? 'Running' : 'Stopped' }}</Hint>
+      <Hint show-on="hover" :offset="-7.5">{{ serviceState === 'connected' ? 'Running' : 'Stopped' }}</Hint>
     </div>
 
     <div class="service-item__content">
@@ -44,7 +44,7 @@
       </Button>
 
       <Dropdown :popup-props="{ offsetHorizontal: 1 }">
-        <template v-slot:trigger="triggerSlotProps">
+        <template #trigger="triggerSlotProps">
           <Button class="service-item__action-more" layout="text" @click="triggerSlotProps.toggle">
             <IconDotes />
           </Button>
@@ -61,6 +61,7 @@
 </template>
 
 <script>
+/* eslint-disable no-unused-vars */
 import { remote as electron } from 'electron'
 
 import { CONNECTED } from '../../lib/constants/connection-states'

@@ -1,13 +1,13 @@
 <template>
   <Dropdown class="base-select" :popup-props="{ align: 'both' }">
-    <template v-slot:trigger="triggerSlotProps">
+    <template #trigger="triggerSlotProps">
       <div class="base-select__input-wrap" @click="triggerSlotProps.toggle">
-        <BaseInput readonly :value="valueLabel" :placeholder="placeholder"/>
+        <BaseInput readonly :value="valueLabel" :placeholder="placeholder" />
         <IconArrowDropdown :to="triggerSlotProps.opened ? 'top' : 'bottom'" />
       </div>
     </template>
 
-    <template v-slot="slotProps">
+    <template #default="slotProps">
       <ul class="popup__actions">
         <li v-for="option in options" :key="option[0]">
           <Action @click="selectOption(option, slotProps.close)">{{ option[1] }}</Action>
@@ -18,6 +18,7 @@
 </template>
 
 <script>
+/* eslint-disable no-unused-vars */
 import Dropdown from '../Dropdown'
 import BaseInput from './BaseInput'
 import IconArrowDropdown from '../icons/IconArrowDropdown'

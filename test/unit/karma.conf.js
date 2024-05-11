@@ -1,7 +1,7 @@
 'use strict'
 
 const path = require('path')
-const merge = require('webpack-merge')
+const { merge } = require('webpack-merge')
 const webpack = require('webpack')
 
 const baseConfig = require('../../.electron-vue/webpack.renderer.config')
@@ -11,7 +11,7 @@ const projectRoot = path.resolve(__dirname, '../../src/renderer')
 process.env.BABEL_ENV = 'test'
 
 let webpackConfig = merge(baseConfig, {
-  devtool: '#inline-source-map',
+  devtool: 'inline-source-map', // Adjusted according to webpack 5 schema
   plugins: [
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': '"testing"'
@@ -24,9 +24,31 @@ delete webpackConfig.entry
 delete webpackConfig.externals
 delete webpackConfig.output.libraryTarget
 
-// apply vue option to apply isparta-loader on js
-webpackConfig.module.rules
-  .find(rule => rule.use.loader === 'vue-loader').use.options.loaders.js = 'babel-loader'
+// Correctly apply babel-loader for js files within vue-loader
+webpackConfig.module.rules = webpackConfig.module.rules.map(rule => {
+  if (rule.loader === 'vue-loader') {
+    rule.options.loaders = {
+      ...rule.options.loaders,
+      js: 'babel-loader'
+    };
+  } else if (rule.use && Array.isArray(rule.use)) {
+    rule.use = rule.use.map(use => {
+      if (use.loader === 'vue-loader') {
+        return {
+          loader: use.loader,
+          options: {
+            ...use.options,
+            loaders: {
+              js: 'babel-loader'
+            }
+          }
+        };
+      }
+      return use;
+    });
+  }
+  return rule;
+});
 
 module.exports = config => {
   config.set({

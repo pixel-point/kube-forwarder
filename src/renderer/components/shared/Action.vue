@@ -23,7 +23,7 @@ export default {
     className() {
       return {
         action: true,
-        'action_disabled': this.disabled || this.disabledStyle,
+        action_disabled: this.disabled || this.disabledStyle,
         [`action_theme_${this.theme}`]: this.theme
       }
     },

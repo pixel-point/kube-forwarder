@@ -1,4 +1,5 @@
-import uuidv1 from 'uuid/v1'
+/* eslint-disable no-unused-vars */
+import { v1 as uuidv1 } from 'uuid'
 
 import { createToolset, commitIfValid } from '../helpers/validations'
 import workloadTypes from '../../lib/constants/workload-types'

@@ -6,10 +6,12 @@
       </ControlGroup>
 
       <ControlGroup label="Namespace" size="2" :attribute="$v.attributes.namespace">
-        <AutocompleteInput v-model="$v.attributes.namespace.$model"
-                           :options="namespaces.data"
-                           :loading="namespaces.loading"
-                           @focus="handleNamespaceFocus" />
+        <AutocompleteInput
+          v-model="$v.attributes.namespace.$model"
+          :options="namespaces.data"
+          :loading="namespaces.loading"
+          @focus="handleNamespaceFocus"
+        />
       </ControlGroup>
 
       <ControlGroup label="Kind" size="2" :attribute="$v.attributes.workloadType">
@@ -26,12 +28,14 @@
         :attribute="$v.attributes.workloadName"
         :disabled="!attributes.workloadType"
       >
-        <template v-slot="slotProps">
-          <AutocompleteInput v-model="slotProps.attribute.$model"
-                             v-bind="slotProps"
-                             :options="resources.data"
-                             :loading="resources.loading"
-                             @focus="handleResourceNameFocus" />
+        <template #default="slotProps">
+          <AutocompleteInput
+            v-model="slotProps.attribute.$model"
+            v-bind="slotProps"
+            :options="resources.data"
+            :loading="resources.loading"
+            @focus="handleResourceNameFocus"
+          />
         </template>
       </ControlGroup>
 
@@ -44,16 +48,18 @@
       </ControlGroup>
 
       <ControlGroup label="">
-        <BaseCheckbox :value="attributes.localAddress != null"
-                      @input="toggleCustomLocalAddress"
+        <BaseCheckbox
+          :value="attributes.localAddress != null"
+          @input="toggleCustomLocalAddress"
         >
           Use custom local address
         </BaseCheckbox>
       </ControlGroup>
 
       <ControlGroup v-if="attributes.localAddress != null" label="">
-        <BaseInput v-model="$v.attributes.localAddress.$model"
-                   placeholder="localhost"
+        <BaseInput
+          v-model="$v.attributes.localAddress.$model"
+          placeholder="localhost"
         />
       </ControlGroup>
     </fieldset>
@@ -155,7 +161,7 @@ export default {
       ]
     },
     submitButtonTitle() {
-      return this.serviceId ? `Save` : 'Add a resource'
+      return this.serviceId ? 'Save' : 'Add a resource'
     },
     backPath() {
       return '/'

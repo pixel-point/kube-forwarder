@@ -19,9 +19,6 @@ steps:
 # TODO: Fix different font rendering on different operation systems
 #  - name: cypress
 #    image: cypress/included:3.3.1
-#    environment:
-#      SENTRY_DSN: ''
-#      GA_TRACKING_ID: ''
 #    commands:
 #      - npm install
 #      - npm run test:cypress:onhost

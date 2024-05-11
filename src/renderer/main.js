@@ -1,9 +1,5 @@
 import Vue from 'vue'
 
-// require Sentry as soon as possible
-import configureSentry from './configure-sentry'
-configureSentry({ Vue })
-
 /* eslint-disable import/first */
 import fixPath from './lib/fix-path'
 fixPath()
@@ -11,7 +7,6 @@ fixPath()
 import App from './App'
 import router from './router'
 import store from './store'
-import('./analytics')
 import './lib/k8s-shelljs-replace-patch'
 /* eslint-enable import/first */
 

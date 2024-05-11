@@ -51,7 +51,7 @@ export async function exportCluster(state, clusterId, options = {}) {
   if (!valid) {
     throw new Error(
       'Sorry, something went wrong.' +
-      `Feel free to create an issue here https://github.com/pixel-point/kube-forwarder/issues/new.` +
+      'Feel free to create an issue here https://github.com/pixel-point/kube-forwarder/issues/new.' +
       `Error: ${JSON.stringify(validate.errors)}`
     )
   }

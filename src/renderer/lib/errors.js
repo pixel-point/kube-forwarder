@@ -1,5 +1,4 @@
-export function buildSentryIgnoredError(message) {
+export function buildError(message) {
   const error = new Error(message)
-  error.sentryIgnore = true
   return error
 }

@@ -8,13 +8,13 @@
           <Button layout="outline" theme="primary" to="/clusters/add">Add a cluster</Button>
 
           <Dropdown class="clusters__more-dropdown">
-            <template v-slot:trigger="triggerSlotProps">
+            <template #trigger="triggerSlotProps">
               <Button layout="outline" @click="triggerSlotProps.toggle">
                 <IconDotes />
               </Button>
             </template>
 
-            <template v-slot="slotProps">
+            <template #default="slotProps">
               <ul class="popup__actions">
                 <li v-if="isEveryClusterFolded">
                   <Action @click="unfoldAll(slotProps.close)">Show All Clusters</Action>
@@ -38,7 +38,7 @@
     </template>
 
     <template v-else>
-      <h1>Add your <span class="text_theme_gradient">first cluster</span> before<br/>you start forward services</h1>
+      <h1>Add your <span class="text_theme_gradient">first cluster</span> before<br>you start forward services</h1>
 
       <div class="clusters__controls">
         <Button theme="primary" size="l" to="/clusters/add">ADD A CLUSTER</Button>
@@ -48,6 +48,7 @@
 </template>
 
 <script>
+/* eslint-disable no-unused-vars */
 import { mapActions } from 'vuex'
 
 import Button from './shared/Button'

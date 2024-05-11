@@ -4,9 +4,7 @@ process.env.NODE_ENV = 'production'
 
 require('../env')
 const fs = require('fs').promises
-const dateFormat = require('dateformat')
 const path = require('path')
-const mkdirp = require('mkdirp')
 const chalk = require('chalk')
 const del = require('del')
 const { exec } = require('child_process')
@@ -23,9 +21,15 @@ const errorLog = chalk.bgRed.white(' ERROR ') + ' '
 const okayLog = chalk.bgBlue.white(' OKAY ') + ' '
 const isCI = process.env.CI || false
 
-if (process.env.BUILD_TARGET === 'clean') clean()
-else if (process.env.BUILD_TARGET === 'web') web()
-else build()
+let dateFormat; // Placeholder for the dateFormat module
+
+// Dynamically import the dateFormat module
+import('dateformat').then(module => {
+  dateFormat = module.default;
+  if (process.env.BUILD_TARGET === 'clean') clean()
+  else if (process.env.BUILD_TARGET === 'web') web()
+  else build()
+}).catch(error => console.error(`Failed to load module: ${error}`));
 
 function clean() {
   del.sync(['build/*', '!build/icons', '!build/icons/icon.*'])
@@ -102,7 +106,7 @@ async function setBuildVersionAndNumber() {
   const { version } = packageJson
   const buildNumber = dateFormat(new Date(), 'yyyymmdd-HHMMss', true)
 
-  await mkdirp(path.resolve(__dirname, '../build'))
+  await fs.mkdir(path.resolve(__dirname, '../build'), { recursive: true })
   await Promise.all([
     fs.writeFile(path.resolve(__dirname, '../build/.number'), buildNumber),
     fs.writeFile(path.resolve(__dirname, '../build/.version'), version),
@@ -155,18 +159,37 @@ function web() {
 }
 
 async function prepareLogo() {
-  const createIconsDir = new Promise((resolve, reject) => {
-    mkdirp(path.resolve(__dirname, '../build/icons'), (err) => {
-      if (!err) resolve()
-      else reject(err)
-    })
-  })
+	try {
+	  await fs.mkdir(path.resolve(__dirname, '../build/icons'), { recursive: true });
+	  console.log(`${doneLog}Created icons directory.`);
+	} catch (err) {
+	  console.error(`${errorLog}Failed to create icons directory: ${err}`);
+	  throw err; // Rethrow to be caught by the caller
+	}
 
-  const generateIcons = new Promise((resolve, reject) => {
-    exec('bash .electron-vue/generate-icons.sh src/app-icon.png build', (error, stdout, stderr) => {
-      error ? reject(error) : resolve()
-    })
-  })
+	try {
+	  const generateIconsCmd = 'bash .electron-vue/generate-icons.sh src/app-icon.png build';
+	  await execPromise(generateIconsCmd);
+	  console.log(`${doneLog}Icons generated successfully.`);
+	} catch (err) {
+	  console.error(`${errorLog}Failed to generate icons: ${err}`);
+	  throw err; // Rethrow to be caught by the caller
+	}
+  }
 
-  return createIconsDir.then(generateIcons)
-}
+  // Utility function to promisify exec
+  function execPromise(command) {
+	return new Promise((resolve, reject) => {
+	  exec(command, (error, stdout, stderr) => {
+		if (error) {
+		  console.error(`exec error: ${error}`);
+		  reject(error);
+		}
+		if (stderr) {
+		  console.error(`stderr: ${stderr}`);
+		}
+		console.log(`stdout: ${stdout}`);
+		resolve(stdout);
+	  });
+	});
+  }
