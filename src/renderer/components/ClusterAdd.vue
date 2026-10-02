@@ -63,20 +63,14 @@
 </template>
 
 <script>
-import { remote } from 'electron'
-import * as path from 'path'
-import { KubeConfig } from '@kubernetes/client-node'
 import { mapActions } from 'vuex'
-import * as Sentry from '@sentry/electron'
 
 import Header from './shared/Header'
 import Button from './shared/Button'
 import BaseCheckbox from './shared/form/BaseCheckbox'
-import { checkConnection } from '../lib/helpers/cluster'
+import { checkConnection, contextsFromFile } from '../lib/helpers/cluster'
 import { showConfirmBox, showOpenDialog } from '../lib/helpers/ui'
 import * as configStoringMethods from '../lib/constants/config-storing-methods'
-
-const { app } = remote
 
 export default {
   components: {
@@ -106,22 +100,20 @@ export default {
     }
   },
   async mounted() {
-    const kubeConfigDefaultPath = path.join(app.getPath('home'), '.kube/config')
-    this.addConfig(kubeConfigDefaultPath)
+    const kubeConfigDefaultPath = await window.api.app.defaultKubeConfigPath()
+    await this.addConfig(kubeConfigDefaultPath)
     this.defaultDetected = !this.configs[0].error
   },
   methods: {
     ...mapActions('Clusters', ['createCluster']),
-    addConfig(filePath) {
-      const kubeConfig = new KubeConfig()
-      try {
-        kubeConfig.loadFromFile(filePath)
-      } catch (error) {
-        this.configs.push({ filePath, error, contexts: [], checkedContextsIndex: {} })
+    async addConfig(filePath) {
+      const result = await contextsFromFile(filePath)
+      if (result.error) {
+        this.configs.push({ filePath, error: result.error, contexts: [], checkedContextsIndex: {} })
         return
       }
 
-      const contexts = kubeConfig.contexts
+      const contexts = result.contexts
       const checkedContextsIndex = {}
 
       for (const context of contexts) {
@@ -130,7 +122,6 @@ export default {
 
       this.configs.push({
         filePath,
-        kubeConfig,
         contexts,
         checkedContextsIndex,
         nonUniqClusters: this.buildNonUniqClusters(contexts)
@@ -191,40 +182,40 @@ export default {
       const errors = []
 
       for (const { config, context } of pairs) {
-        const error = await checkConnection(config.kubeConfig, context.name)
+        const error = await checkConnection({
+          storingMethod: configStoringMethods.PATH,
+          path: config.filePath,
+          currentContext: context.name
+        })
         if (error) errors.push({ error, contextName: context.name })
       }
 
       return { success: errors.length === 0, errors }
     },
     async confirmInvalidConnection(errors) {
-      const messages = errors.map(({ error, contextName }) => {
-        // TODO a breadcrumb for originError
-        Sentry.captureException(error)
-        return this.getConnectionErrorMessage(error, contextName)
-      })
+      const messages = errors.map(({ error, contextName }) => this.getConnectionErrorMessage(error, contextName))
 
       const message = messages.concat(['Do you want to continue saving?']).join('\n\n')
       return showConfirmBox(message)
     },
     getConnectionErrorMessage(error, contextName) {
-      const { originError } = error
+      const { originMessage } = error
 
-      if (originError && typeof originError.message === 'string') {
-        const awsNotFoundMatch = originError.message.match(/\s(aws: command not found)/)
+      if (originMessage && typeof originMessage === 'string') {
+        const awsNotFoundMatch = originMessage.match(/\s(aws: command not found)/)
         if (awsNotFoundMatch) {
           return `Failed to connect to ${contextName}: ${awsNotFoundMatch[1]}. ` +
             'Please make sure you have installed AWS CLI. (https://docs.aws.amazon.com/cli/)'
         }
 
-        const gcloudNotFoundMatch = originError.message.match(/\W(gcloud: No such file or directory)/)
+        const gcloudNotFoundMatch = originMessage.match(/\W(gcloud: No such file or directory)/)
         if (gcloudNotFoundMatch) {
           return `Failed to connect to ${contextName}: ${gcloudNotFoundMatch[1]}. ` +
             'Please make sure you have installed Google Cloud SDK. (https://cloud.google.com/sdk)'
         }
       }
 
-      const originMessagePart = `${error.originError.message ? `, ${error.originError.message}` : ''}`
+      const originMessagePart = `${originMessage ? `, ${originMessage}` : ''}`
       return `Failed to connect to ${contextName}: ${error.message}${originMessagePart}`
     },
     async handleOpenFile() {
@@ -234,7 +225,7 @@ export default {
         this.filesOpened = true
         this.configs = []
         for (const filePath of filePaths) {
-          this.addConfig(filePath)
+          await this.addConfig(filePath)
         }
       }
     }

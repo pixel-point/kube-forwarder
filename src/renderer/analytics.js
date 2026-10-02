@@ -1,12 +1,5 @@
-let analytics
-
-if (!process.env.IS_WEB) {
-  const Analytics = require('electron-ga').default
-  analytics = new Analytics(process.env.GA_TRACKING_ID)
-} else {
-  analytics = {
-    send: () => {}
-  }
+// electron-ga is abandoned and pulled in Node/Electron internals; analytics is
+// disabled during modernization. Kept as a no-op so callers need no changes.
+export default {
+  send: () => {}
 }
-
-export default analytics

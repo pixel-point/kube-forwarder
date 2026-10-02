@@ -4,8 +4,8 @@
       :id="id"
       class="base-checkbox__input"
       type="checkbox"
-      :checked="value"
-      @change="$emit('input', $event.target.checked)"
+      :checked="modelValue"
+      @change="$emit('update:modelValue', $event.target.checked)"
     >
     <label class="base-checkbox__label" :for="id">
       <slot />
@@ -18,8 +18,9 @@ export default {
   name: 'BaseCheckbox',
   props: {
     name: { type: String, default: () => Math.random().toString() },
-    value: { type: Boolean, default: null }
+    modelValue: { type: Boolean, default: null }
   },
+  emits: ['update:modelValue'],
   computed: {
     id() {
       return `base-checkbox-${this.name}`

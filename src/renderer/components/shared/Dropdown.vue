@@ -15,9 +15,22 @@
 </template>
 
 <script>
-import ClickOutside from 'vue-click-outside'
-
 import Popup from './Popup'
+
+// Replaces the abandoned `vue-click-outside` (Vue 2 only). Calls the bound
+// handler when a click lands outside the element the directive is on.
+const ClickOutside = {
+  beforeMount(el, binding) {
+    el.__clickOutside = event => {
+      if (el !== event.target && !el.contains(event.target)) binding.value(event)
+    }
+    document.addEventListener('click', el.__clickOutside, true)
+  },
+  unmounted(el) {
+    document.removeEventListener('click', el.__clickOutside, true)
+    delete el.__clickOutside
+  }
+}
 
 export default {
   components: {

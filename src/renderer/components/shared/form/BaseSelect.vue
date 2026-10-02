@@ -2,7 +2,7 @@
   <Dropdown class="base-select" :popup-props="{ align: 'both' }">
     <template v-slot:trigger="triggerSlotProps">
       <div class="base-select__input-wrap" @click="triggerSlotProps.toggle">
-        <BaseInput readonly :value="valueLabel" :placeholder="placeholder"/>
+        <BaseInput readonly :model-value="valueLabel" :placeholder="placeholder"/>
         <IconArrowDropdown :to="triggerSlotProps.opened ? 'top' : 'bottom'" />
       </div>
     </template>
@@ -30,18 +30,16 @@ export default {
     BaseInput,
     IconArrowDropdown
   },
-  model: {
-    event: 'change'
-  },
   props: {
-    value: { type: null, default: null },
+    modelValue: { type: null, default: null },
     options: { type: Array, required: true },
     placeholder: { type: String, default: 'Select...' }
   },
+  emits: ['update:modelValue'],
   computed: {
     valueLabel() {
       for (const option of this.options) {
-        if (option[0] === this.value) return option[1]
+        if (option[0] === this.modelValue) return option[1]
       }
 
       return null
@@ -49,7 +47,7 @@ export default {
   },
   methods: {
     selectOption(option, close) {
-      this.$emit('change', option[0])
+      this.$emit('update:modelValue', option[0])
       close()
     }
   }

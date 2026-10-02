@@ -1,14 +1,13 @@
 /**
- * The file enables `@/store/index.js` to import all vuex modules
- * in a one-shot manner. There should not be any reason to edit this file.
+ * Imports all vuex modules in this folder in one shot (Vite equivalent of the
+ * old webpack `require.context`). There should not be any reason to edit this file.
  */
-
-const files = require.context('.', false, /\.js$/)
+const files = import.meta.glob('./*.js', { eager: true })
 const modules = {}
 
-files.keys().forEach(key => {
-  if (key === './index.js') return
-  modules[key.replace(/(\.\/|\.js)/g, '')] = files(key).default
-})
+for (const key of Object.keys(files)) {
+  if (key === './index.js') continue
+  modules[key.replace(/(\.\/|\.js)/g, '')] = files[key].default
+}
 
 export default modules

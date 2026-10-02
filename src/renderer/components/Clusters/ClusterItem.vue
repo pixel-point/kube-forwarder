@@ -39,7 +39,6 @@ import { mapActions } from 'vuex'
 import { exportCluster, saveObjectToJsonFile } from '../../lib/export'
 import { showSaveDialog, showErrorBox, showMessageBox, showConfirmBox } from '../../lib/helpers/ui'
 import { CURRENT_STATE_VERSION } from '../../store'
-import * as Sentry from '@sentry/electron'
 
 import Dropdown from '../shared/Dropdown'
 import IconDotes from '../shared/icons/IconDotes'
@@ -113,7 +112,6 @@ export default {
             includeConfig: checkboxChecked
           })
         } catch (error) {
-          Sentry.captureException(error)
           showErrorBox(error.message)
           return
         }
@@ -123,7 +121,7 @@ export default {
 
         if (filename) {
           try {
-            saveObjectToJsonFile(objectToExport, filename)
+            await saveObjectToJsonFile(objectToExport, filename)
           } catch (error) {
             console.error(error)
             showErrorBox(`Sorry, an error occurred while saving the file. Raw error message: ${error.message}`)

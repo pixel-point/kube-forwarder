@@ -1,6 +1,6 @@
 <template>
   <div class="search-input">
-    <BaseInput v-bind="$attrs" :placeholder="placeholder" type="search" v-on="$listeners" />
+    <BaseInput v-bind="$attrs" :placeholder="placeholder" type="search" />
     <IconMagnifier />
   </div>
 </template>
@@ -11,6 +11,7 @@ import IconMagnifier from './icons/IconMagnifier'
 
 export default {
   name: 'SearchInput',
+  inheritAttrs: false,
   components: {
     BaseInput,
     IconMagnifier

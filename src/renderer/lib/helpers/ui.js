@@ -1,19 +1,21 @@
-const { dialog, app } = require('electron').remote
+// Dialogs run in the main process; the renderer reaches them through window.api.
 
-// @param options.details
+// @param options.details — when set, adds a "Details" button that opens a follow-up box.
 export async function showMessageBox(message, options = {}) {
   const { details } = options
   const detailsLabel = 'Details'
   const buttons = options.buttons ? options.buttons.slice(0) : ['OK']
   if (details) buttons.push(detailsLabel)
 
-  const args = await dialog.showMessageBox({ title: 'Message', message, buttons, ...options });
-  const {checkboxChecked, response: index} = args;
-  if (details && index === buttons.indexOf(detailsLabel)) {
+  const { response, checkboxChecked } = await window.api.dialog.messageBox({
+    title: 'Message', message, buttons, ...options
+  })
+
+  if (details && response === buttons.indexOf(detailsLabel)) {
     return showMessageBox(details)
   }
 
-  return [index, checkboxChecked];
+  return [response, checkboxChecked]
 }
 
 export async function showConfirmBox(message, options = {}) {
@@ -27,19 +29,13 @@ export async function showConfirmBox(message, options = {}) {
 }
 
 export function showErrorBox(message, title = 'Error') {
-  dialog.showErrorBox(title, message)
+  window.api.dialog.errorBox(title, message)
 }
 
-export async function showSaveDialog(options = {}) {
-  const defaultPath = options.defaultName ? `${app.getPath('documents')}/${options.defaultName}` : undefined
-  const {filePath} = await dialog.showSaveDialog({ defaultPath, ...options });
-  return filePath;
+export function showSaveDialog(options = {}) {
+  return window.api.dialog.saveFile(options)
 }
 
 export function showOpenDialog(options = {}) {
-  const defaultPath = options.defaultPath || app.getPath('documents')
-
-  return new Promise(resolve => {
-    dialog.showOpenDialog({ defaultPath, ...options }, resolve)
-  })
+  return window.api.dialog.openFile(options)
 }

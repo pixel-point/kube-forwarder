@@ -6,7 +6,7 @@
         type="radio"
         :name="name"
         :value="option[0]"
-        :checked="option[0] === value"
+        :checked="option[0] === modelValue"
         @change="handleChange(option)"
       >
       <label :for="`${name}-${option[0]}`">
@@ -19,15 +19,15 @@
 <script>
 export default {
   name: 'BaseRadioButtons',
-  model: { event: 'change' },
   props: {
     name: { type: String, required: true },
-    value: { type: String, required: true },
+    modelValue: { type: String, required: true },
     options: { type: Array, required: true }
   },
+  emits: ['update:modelValue'],
   methods: {
     handleChange(option) {
-      this.$emit('change', option[0])
+      this.$emit('update:modelValue', option[0])
     }
   }
 }

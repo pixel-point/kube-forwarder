@@ -1,8 +1,8 @@
 <template>
   <textarea
     class="base-textarea"
-    :value="value"
-    @input="$emit('input', $event.target.value)"
+    :value="modelValue"
+    @input="onInput"
   />
 </template>
 
@@ -10,7 +10,16 @@
 export default {
   name: 'BaseTextArea',
   props: {
-    value: { type: String, default: '' }
+    modelValue: { type: String, default: '' },
+    modelModifiers: { type: Object, default: () => ({}) }
+  },
+  emits: ['update:modelValue'],
+  methods: {
+    onInput(event) {
+      let value = event.target.value
+      if (this.modelModifiers.trim) value = value.trim()
+      this.$emit('update:modelValue', value)
+    }
   }
 }
 </script>

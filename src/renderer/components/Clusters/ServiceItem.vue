@@ -61,8 +61,6 @@
 </template>
 
 <script>
-import { remote as electron } from 'electron'
-
 import { CONNECTED } from '../../lib/constants/connection-states'
 import { showMessageBox, showConfirmBox } from '../../lib/helpers/ui'
 import { getServiceLabel } from '../../lib/helpers/service'
@@ -136,12 +134,12 @@ export default {
 
       if (!success) {
         if (error) {
-          return showMessageBox(error.message, { detail: error.originError && error.originError.message })
+          return showMessageBox(error.message, { detail: error.originMessage })
         }
 
         if (results) {
           const messages = results.filter(x => !x.success)
-            .map(x => `Failed to forward port ${x.forward.localPort} to ${x.forward.remotePort}  - ${x.error}`)
+            .map(x => `Failed to forward port ${x.forward.localPort} to ${x.forward.remotePort}  - ${x.error.message}`)
 
           showMessageBox(messages.join(';\n'))
         }
@@ -181,7 +179,7 @@ export default {
     },
     openHttpPort(e, port) {
       e.preventDefault()
-      electron.shell.openExternal(`http://${this.service.localAddress || 'localhost'}:${port}`)
+      window.api.shell.openExternal(`http://${this.service.localAddress || 'localhost'}:${port}`)
     }
   }
 }

@@ -1,48 +1,17 @@
-import { CoreV1Api, KubeConfig } from '@kubernetes/client-node'
+// Thin renderer-side wrappers over the main-process k8s handlers (see
+// src/main/k8s.js). KubeConfig and the k8s client are Node-only and live in main.
+import { plain } from '../plain'
 
-import { k8nApiPrettyError } from './k8n-api-error'
-import * as configStoringMethods from '../constants/config-storing-methods'
-
-// You must catch errors manually
-export function buildKubeConfig(clusterConfig) {
-  const kubeConfig = new KubeConfig()
-
-  if (clusterConfig.storingMethod === configStoringMethods.PATH) {
-    kubeConfig.loadFromFile(clusterConfig.path)
-    kubeConfig.setCurrentContext(clusterConfig.currentContext)
-  } else if (clusterConfig.storingMethod === configStoringMethods.CONTENT) {
-    kubeConfig.loadFromString(clusterConfig.content)
-  } else {
-    throw new Error(`storingMethod "${clusterConfig.storingMethod}" is invalid.`)
-  }
-
-  return kubeConfig
+// Returns a plain error object `{ message, originMessage }` or null.
+export function checkConnection(clusterConfig, context = null) {
+  return window.api.cluster.check(plain(clusterConfig), context)
 }
 
-export async function checkConnection(kubeConfig, context = null) {
-  if (!kubeConfig || typeof kubeConfig.makeApiClient !== 'function') return
-
-  let error = null
-  const currentContext = kubeConfig.getCurrentContext()
-
-  if (context) {
-    kubeConfig.setCurrentContext(context)
-  }
-
-  try {
-    const api = kubeConfig.makeApiClient(CoreV1Api)
-    await api.listNode()
-  } catch (e) {
-    error = k8nApiPrettyError(e)
-  }
-
-  kubeConfig.setCurrentContext(currentContext)
-
-  return error
+// Returns `{ contexts, currentContext }` or `{ error }`.
+export function contextsFromString(content) {
+  return window.api.cluster.contextsFromString(content)
 }
 
-// You must catch errors manually
-export function buildApiClient(cluster, api) {
-  const kubeConfig = buildKubeConfig(cluster.config)
-  return kubeConfig.makeApiClient(api)
+export function contextsFromFile(filePath) {
+  return window.api.cluster.contextsFromFile(filePath)
 }

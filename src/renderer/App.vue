@@ -44,6 +44,13 @@ body {
   display: flex;
 }
 
+// Vue 3 keeps #app as a wrapper (Vue 2's el:'#app' replaced it), so the
+// mount point must fill the body flex row itself for .app-container to grow.
+#app {
+  display: flex;
+  flex-grow: 1;
+}
+
 .body_target_web {
   font-family: Helvetica !important;
 }

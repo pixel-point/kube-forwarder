@@ -10,26 +10,28 @@
         <td class="forwards-table__column-header forwards-table__column-header_name_actions" />
       </tr>
       <tr
-        v-for="(forwardAttribute, index) in attribute.$each.$iter"
-        :key="forwardAttribute.$model.id"
+        v-for="(forward, index) in modelValue"
+        :key="forward.id"
         class="forwards-table__column"
       >
         <td class="forwards-table__column forwards-table__column_name_local-port">
           <BaseInput
-            v-model.number="forwardAttribute.localPort.$model"
+            :model-value="forward.localPort"
             inline
             type="number"
             size="s"
-            :invalid="forwardAttribute.localPort.$error"
+            :invalid="rowError(index, 'localPort')"
+            @update:model-value="value => updatePort(index, 'localPort', value)"
           />
         </td>
         <td class="forwards-table__column forwards-table__column_name_remote-port">
           <BaseInput
-            v-model.number="forwardAttribute.remotePort.$model"
+            :model-value="forward.remotePort"
             inline
             type="number"
             size="s"
-            :invalid="forwardAttribute.remotePort.$error"
+            :invalid="rowError(index, 'remotePort')"
+            @update:model-value="value => updatePort(index, 'remotePort', value)"
           />
         </td>
         <td class="forwards-table__column forwards-table__column_name_actions">
@@ -65,7 +67,7 @@
 </template>
 
 <script>
-import uuidv1 from 'uuid'
+import { v1 as uuidv1 } from 'uuid'
 
 import BaseInput from '../form/BaseInput'
 import IconArrowDropdown from '../icons/IconArrowDropdown'
@@ -79,13 +81,11 @@ export default {
     IconArrowDropdown,
     IconCross
   },
-  model: {
-    event: 'change'
-  },
   props: {
-    value: { type: Array, default: () => [] }, // [{ localPort: 123, remotePort: 345, id: <uuid> }]
+    modelValue: { type: Array, default: () => [] }, // [{ localPort: 123, remotePort: 345, id: <uuid> }]
     attribute: { type: Object, default: null }
   },
+  emits: ['update:modelValue'],
   data() {
     return {
       newForward: this.getEmptyForward()
@@ -107,17 +107,28 @@ export default {
     getEmptyForward() {
       return { localPort: null, remotePort: null, id: uuidv1() }
     },
+    rowError(index, key) {
+      const row = this.attribute && this.attribute.rows[index]
+      return row ? row[key].$error : false
+    },
+    updatePort(index, key, value) {
+      const number = parseFloat(value)
+      const next = this.modelValue.map((forward, i) =>
+        i === index ? { ...forward, [key]: Number.isNaN(number) ? value : number } : forward
+      )
+      this.$emit('update:modelValue', next)
+    },
     create() {
       if (this.newForward.remotePort || this.newForward.localPort) {
-        this.$emit('change', [...this.value, this.newForward])
+        this.$emit('update:modelValue', [...this.modelValue, this.newForward])
         this.newForward = this.getEmptyForward()
       }
     },
     removeForward(index) {
-      const nextValue = this.value.slice(0) // Clone
+      const nextValue = this.modelValue.slice(0) // Clone
       nextValue.splice(index, 1) // Remove at index
 
-      this.$emit('change', nextValue)
+      this.$emit('update:modelValue', nextValue)
     }
   }
 }

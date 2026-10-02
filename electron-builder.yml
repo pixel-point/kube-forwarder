@@ -1,0 +1,25 @@
+appId: com.pixelpoint.kube-forwarder
+productName: Kube Forwarder
+artifactName: kube-forwarder-${arch}.${ext}
+directories:
+  output: dist
+  buildResources: build
+files:
+  - out/**/*
+  - package.json
+mac:
+  target:
+    - target: dmg
+      arch: arm64
+  category: public.app-category.developer-tools
+  # Unsigned local build for this pass; notarization is a later follow-up.
+dmg:
+  contents:
+    - x: 130
+      y: 220
+      type: file
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
+publish: null

@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import packageJs from '../../../../package'
+import packageJs from '../../../../package.json'
 import { showMessageBox } from '../../lib/helpers/ui'
 
 export default {

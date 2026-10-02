@@ -1,6 +1,12 @@
 <template>
   <div class="autocomplete-input">
-    <BaseInput v-bind="$attrs" :value="value" v-on="listeners" />
+    <BaseInput
+      v-bind="$attrs"
+      :model-value="modelValue"
+      @update:model-value="value => $emit('update:modelValue', value)"
+      @focus="handleFocus"
+      @blur="handleBlur"
+    />
     <Popup v-if="focused && options.length > 0" :position="'bottom'" :align="'both'">
       <div v-if="loading" class="autocomplete-input__content">
         <Loader size="s" />
@@ -28,12 +34,14 @@ import Loader from '../Loader'
 export default {
   name: 'AutocompleteInput',
   components: { BaseInput, Popup, Action, Loader },
+  inheritAttrs: false,
   props: {
     loading: { type: Boolean, default: false },
     options: { type: Array, default: () => [] },
-    value: BaseInput.props.value, // eslint-disable-line vue/require-default-prop
+    modelValue: { type: null, default: undefined },
     notFoundMessage: { type: String, default: 'Not found' }
   },
+  emits: ['update:modelValue', 'focus', 'blur'],
   data() {
     return {
       focused: false
@@ -41,28 +49,21 @@ export default {
   },
   computed: {
     matchedOptions() {
-      return this.options.filter(x => x.startsWith(this.value))
-    },
-    listeners() {
-      return {
-        ...this.$listeners,
-        focus: this.handleFocus,
-        blur: this.handleBlur
-      }
+      return this.options.filter(x => x.startsWith(this.modelValue || ''))
     }
   },
   methods: {
     handleOptionClick(option) {
-      this.$emit('input', option)
+      this.$emit('update:modelValue', option)
     },
     handleFocus() {
       this.focused = true
-      this.$listeners.focus && this.$listeners.focus()
+      this.$emit('focus')
     },
     handleBlur() {
       setTimeout(() => {
         this.focused = false
-        this.$listeners.blur && this.$listeners.blur()
+        this.$emit('blur')
       }, 100)
     }
   }

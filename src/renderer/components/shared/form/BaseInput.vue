@@ -1,23 +1,24 @@
 <template>
   <input
     :class="className"
-    :value="value"
-    v-on="{
-      ...$listeners,
-      input: event => $emit('input', event.target.value)
-    }"
+    :value="modelValue"
+    v-bind="$attrs"
+    @input="onInput"
   >
 </template>
 
 <script>
 export default {
   name: 'BaseInput',
+  inheritAttrs: false,
   props: {
-    value: { type: null, default: undefined },
+    modelValue: { type: null, default: undefined },
+    modelModifiers: { type: Object, default: () => ({}) },
     size: { type: String, default: 'm', validator: val => ['s', 'm'].includes(val) },
     inline: { type: Boolean, default: false },
     invalid: { type: Boolean, default: false }
   },
+  emits: ['update:modelValue'],
   computed: {
     className() {
       return {
@@ -26,6 +27,19 @@ export default {
         [`base-input_inline`]: this.inline,
         [`base-input_invalid`]: this.invalid
       }
+    }
+  },
+  methods: {
+    // Vue 3 no longer applies v-model .trim/.number on components; the child does.
+    onInput(event) {
+      let value = event.target.value
+      if (this.modelModifiers.number) {
+        const parsed = parseFloat(value)
+        value = isNaN(parsed) ? value : parsed
+      } else if (this.modelModifiers.trim) {
+        value = value.trim()
+      }
+      this.$emit('update:modelValue', value)
     }
   }
 }

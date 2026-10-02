@@ -1,4 +1,3 @@
-import { promises as fs } from 'fs'
 import { omit, pick, intersection } from 'lodash'
 import Ajv from 'ajv'
 
@@ -7,13 +6,15 @@ import { clusterSchema } from '../store/modules/Clusters'
 import { CURRENT_STATE_VERSION } from '../store'
 import * as configStoringMethods from '../lib/constants/config-storing-methods'
 
-export function saveObjectToJsonFile(object, filename) {
-  return fs.writeFile(filename, JSON.stringify(object))
+export async function saveObjectToJsonFile(object, filename) {
+  const result = await window.api.writeFile(filename, JSON.stringify(object))
+  if (result.error) throw new Error(result.error)
 }
 
 export async function readObjectFromJsonFile(filename) {
-  const data = await fs.readFile(filename, { encoding: 'utf8' })
-  return JSON.parse(data)
+  const result = await window.api.readFile(filename)
+  if (result.error) throw new Error(result.error)
+  return JSON.parse(result.content)
 }
 
 const clusterFields = ['name']
@@ -36,10 +37,12 @@ export async function exportCluster(state, clusterId, options = {}) {
     const config = cluster.config
 
     if (config.storingMethod === configStoringMethods.PATH) {
+      const file = await window.api.readFile(config.path)
+      if (file.error) throw new Error(file.error)
       clusterObject.config = {
         ...omit(config, 'path'),
         storingMethod: configStoringMethods.CONTENT,
-        content: await fs.readFile(config.path, { encoding: 'utf8' })
+        content: file.content
       }
     } else if (config.storingMethod === configStoringMethods.CONTENT) {
       clusterObject.config = config

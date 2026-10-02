@@ -1,20 +1,20 @@
 <template>
   <BaseForm multicolumn class="service-form" @submit="handleSubmit">
     <fieldset>
-      <ControlGroup label="Cluster Name" size="2" :attribute="$v.attributes.clusterId">
-        <BaseSelect v-model="$v.attributes.clusterId.$model" :options="clusterOptions" />
+      <ControlGroup label="Cluster Name" size="2" :attribute="v.attributes.clusterId">
+        <BaseSelect v-model="attributes.clusterId" :options="clusterOptions" />
       </ControlGroup>
 
-      <ControlGroup label="Namespace" size="2" :attribute="$v.attributes.namespace">
-        <AutocompleteInput v-model="$v.attributes.namespace.$model"
+      <ControlGroup label="Namespace" size="2" :attribute="v.attributes.namespace">
+        <AutocompleteInput v-model="attributes.namespace"
                            :options="namespaces.data"
                            :loading="namespaces.loading"
                            @focus="handleNamespaceFocus" />
       </ControlGroup>
 
-      <ControlGroup label="Kind" size="2" :attribute="$v.attributes.workloadType">
+      <ControlGroup label="Kind" size="2" :attribute="v.attributes.workloadType">
         <BaseSelect
-          v-model="$v.attributes.workloadType.$model"
+          v-model="attributes.workloadType"
           :options="workloadTypeOptions"
           placeholder="Select Workload Type"
         />
@@ -23,36 +23,34 @@
       <ControlGroup
         label="Name"
         size="2"
-        :attribute="$v.attributes.workloadName"
+        :attribute="v.attributes.workloadName"
         :disabled="!attributes.workloadType"
       >
-        <template v-slot="slotProps">
-          <AutocompleteInput v-model="slotProps.attribute.$model"
-                             v-bind="slotProps"
-                             :options="resources.data"
-                             :loading="resources.loading"
-                             @focus="handleResourceNameFocus" />
-        </template>
+        <AutocompleteInput v-model="attributes.workloadName"
+                           :disabled="!attributes.workloadType"
+                           :options="resources.data"
+                           :loading="resources.loading"
+                           @focus="handleResourceNameFocus" />
       </ControlGroup>
 
-      <ControlGroup label="Alias" size="2" :attribute="$v.attributes.alias">
-        <BaseInput v-model="$v.attributes.alias.$model" placeholder="Optional..." />
+      <ControlGroup label="Alias" size="2" :attribute="v.attributes.alias">
+        <BaseInput v-model="attributes.alias" placeholder="Optional..." />
       </ControlGroup>
 
       <ControlGroup label="Ports Forwarding">
-        <ForwardsTable v-model="attributes.forwards" :attribute="$v.attributes.forwards" />
+        <ForwardsTable v-model="attributes.forwards" :attribute="v.attributes.forwards" />
       </ControlGroup>
 
       <ControlGroup label="">
-        <BaseCheckbox :value="attributes.localAddress != null"
-                      @input="toggleCustomLocalAddress"
+        <BaseCheckbox :model-value="attributes.localAddress != null"
+                      @update:model-value="toggleCustomLocalAddress"
         >
           Use custom local address
         </BaseCheckbox>
       </ControlGroup>
 
       <ControlGroup v-if="attributes.localAddress != null" label="">
-        <BaseInput v-model="$v.attributes.localAddress.$model"
+        <BaseInput v-model="attributes.localAddress"
                    placeholder="localhost"
         />
       </ControlGroup>
@@ -62,7 +60,7 @@
       <Button theme="danger" layout="outline" :to="backPath">Cancel</Button>
       <div class="space" />
       <div class="control-actions__error">{{ error }}</div>
-      <Button type="submit" theme="primary" :disabled="$v.$invalid">{{ submitButtonTitle }}</Button>
+      <Button type="submit" theme="primary" :disabled="v.$invalid">{{ submitButtonTitle }}</Button>
     </div>
   </BaseForm>
 </template>
@@ -70,12 +68,10 @@
 <script>
 import cloneDeep from 'clone-deep'
 import { mapActions } from 'vuex'
-import { required, minLength, integer, between } from 'vuelidate/lib/validators'
-import { validationMixin } from 'vuelidate'
-import { CoreV1Api, ExtensionsV1beta1Api } from '@kubernetes/client-node' // eslint-disable-line camelcase
 
+import { required, integer, between, field } from '../../../lib/validators'
+import { plain } from '../../../lib/plain'
 import * as resourceKinds from '../../../lib/constants/workload-types'
-import * as clusterHelper from '../../../lib/helpers/cluster'
 
 import BaseCheckbox from '../form/BaseCheckbox'
 import BaseForm from '../form/BaseForm'
@@ -97,35 +93,14 @@ export default {
     BaseSelect,
     ForwardsTable
   },
-  mixins: [validationMixin],
   props: {
     serviceId: { type: String, default: null },
     initialAttributes: { type: Object, default: () => ({}) }
   },
-  validations: {
-    attributes: {
-      clusterId: { required },
-      alias: {},
-      namespace: { required },
-      workloadType: {
-        required,
-        oneOf: (value) => Object.values(resourceKinds).includes(value)
-      },
-      workloadName: { required },
-      forwards: {
-        required,
-        minLength: minLength(1),
-        $each: {
-          localPort: { required, integer, between: between(0, 65535) },
-          remotePort: { required, integer, between: between(0, 65535) }
-        }
-      },
-      localAddress: {}
-    }
-  },
   data() {
     return {
       error: null,
+      touched: false,
       attributes: {
         ...this.getEmptyAttributes(),
         clusterId: this.$route.params.clusterId,
@@ -143,7 +118,38 @@ export default {
       }
     }
   },
+  watch: {
+    // ponytail: global touched flag (vuelidate tracked per-field dirtiness);
+    // errors appear once the user edits anything. The submit button gates
+    // actual submission, so coarse-grained is fine.
+    attributes: { deep: true, handler() { this.touched = true } }
+  },
   computed: {
+    v() {
+      const a = this.attributes
+      const t = this.touched
+      const oneOf = value => Object.values(resourceKinds).includes(value)
+
+      const rows = a.forwards.map(forward => ({
+        localPort: field(forward.localPort, { required, integer, between: between(0, 65535) }, t),
+        remotePort: field(forward.remotePort, { required, integer, between: between(0, 65535) }, t)
+      }))
+      const forwards = {
+        $invalid: !required(a.forwards) || rows.some(row => row.localPort.$invalid || row.remotePort.$invalid),
+        rows
+      }
+
+      const attributes = {
+        clusterId: field(a.clusterId, { required }, t),
+        namespace: field(a.namespace, { required }, t),
+        workloadType: field(a.workloadType, { required, oneOf }, t),
+        workloadName: field(a.workloadName, { required }, t),
+        alias: field(a.alias, {}, t),
+        forwards
+      }
+
+      return { attributes, $invalid: Object.values(attributes).some(f => f.$invalid) }
+    },
     clusterOptions() {
       return Object.values(this.$store.state.Clusters.items).map(x => [x.id, x.name])
     },
@@ -162,14 +168,6 @@ export default {
     },
     cluster() {
       return this.$store.state.Clusters.items[this.attributes.clusterId]
-    },
-    coreApi() {
-      try {
-        return clusterHelper.buildApiClient(this.cluster, CoreV1Api)
-      } catch (e) {
-        console.error(e)
-        return null
-      }
     },
     resourcesCacheKey() {
       const { clusterId, namespace, workloadType } = this.attributes
@@ -190,12 +188,11 @@ export default {
       }
     },
     async handleNamespaceFocus() {
-      if (this.coreApi && this.namespaces.clusterId !== this.attributes.clusterId) {
+      if (this.cluster && this.namespaces.clusterId !== this.attributes.clusterId) {
         this.namespaces.loading = true
 
         try {
-          const namespaces = (await this.coreApi.listNamespace()).body.items
-          this.namespaces.data = namespaces.map(x => x.metadata.name)
+          this.namespaces.data = await window.api.resources.namespaces(plain(this.cluster.config))
           this.namespaces.clusterId = this.cluster.id
         } catch (e) {
           console.error(e)
@@ -205,12 +202,12 @@ export default {
       }
     },
     async handleResourceNameFocus() {
-      if (this.coreApi && this.resources.cacheKey !== this.resourcesCacheKey) {
+      if (this.cluster && this.resources.cacheKey !== this.resourcesCacheKey) {
         this.resources.loading = true
 
         try {
-          this.resources.data = await this.getResources(
-            this.coreApi,
+          this.resources.data = await window.api.resources.list(
+            plain(this.cluster.config),
             this.attributes.workloadType,
             this.attributes.namespace
           )
@@ -221,21 +218,6 @@ export default {
 
         this.resources.loading = false
       }
-    },
-    async getResources(coreApi, kind, namespace) {
-      if (kind === resourceKinds.POD) {
-        const response = await coreApi.listNamespacedPod(namespace)
-        return response.body.items.map(x => x.metadata.name)
-      } else if (kind === resourceKinds.DEPLOYMENT) {
-        const extensionsApi = clusterHelper.buildApiClient(this.cluster, ExtensionsV1beta1Api)
-        const response = await extensionsApi.listNamespacedDeployment(namespace)
-        return response.body.items.map(x => x.metadata.name)
-      } else if (kind === resourceKinds.SERVICE) {
-        const response = await coreApi.listNamespacedService(namespace)
-        return response.body.items.map(x => x.metadata.name)
-      }
-
-      return []
     },
     handleSubmit() {
       const action = this.serviceId ? 'Services/updateService' : 'Services/createService'

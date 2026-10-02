@@ -1,6 +1,9 @@
 .DS_Store
 dist/*
 build/*
+out/
+.cache/
+.npmcache/
 coverage
 node_modules/
 npm-debug.log

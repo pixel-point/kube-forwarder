@@ -1,73 +1,47 @@
-import Vue from 'vue'
-import Router from 'vue-router'
-import * as Sentry from '@sentry/electron'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
 import store from '../store'
 import analytics from '../analytics'
 
-Vue.use(Router)
+import Layout from '@/components/Layout'
+import Clusters from '@/components/Clusters'
+import ClusterNew from '@/components/ClusterNew'
+import ClusterAdd from '@/components/ClusterAdd'
+import ClusterImport from '@/components/ClusterImport'
+import ClusterEdit from '@/components/ClusterEdit'
+import ServiceNew from '@/components/ServiceNew'
+import ServiceEdit from '@/components/ServiceEdit'
+import ServiceClone from '@/components/ServiceClone'
 
-const router = new Router({
+const router = createRouter({
+  history: createWebHashHistory(),
   routes: [
     {
       path: '/',
-      component: require('@/components/Layout').default,
+      component: Layout,
       children: [
-        {
-          name: 'Clusters',
-          path: '',
-          component: require('@/components/Clusters').default
-        },
-        {
-          name: 'Cluster New',
-          path: 'clusters/new',
-          component: require('@/components/ClusterNew').default
-        },
-        {
-          name: 'Cluster Add',
-          path: 'clusters/add',
-          component: require('@/components/ClusterAdd').default
-        },
-        {
-          name: 'Cluster Import',
-          path: 'clusters/import',
-          component: require('@/components/ClusterImport').default
-        },
-        {
-          name: 'Cluster Edit',
-          path: 'clusters/:id/edit',
-          component: require('@/components/ClusterEdit').default
-        },
-        {
-          name: 'Service New',
-          path: 'clusters/:clusterId/services/new',
-          component: require('@/components/ServiceNew').default
-        },
-        {
-          name: 'Service Edit',
-          path: 'clusters/:clusterId/services/:id/edit',
-          component: require('@/components/ServiceEdit').default
-        },
-        {
-          name: 'Service Clone',
-          path: 'clusters/:clusterId/services/:id/clone',
-          component: require('@/components/ServiceClone').default
-        }
+        { name: 'Clusters', path: '', component: Clusters },
+        { name: 'Cluster New', path: 'clusters/new', component: ClusterNew },
+        { name: 'Cluster Add', path: 'clusters/add', component: ClusterAdd },
+        { name: 'Cluster Import', path: 'clusters/import', component: ClusterImport },
+        { name: 'Cluster Edit', path: 'clusters/:id/edit', component: ClusterEdit },
+        { name: 'Service New', path: 'clusters/:clusterId/services/new', component: ServiceNew },
+        { name: 'Service Edit', path: 'clusters/:clusterId/services/:id/edit', component: ServiceEdit },
+        { name: 'Service Clone', path: 'clusters/:clusterId/services/:id/clone', component: ServiceClone }
       ]
     },
     {
-      path: '*',
+      path: '/:pathMatch(.*)*',
       redirect: '/'
     }
   ],
-  scrollBehavior(to, from, savedPosition) {
-    return { x: 0, y: 0 }
+  scrollBehavior() {
+    return { left: 0, top: 0 }
   }
 })
 
 router.afterEach((to, from) => {
   analytics.send('screenview', { cd: to.name })
-  Sentry.addBreadcrumb({ category: 'navigation', data: { from: from.path, to: to.path } })
 
   // todo Move it in the right place.
   if (from.name === 'Cluster Add') {

@@ -1,15 +1,13 @@
+import { join } from 'path'
 import { autoUpdater } from 'electron-updater'
-import packageJson from '../../package'
-import { dialog } from 'electron'
+import { app, dialog } from 'electron'
 
 autoUpdater.autoDownload = false
 autoUpdater.enableUserAwareness = false
 
-if (process.env.NODE_ENV !== 'production') {
-  const path = require('path')
-  autoUpdater.updateConfigPath = path.join(__dirname, 'dev-app-update.yml')
-  // noinspection JSUnresolvedVariable
-  autoUpdater.currentVersion = packageJson.version
+if (!app.isPackaged) {
+  autoUpdater.updateConfigPath = join(__dirname, 'dev-app-update.yml')
+  autoUpdater.currentVersion = app.getVersion()
 }
 
 autoUpdater.on('update-available', () => {
@@ -18,8 +16,8 @@ autoUpdater.on('update-available', () => {
     title: 'Found Updates',
     message: 'Found updates, do you want update now?',
     buttons: ['Sure', 'No']
-  }, (buttonIndex) => {
-    if (buttonIndex === 0) {
+  }).then(({ response }) => {
+    if (response === 0) {
       autoUpdater.downloadUpdate()
       autoUpdater.enableUserAwareness = true
     }
@@ -41,7 +39,7 @@ autoUpdater.on('update-downloaded', () => {
   dialog.showMessageBox({
     title: 'Install Updates',
     message: 'Updates downloaded, application will be quit for update...'
-  }, () => {
+  }).then(() => {
     setImmediate(() => autoUpdater.quitAndInstall())
   })
 })
