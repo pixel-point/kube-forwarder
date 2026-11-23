@@ -12,7 +12,7 @@ use gpui::{
     StatefulInteractiveElement, Styled, Subscription, Window, div, point, px,
 };
 use gpui_component::notification::Notification;
-use gpui_component::scroll::ScrollableElement;
+use gpui_component::scroll::Scrollbar;
 use gpui_component::{InteractiveElementExt, Root, WindowExt};
 use kf_core::export::ImportedCluster;
 
@@ -136,7 +136,8 @@ impl MainView {
 
     /// Development aid (debug builds only) used to take screenshots of every page:
     /// `KUBE_FORWARDER_DEBUG_ROUTE` opens a page (`add`, `new`, `edit:<cluster id>`,
-    /// `resource-new:<cluster id>`, `resource-edit:<id>`, `resource-clone:<id>`) and
+    /// `resource-new:<cluster id>`, `resource-edit:<id>`, `resource-clone:<id>`),
+    /// `KUBE_FORWARDER_DEBUG_SCROLL` scrolls the page down by the given number of pixels and
     /// `KUBE_FORWARDER_DEBUG_START` starts resources (comma separated ids).
     #[cfg(debug_assertions)]
     fn apply_debug_env(&self, window: &mut Window, cx: &mut Context<Self>) {
@@ -154,33 +155,48 @@ impl MainView {
                 .detach();
             }
         }
-        let Ok(route) = std::env::var("KUBE_FORWARDER_DEBUG_ROUTE") else {
+        let route = std::env::var("KUBE_FORWARDER_DEBUG_ROUTE")
+            .ok()
+            .and_then(|route| {
+                let (name, arg) = route.split_once(':').unwrap_or((route.as_str(), ""));
+                let arg = arg.to_string();
+                Some(match name {
+                    "add" => Route::ClusterAdd,
+                    "new" => Route::ClusterNew {
+                        back: Box::new(Route::ClusterAdd),
+                    },
+                    "edit" => Route::ClusterEdit { id: arg },
+                    "resource-new" => Route::ServiceNew {
+                        cluster_id: Some(arg),
+                        cluster_created: true,
+                    },
+                    "resource-edit" => Route::ServiceEdit { id: arg },
+                    "resource-clone" => Route::ServiceClone { id: arg },
+                    _ => return None,
+                })
+            });
+        let scroll = std::env::var("KUBE_FORWARDER_DEBUG_SCROLL")
+            .ok()
+            .and_then(|scroll| scroll.parse::<f32>().ok());
+        if route.is_none() && scroll.is_none() {
             return;
-        };
-        let (name, arg) = route.split_once(':').unwrap_or((route.as_str(), ""));
-        let arg = arg.to_string();
-        let route = match name {
-            "add" => Route::ClusterAdd,
-            "new" => Route::ClusterNew {
-                back: Box::new(Route::ClusterAdd),
-            },
-            "edit" => Route::ClusterEdit { id: arg },
-            "resource-new" => Route::ServiceNew {
-                cluster_id: Some(arg),
-                cluster_created: true,
-            },
-            "resource-edit" => Route::ServiceEdit { id: arg },
-            "resource-clone" => Route::ServiceClone { id: arg },
-            _ => return,
-        };
-        // Navigate once the first page has loaded its images (GPUI notifies only the view
-        // that requested an asset first).
+        }
+        // Wait until the first page has loaded its images (GPUI notifies only the view that
+        // requested an asset first) and has been laid out.
         cx.spawn_in(window, async move |this, cx| {
             cx.background_executor()
                 .timer(std::time::Duration::from_millis(300))
                 .await;
-            this.update_in(cx, |this, window, cx| this.navigate(route, window, cx))
-                .ok();
+            this.update_in(cx, |this, window, cx| {
+                if let Some(route) = route {
+                    this.navigate(route, window, cx);
+                }
+                if let Some(scroll) = scroll {
+                    this.scroll_handle.set_offset(point(px(0.), px(-scroll)));
+                    cx.notify();
+                }
+            })
+            .ok();
         })
         .detach();
     }
@@ -355,29 +371,45 @@ impl Render for MainView {
             .text_size(px(FONT_BASE))
             .child(self.render_toolbar(cx))
             .child(
+                // The scrollbar is a sibling of the scrolled element: as a child it would
+                // scroll away with the content.
                 div()
-                    .id("page-scroll")
                     .relative()
                     .flex_1()
                     .min_h_0()
-                    .flex()
-                    .flex_col()
-                    .overflow_y_scroll()
-                    .track_scroll(&self.scroll_handle)
                     .child(
-                        // GPUI measures the scrollable height from the children of the scroll
-                        // container: this element grows with the page, and fills at least the
-                        // visible area (for pages that stretch, like the empty clusters page).
                         div()
-                            .id("page")
-                            .debug_selector(|| "page".into())
+                            .id("page-scroll")
+                            .size_full()
                             .flex()
                             .flex_col()
-                            .flex_grow()
-                            .flex_shrink_0()
-                            .child(self.page.view()),
+                            .overflow_y_scroll()
+                            .track_scroll(&self.scroll_handle)
+                            .child(
+                                // GPUI measures the scrollable height from the children of the
+                                // scroll container: this element grows with the page, and fills
+                                // at least the visible area (for pages that stretch, like the
+                                // empty clusters page).
+                                div()
+                                    .id("page")
+                                    .debug_selector(|| "page".into())
+                                    .flex()
+                                    .flex_col()
+                                    .flex_grow()
+                                    .flex_shrink_0()
+                                    .child(self.page.view()),
+                            ),
                     )
-                    .vertical_scrollbar(&self.scroll_handle),
+                    .child(
+                        div()
+                            .debug_selector(|| "page-scrollbar".into())
+                            .absolute()
+                            .top_0()
+                            .left_0()
+                            .right_0()
+                            .bottom_0()
+                            .child(Scrollbar::vertical(&self.scroll_handle).id("page-scrollbar")),
+                    ),
             )
             .children(Root::render_dialog_layer(window, cx))
             .children(Root::render_notification_layer(window, cx))
@@ -431,6 +463,26 @@ mod tests {
             after.origin.y,
             before.origin.y - px(300.),
             "the list didn't scroll"
+        );
+    }
+
+    #[gpui::test]
+    fn the_scrollbar_stays_in_place(cx: &mut TestAppContext) {
+        let (_harness, cx) = setup(cx, long_state());
+        cx.simulate_resize(size(px(800.), px(580.)));
+        let scrollbar = bounds(cx, "page-scrollbar");
+        assert_eq!(
+            scrollbar.origin.y,
+            px(TOOLBAR_HEIGHT),
+            "the scrollbar starts below the toolbar"
+        );
+        assert_eq!(scrollbar.size.height, px(580. - TOOLBAR_HEIGHT));
+
+        scroll_down(cx, 300.);
+        assert_eq!(
+            bounds(cx, "page-scrollbar"),
+            scrollbar,
+            "the scrollbar moved with the content"
         );
     }
 

@@ -152,9 +152,10 @@ The end-to-end tests forward ports of pods, deployments and services (with named
 ports), follow pods that get replaced, check error reporting and start/stop forwarding from
 the UI.
 
-Debug builds accept two environment variables that help with screenshots:
+Debug builds accept environment variables that help with screenshots:
 `KUBE_FORWARDER_DEBUG_ROUTE` opens a page (`add`, `new`, `edit:<cluster id>`,
-`resource-new:<cluster id>`, `resource-edit:<id>`, `resource-clone:<id>`) and
+`resource-new:<cluster id>`, `resource-edit:<id>`, `resource-clone:<id>`),
+`KUBE_FORWARDER_DEBUG_SCROLL` scrolls the page down (pixels) and
 `KUBE_FORWARDER_DEBUG_START` starts resources (comma separated ids).
 `KUBE_FORWARDER_LOG` sets the log filter (for example `debug`).
 
