@@ -404,12 +404,14 @@ impl ClustersPage {
 
     fn render_empty(&self, cx: &mut Context<Self>) -> AnyElement {
         div()
+            .debug_selector(|| "empty-state".into())
             .relative()
             .flex()
             .flex_col()
             .items_center()
-            .size_full()
-            .min_h(px(480.))
+            .flex_grow()
+            .w_full()
+            .min_h(px(440.))
             .child(
                 img("images/pattern.png")
                     .absolute()
@@ -838,8 +840,15 @@ fn url_host(address: &str) -> String {
 impl Render for ClustersPage {
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let store = self.store.read(cx);
+        // The page stretches to the visible area at least (see `MainView`): the pattern of
+        // the empty page sits at the bottom and "Nothing found" is centered.
         if store.state.clusters.is_empty() {
-            return div().size_full().child(self.render_empty(cx));
+            return div()
+                .w_full()
+                .flex_grow()
+                .flex()
+                .flex_col()
+                .child(self.render_empty(cx));
         }
 
         let items = self.visible_items(store);
@@ -858,7 +867,8 @@ impl Render for ClustersPage {
             .collect();
 
         div()
-            .size_full()
+            .w_full()
+            .flex_grow()
             .p(px(20.))
             .flex()
             .flex_col()

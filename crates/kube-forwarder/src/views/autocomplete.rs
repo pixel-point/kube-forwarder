@@ -105,6 +105,11 @@ impl Autocomplete {
         cx.notify();
     }
 
+    #[cfg(test)]
+    pub fn is_open(&self) -> bool {
+        self.open
+    }
+
     pub fn set_invalid(&mut self, invalid: bool, cx: &mut Context<Self>) {
         if self.invalid != invalid {
             self.invalid = invalid;
@@ -187,12 +192,14 @@ impl Render for Autocomplete {
                     this.child(
                         div()
                             .id("autocomplete-options")
+                            .debug_selector(|| "autocomplete-options".into())
                             .max_h(px(200.))
                             .overflow_y_scroll()
                             .children(matches.into_iter().enumerate().map(|(ix, option)| {
                                 let value = option.clone();
                                 div()
                                     .id(("option", ix))
+                                    .debug_selector(move || format!("autocomplete-option-{ix}"))
                                     .h(px(36.))
                                     .px(px(15.))
                                     .flex()

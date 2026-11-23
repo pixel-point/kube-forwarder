@@ -360,12 +360,105 @@ impl Render for MainView {
                     .relative()
                     .flex_1()
                     .min_h_0()
+                    .flex()
+                    .flex_col()
                     .overflow_y_scroll()
                     .track_scroll(&self.scroll_handle)
-                    .child(self.page.view())
+                    .child(
+                        // GPUI measures the scrollable height from the children of the scroll
+                        // container: this element grows with the page, and fills at least the
+                        // visible area (for pages that stretch, like the empty clusters page).
+                        div()
+                            .id("page")
+                            .debug_selector(|| "page".into())
+                            .flex()
+                            .flex_col()
+                            .flex_grow()
+                            .flex_shrink_0()
+                            .child(self.page.view()),
+                    )
                     .vertical_scrollbar(&self.scroll_handle),
             )
             .children(Root::render_dialog_layer(window, cx))
             .children(Root::render_notification_layer(window, cx))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use gpui::{TestAppContext, px, size};
+    use kf_core::model::{AppState, Cluster, ClusterConfig, Forward, Service, WorkloadType};
+
+    use super::*;
+    use crate::test_support::{bounds, scroll_down, setup};
+
+    /// More clusters and resources than fit into the window.
+    fn long_state() -> AppState {
+        let mut state = AppState::default();
+        for cluster in 0..5 {
+            state.clusters.push(Cluster {
+                id: format!("c{cluster}"),
+                name: format!("cluster {cluster}"),
+                folded: false,
+                config: ClusterConfig::from_content("apiVersion: v1\n", None),
+            });
+            for service in 0..4 {
+                state.services.push(Service {
+                    id: format!("s{cluster}-{service}"),
+                    cluster_id: format!("c{cluster}"),
+                    alias: None,
+                    namespace: "default".into(),
+                    workload_type: WorkloadType::Deployment,
+                    workload_name: format!("app-{service}"),
+                    forwards: (0..6)
+                        .map(|port| Forward::new(10_000 + cluster * 100 + service * 10 + port, 80))
+                        .collect(),
+                    local_address: None,
+                });
+            }
+        }
+        state
+    }
+
+    #[gpui::test]
+    fn the_cluster_list_scrolls(cx: &mut TestAppContext) {
+        let (_harness, cx) = setup(cx, long_state());
+        cx.simulate_resize(size(px(800.), px(580.)));
+        let before = bounds(cx, "cluster-header-c0");
+        scroll_down(cx, 300.);
+        let after = bounds(cx, "cluster-header-c0");
+        assert_eq!(
+            after.origin.y,
+            before.origin.y - px(300.),
+            "the list didn't scroll"
+        );
+    }
+
+    #[gpui::test]
+    fn short_pages_fill_the_window(cx: &mut TestAppContext) {
+        let (_harness, cx) = setup(cx, AppState::default());
+        cx.simulate_resize(size(px(800.), px(580.)));
+        let page = bounds(cx, "page");
+        let empty = bounds(cx, "empty-state");
+        assert_eq!(page.size.height, px(580. - TOOLBAR_HEIGHT));
+        assert_eq!(
+            empty.size.height, page.size.height,
+            "the empty page fills the window"
+        );
+
+        // Nothing to scroll.
+        scroll_down(cx, 300.);
+        assert_eq!(bounds(cx, "empty-state").origin.y, empty.origin.y);
+    }
+
+    #[gpui::test]
+    fn forms_scroll(cx: &mut TestAppContext) {
+        let (harness, cx) = setup(cx, long_state());
+        cx.simulate_resize(size(px(800.), px(580.)));
+        harness.navigate(cx, Route::ServiceEdit { id: "s0-0".into() });
+        let before = bounds(cx, "button-submit-service");
+        scroll_down(cx, 200.);
+        let after = bounds(cx, "button-submit-service");
+        assert!(after.origin.y < before.origin.y, "the form didn't scroll");
     }
 }

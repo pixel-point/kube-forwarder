@@ -1022,6 +1022,41 @@ mod tests {
     }
 
     #[gpui::test]
+    fn long_suggestion_lists_scroll(cx: &mut TestAppContext) {
+        let (harness, cx) = setup(cx, state());
+        // No cluster selected: no namespaces are requested from a cluster.
+        harness.navigate(
+            cx,
+            Route::ServiceNew {
+                cluster_id: None,
+                cluster_created: false,
+            },
+        );
+        let page = harness.page::<ServiceFormPage>(cx);
+        let namespace = page.read_with(cx, |page, _| page.namespace.clone());
+        namespace.update(cx, |namespace, cx| {
+            namespace.set_options((0..40).map(|ix| format!("namespace-{ix:02}")).collect(), cx)
+        });
+        let input = namespace.read_with(cx, |namespace, _| namespace.input.clone());
+        type_into(cx, &input, "");
+        assert!(namespace.read_with(cx, |namespace, _| namespace.is_open()));
+
+        let list = crate::test_support::bounds(cx, "autocomplete-options");
+        assert_eq!(
+            list.size.height,
+            gpui::px(200.),
+            "the list is limited to 200px"
+        );
+        let before = crate::test_support::bounds(cx, "autocomplete-option-0");
+        crate::test_support::scroll_down_at(cx, list.center(), 100.);
+        let after = crate::test_support::bounds(cx, "autocomplete-option-0");
+        assert!(
+            after.origin.y < before.origin.y,
+            "the suggestions didn't scroll"
+        );
+    }
+
+    #[gpui::test]
     fn edits_a_resource(cx: &mut TestAppContext) {
         let mut state = state();
         state.services.push(Service {

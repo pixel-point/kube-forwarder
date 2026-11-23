@@ -2,7 +2,10 @@
 
 use std::time::Duration;
 
-use gpui::{AppContext, Entity, Modifiers, TestAppContext, VisualTestContext};
+use gpui::{
+    AppContext, Bounds, Entity, Modifiers, MouseMoveEvent, Pixels, ScrollDelta, ScrollWheelEvent,
+    TestAppContext, TouchPhase, VisualTestContext, point, px,
+};
 use gpui_component::Root;
 use gpui_component::input::InputState;
 use kf_core::model::AppState;
@@ -41,6 +44,9 @@ pub fn setup(cx: &mut TestAppContext, state: AppState) -> (Harness, &mut VisualT
         main = Some(view.clone());
         Root::new(view, window, cx)
     });
+    // Focus events are only delivered to an active window (like a window the user clicks).
+    cx.update(|window, _| window.activate_window());
+    cx.run_until_parked();
     let harness = Harness {
         store,
         main: main.unwrap(),
@@ -113,4 +119,32 @@ pub fn wait_until(
         std::thread::sleep(Duration::from_millis(50));
     }
     panic!("the condition was not met in time");
+}
+
+/// Bounds of an element marked with `debug_selector` in the last frame.
+pub fn bounds(cx: &mut VisualTestContext, selector: &str) -> Bounds<Pixels> {
+    cx.run_until_parked();
+    let selector: &'static str = Box::leak(selector.to_string().into_boxed_str());
+    cx.debug_bounds(selector)
+        .unwrap_or_else(|| panic!("`{selector}` is not rendered"))
+}
+
+/// Scrolls with the mouse wheel (or the trackpad) over the middle of the window.
+pub fn scroll_down(cx: &mut VisualTestContext, distance: f32) {
+    scroll_down_at(cx, point(px(400.), px(300.)), distance);
+}
+
+pub fn scroll_down_at(cx: &mut VisualTestContext, position: gpui::Point<Pixels>, distance: f32) {
+    cx.simulate_event(MouseMoveEvent {
+        position,
+        pressed_button: None,
+        modifiers: Modifiers::none(),
+    });
+    cx.simulate_event(ScrollWheelEvent {
+        position,
+        delta: ScrollDelta::Pixels(point(px(0.), px(-distance))),
+        modifiers: Modifiers::none(),
+        touch_phase: TouchPhase::Moved,
+    });
+    cx.run_until_parked();
 }
