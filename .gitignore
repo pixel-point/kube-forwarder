@@ -13,3 +13,4 @@ sentry.properties
 __diff_output__
 cypress/screenshots
 cypress/videos
+/target

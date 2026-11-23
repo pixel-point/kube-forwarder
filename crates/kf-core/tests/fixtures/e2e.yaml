@@ -1,0 +1,76 @@
+# Workloads used by the end-to-end tests (crates/kf-core/tests/e2e.rs).
+# Every pod serves "pod=<pod name>" over HTTP on its named port "http" (8080).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kf-e2e
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: kf-e2e
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web
+    matchExpressions:
+      - { key: tier, operator: In, values: [front] }
+  template:
+    metadata:
+      labels:
+        app: web
+        tier: front
+    spec:
+      terminationGracePeriodSeconds: 1
+      containers:
+        - name: httpd
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "mkdir -p /www && echo \"pod=$HOSTNAME\" > /www/index.html && exec httpd -f -p 8080 -h /www"]
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: kf-e2e
+spec:
+  selector:
+    app: web
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: headless-no-selector
+  namespace: kf-e2e
+spec:
+  ports:
+    - port: 80
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: standalone
+  namespace: kf-e2e
+spec:
+  terminationGracePeriodSeconds: 1
+  containers:
+    - name: httpd
+      image: busybox:1.36
+      imagePullPolicy: IfNotPresent
+      command: ["sh", "-c", "mkdir -p /www && echo \"pod=$HOSTNAME\" > /www/index.html && exec httpd -f -p 8080 -h /www"]
+      ports:
+        - name: http
+          containerPort: 8080
