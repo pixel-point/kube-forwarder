@@ -1,0 +1,27 @@
+[package]
+name = "kube-forwarder"
+description = "Easy to use Kubernetes port forwarding manager"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+kf-core = { path = "../kf-core" }
+dirs.workspace = true
+futures.workspace = true
+# `runtime_shaders` compiles the Metal shaders at runtime, so building doesn't need the
+# full Xcode (the Command Line Tools are enough).
+gpui = { version = "=0.2.2", features = ["runtime_shaders"] }
+gpui-component = "=0.5.1"
+kube.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+[dev-dependencies]
+gpui = { version = "=0.2.2", features = ["runtime_shaders", "test-support"] }
+tempfile = "3"

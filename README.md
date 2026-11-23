@@ -1,46 +1,37 @@
-<p align="center">
-  <a href="https://nodejs.org/en/">
-    <img src="https://img.shields.io/badge/Node-v10.16.0-brightgreen.svg" alt="node version">
-  </a>
-  <a href="https://electronjs.org/">
-    <img src="https://img.shields.io/badge/Electron-v5.0.6-brightgreen.svg" alt="electron version">
-  </a>
-  <a href="https://electronjs.org/">
-    <img src="https://img.shields.io/badge/Vue-v2.6.10-brightgreen.svg" alt="vue version">
-  </a>
-</p>
-
-<h1 align="center"> Kube Forwarder</h1>
+<h1 align="center">Kube Forwarder</h1>
 <h3 align="center">Easy to use Kubernetes port forwarding manager</h3>
 <h4 align="center">
-  <a href="https://kube-forwarder.pixelpoint.io">Visit a Website</a> ·
-  <a href="https://github.com/pixel-point/kube-forwarder/releases/latest/download/kube-forwarder.dmg">Download for macOS</a> ·
-  <a href="https://github.com/pixel-point/kube-forwarder/releases/latest/download/kube-forwarder.exe">Download for Windows</a> ·
-  <a href="https://github.com/pixel-point/kube-forwarder/releases/latest/download/kube-forwarder.AppImage">Download for Linux</a>
-  ·
+  <a href="https://kube-forwarder.pixelpoint.io">Website</a> ·
+  <a href="#build-from-source">Build from source</a> ·
   <a href="#install-with-homebrew">Install with Homebrew</a>
 </h4>
 
+![Clusters page](docs/screenshot.png)
 
-![Clusters Page](https://user-images.githubusercontent.com/2697570/60103100-524d5d80-975f-11e9-84ab-bcc962be0bb7.png)
+Kube Forwarder 2 is a native rewrite of the application in Rust with
+[GPUI](https://www.gpui.rs) (the UI framework of the Zed editor). It runs natively on Apple
+Silicon: the 1.x releases were x86_64-only Electron builds that need Rosetta 2, which is
+going away in upcoming macOS versions. The new application is a single ~25 MB binary that
+doesn't need Node.js, Electron or `kubectl`.
 
 ## Features
 
-**Auto-reconnect**
+**Auto-reconnect** — every local connection opens its own port-forward stream, a broken
+connection never takes the forwarding down. When the pod behind a deployment or a service is
+replaced (rollout, eviction, ...), the new pod is picked up automatically.
 
-Kube Forwarder watches for connection status and always tries reconnect on failure
+**Multiple clusters support** — bookmark and forward Kubernetes resources from multiple
+clusters.
 
-**Multiple clusters support**
+**Share bookmarks** — export a cluster with its resources to JSON (with or without the kube
+config) and import it on another machine. Exports of Kube Forwarder 1.x can be imported.
 
-Bookmark and forward Kubernetes services from multiple clusters easily like never before
+**Zero native dependencies** — no `kubectl` needed. Credential plugins used by kube configs
+(`aws`, `gcloud`/`gke-gcloud-auth-plugin`, `kubelogin`, ...) are found even when the app is
+started from Finder: the environment of the login shell is imported at startup.
 
-**Share bookmarks**
-
-Use import and export functionality to share bookmarked services with your team or simply backup it
-
-**Zero native dependencies**
-
-Use port-forwarding without installing kubectl and avoid explanations to developers on how to use it
+**Seamless upgrade** — on the first launch, clusters and resources of Kube Forwarder 1.x are
+imported automatically.
 
 ## Optional dependencies
 
@@ -51,222 +42,136 @@ Use port-forwarding without installing kubectl and avoid explanations to develop
 
 ### Add a cluster(s)
 
-Before you start forwarding internal resources to your local machine, you have to add cluster configuration.
-To do this we have 3 different options in the app:
+Before you start forwarding internal resources to your local machine, you have to add a
+cluster configuration. There are several options:
 
-1) Auto-detection of ~/.kube/config file and parsing settings from it
-1) Manual adding of Kubernetes config by selecting a file(s)
-1) Manual adding of Kubernetes config by pasting a text
-1) Import of the JSON file that could be generated via Kube Forwarder export functionality
+1. Auto-detection of the `~/.kube/config` file: every context of the file can be added as a
+   cluster.
+1. Opening kube config file(s): when a file contains multiple contexts, you choose the ones to
+   add.
+1. Pasting a kube config as text.
+1. Restoring a JSON file exported by Kube Forwarder.
 
-When you add a new cluster via auto-detection (option 1) or manually using a file(a) selection (option 2), we could parse
-configs and if there are multiple contexts inside we will suggest you to add multiple clusters to the app.
-Few examples of yaml files we expect to have you could find [there](https://github.com/pixel-point/kube-forwarder/issues/7)
+The cluster form has the following fields:
 
-Also, you could add a cluster by filling a form manually (option 3). The form has the following fields:
-* Name - the name of a cluster withing Kube Forwarder app.
-* Storing method (Set destination to your kube config or paste it as a text) - the method of storing a config It has two options:
-    * `Set a path` - storing a path to the config file. It will be read every time when you forwarding a port. It allows
-    a user to don't do any changes in Kube Forwarder's settings when a third-party app updates the config file.
-    For example, when `azure-cli` updates an access token (#13).
-    * `Paste as a text` - storing a config just as a yml text.
-* Path (if storing method is `Set a path`) - the path to a config file.
-* Content (if storing method is `Paste as a text`) - Yml config as a text.
-* Current Context (if storing method is `Set a path`) - When you use `Set a path`, you must select a context from a file
-which will be used to connect to a resource. Let's see an example of a problem that the field solves.
-    1) Let's say we don't have `Current context` field.
-    1) A user has a config file with two contexts: `local-cluster` and `remote-cluster`.
-    `current-context` in the yml file is `local-cluster`.
-    1) The user configured a cluster in Kube Forwarder with `Set a path` option.
-    1) The user created a resource `postgres` and successfully forwarded ports for some time.
-    1) Then the user executed `kubectl config use-context remote-cluster`
-    1) If the user tries to forward the resource in Kube Forwarder again, most likely there will be an error
-    since a connection will be established with `remote-cluster`, not `local-cluster` as the user expected,
-    and `remote-cluster` couldn't have `postgres` resource.
-
-    So, to avoid the error we should store the current context in a separate field.
-
-<a target="_blank" href="https://user-images.githubusercontent.com/2697570/60754775-58a4ca80-9fe6-11e9-8d67-d15a1423b506.png"><img width="320" alt="Screenshot 2019-07-06 at 12 04 45" src="https://user-images.githubusercontent.com/2697570/60754775-58a4ca80-9fe6-11e9-8d67-d15a1423b506.png"></a>
+* Name - the name of the cluster within Kube Forwarder.
+* Storing method:
+    * `Set a path` - only the path to the config file is stored. The file is read every time
+      a port is forwarded, so tools that update the file (for example when `azure-cli`
+      refreshes an access token) keep working without changes in Kube Forwarder.
+    * `Paste as a text` - the whole config is stored as text.
+* Path (`Set a path`) - the path to a config file.
+* Current context (`Set a path`) - the context of the file used to connect. It's stored
+  separately so that `kubectl config use-context` doesn't change the cluster Kube Forwarder
+  connects to.
+* Content (`Paste as a text`) - the kube config as text.
 
 ### Add a resource
 
-Kube Forwarder supports forwarding of all types of resources that supported by `kubectl` – Pod, Deployment, Service.
+Kube Forwarder supports forwarding of Pods, Deployments and Services.
 
-We ask you to fill the form with the following fields:
+* **Cluster Name** - one of the added clusters.
+* **Namespace** - the namespace of the resource (suggestions are loaded from the cluster).
+* **Kind** - Pod, Deployment or Service.
+* **Name** - the name of the Pod, Deployment or Service (suggestions are loaded from the
+  cluster).
+* **Alias** - an alternative name displayed in the list (optional).
+* **Port Forwarding**
+    * **Local port** - the port on your machine.
+    * **Resource port** - the port of the resource. For services it's a service port, which is
+      mapped to the target port of the pod (named target ports are supported).
+* **Use Custom Local Address** - listen on another address than `localhost` (which listens on
+  `127.0.0.1` and `::1`). Putting each resource on its own address avoids collisions of ports
+  and cookies. On macOS only `127.0.0.1` is configured on the loopback interface, add other
+  addresses first, e.g. `sudo ifconfig lo0 alias 127.0.0.2 up`.
 
-**Cluster Name** - pick a cluster from one of the added clusters.
-
-**Namespace** - the namespace of the resource you plan to forward.
-
-**Kind** – pick one of the options Pod, Deployment or Service.
-
-**Name** - name of the Pod, Deployment or Service.
-
-**Alias** - alternative name of the resource that will be displayed on the homepage(optional)
-
-**Port Forwarding**
-
-- **Local port** - port from your local machine where the resource will be forwarded.  Note that ports <= 1024 are
-  restricted to user `root`
-- **Resource port** - port of the resource from the Kubernetes cluster
-
-**Use Custom Local Address** - Check this and put an IP address or hostname into the text field to
-use a different listen address. Putting each service on its own address avoids sharing/collisions between
-services on cookies and port number.  Specify a loopback address like `127.0.x.x` or add entries to your
-hosts file like `127.0.1.1 dashboard.production.kbf` and put the assigned name in this column.  If blank or
-unchecked, `localhost` / `127.0.0.1` will be used.
-
-<a target="_blank" href="https://user-images.githubusercontent.com/2697570/60754738-e207cd00-9fe5-11e9-95b3-8f4704ca3dce.png"><img width="320" alt="Port Forwarding Form" src="https://user-images.githubusercontent.com/2697570/60754738-e207cd00-9fe5-11e9-95b3-8f4704ca3dce.png"></a>
+Ports that answer HTTP requests are displayed as links.
 
 ### Import/Export
 
-Kube Forwarder allows you export cluster configuration in JSON that you could use to share with your team members or for the backup purpose. You could easily store it on Github. When you export cluster, you could export it with or without confidential information.
+A cluster can be exported to JSON to share it with your team or to back it up. The export can
+include the kube config or not. Configs referenced by path are embedded as text.
 
-<a target="_blank" href="https://user-images.githubusercontent.com/2697570/60754844-54c57800-9fe7-11e9-9de0-fe77fc6b4290.png"><img width="320" alt="Screenshot 2019-07-06 at 12 12 20" src="https://user-images.githubusercontent.com/2697570/60754844-54c57800-9fe7-11e9-9de0-fe77fc6b4290.png"></a>
+### Where is the data stored?
+
+`~/Library/Application Support/com.pixelpoint.kube-forwarder/state.json` on macOS
+(`$XDG_DATA_HOME/com.pixelpoint.kube-forwarder/state.json` on Linux). The file is only
+readable by your user because kube configs pasted as text may contain credentials. Set
+`KUBE_FORWARDER_STATE` to use another file.
 
 ### Install with Homebrew
 
 ```
-brew cask install kube-forwarder
+brew install --cask kube-forwarder
 ```
+
+## Build from source
+
+Requirements:
+
+* macOS 11 or newer (Apple Silicon or Intel)
+* [Rust](https://rustup.rs) 1.95 or newer
+* Xcode Command Line Tools (`xcode-select --install`). The full Xcode is not needed: the Metal
+  shaders are compiled at runtime.
+
+```sh
+# Run the application
+cargo run -p kube-forwarder
+
+# Build "Kube Forwarder.app" and kube-forwarder.dmg into dist/
+scripts/bundle-macos.sh
+scripts/bundle-macos.sh --universal   # arm64 + x86_64
+```
+
+Set `MACOS_SIGNING_IDENTITY` to sign the bundle with a Developer ID certificate, otherwise it's
+signed ad hoc. Distributed builds also have to be notarized
+(`xcrun notarytool submit dist/kube-forwarder.dmg --wait`).
+
+GPUI also supports Linux and Windows, but the application is only tested on macOS.
+
+## Project structure
+
+* `crates/kf-core` - everything that doesn't depend on the UI: the persisted model, migration
+  of the 1.x data, import/export, kube config handling and the port forwarding engine
+  ([kube-rs](https://kube.rs)).
+* `crates/kube-forwarder` - the GPUI application. Widgets come from
+  [gpui-component](https://github.com/longbridge/gpui-component).
+
+## Running the tests
+
+```sh
+# Unit tests and UI tests (GPUI test platform, no window is opened)
+cargo test --workspace
+
+# End-to-end tests against a disposable k3d cluster (needs Docker, k3d and kubectl).
+# Your ~/.kube/config is not modified.
+scripts/e2e.sh
+```
+
+The end-to-end tests forward ports of pods, deployments and services (with named target
+ports), follow pods that get replaced, check error reporting and start/stop forwarding from
+the UI.
+
+Debug builds accept environment variables that help with screenshots:
+`KUBE_FORWARDER_DEBUG_ROUTE` opens a page (`add`, `new`, `edit:<cluster id>`,
+`resource-new:<cluster id>`, `resource-edit:<id>`, `resource-clone:<id>`),
+`KUBE_FORWARDER_DEBUG_SCROLL` scrolls the page down (pixels) and
+`KUBE_FORWARDER_DEBUG_START` starts resources (comma separated ids).
+`KUBE_FORWARDER_LOG` sets the log filter (for example `debug`).
 
 ## Contributing
 
 We encourage you to contribute to Kube Forwarder!
 
 We expect contributors to abide by our underlying [code of conduct](./.github/CODE_OF_CONDUCT.md).
-All conversations and discussions on GitHub (issues, pull requests)
-must be respectful and harassment-free.
+All conversations and discussions on GitHub (issues, pull requests) must be respectful and
+harassment-free.
 
-This project was generated with [electron-vue](https://github.com/SimulatedGREG/electron-vue)@[8fae476](https://github.com/SimulatedGREG/electron-vue/tree/8fae4763e9d225d3691b627e83b9e09b56f6c935) using [vue-cli](https://github.com/vuejs/vue-cli). Documentation about the original structure can be found [here](https://simulatedgreg.gitbooks.io/electron-vue/content/index.html).
-
-### How to contribute
-
-1.  Fork the project & clone locally. Follow the initial setup [here](#getting-started).
-2.  Create a branch, naming it either a feature or bug: `git checkout -b feature/that-new-feature` or `bug/fixing-that-bug`
-3.  Code and commit your changes. Bonus points if you write a [good commit message](https://chris.beams.io/posts/git-commit/): `git commit -m 'Add some feature'`
-4.  Push to the branch: `git push origin feature/that-new-feature`
-5.  Create a pull request for your branch 🎉
-
-## Getting started
-
-### Prerequisites
-
-* Node 10.8+
-* MacOS (if you want to build `.dmg` target)
-* Docker (if you want to run tests)
-* ImageMagick (to build app icon)
-
-### Installing
-
-Fork Kube Forwarder repository (https://github.com/pixel-point/kube-forwarder/fork)
-
-```
-# Clone source code
-git clone https://github.com/<your-username>/kube-forwarder
-
-# install dependencies
-npm install
-
-# prepare .env files
-cp .env.example .env
-cp .env.example .env.production
-
-# serve with hot reload in Electron Dev app
-npm run dev
-
-# serve WEB version with hot reload at localhost:9081
-npm run web
-```
-
-### Build
-
-Build an application for production
-```
-# Build a target for current OS
-npm run build
-
-# Build a target for Windows
-npm run build -- -- --win
-
-# Build a target for Linux
-npm run build -- -- --linux
-
-# You can mix targets
-npm run build -- -- --win --linux
-
-# You can build static and target separately
-npm run build:dist
-npm run build:target -- --win
-```
-
-A built version will be appear in `build` directory.
-
-## Running the tests
-
-We are using [Cypress](https://www.cypress.io) to run integration tests.
-There are visual regression tests. It's important to run them inside docker
-container to get same screenshots as in Drone CI.
-
-```
-npm run test:cypress
-```
-
-Or you can run it manually on a local machine.
-```
-# Run the web version to test it
-npm run web
-
-# Run this command in a separate terminal tab
-npm run test:cypress:onhost
-
-# Or you can open Cypress GUI
-npm run test:cypress:open
-```
-
-## Troubleshooting
-
-Q) Node Sass could not find a binding for your current environment: OS X 64-bit with Node.js 12.x
-A) `npm rebuild node-sass`
-
-Q) Error: spawn .../kube-forwarder/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron ENOENT
-A) Reinstall node_modules: `rm -rf node_modules && npm i`
-
-## Release guide
-
-### Configure environment
-
-Also, this steps could be used to configure CI environment.
-
-1) Copy `.env.example` to `.env.production` and fill variables.
-
-### Release steps
-
-1) Update the version in `package.json` and Push to `release` branch.
-1) Run `npm run release` on a Mac computer to build packages.  They will be automatically pushed to releases at Github.
-1) Go to [Releases](https://github.com/pixel-point/kube-forwarder/releases) in the repository.
-Make sure that the created draft is OK and release it (Edit -> Release).
-1) Run `cask-repair kube-forwarder` to update the cask version.
-([https://github.com/Homebrew/homebrew-cask/blob/master/CONTRIBUTING.md#updating-a-cask](About cask-repair))
-
-Notes:
-1) A release tag (for example: `v1.0.3`) will be added to GIT automatically by Github when you release your draft.
-
-## Development tips
-
-Use `tiffutil -cathidpicheck bg.png bg@2x.png -out bg.tiff` to build a tiff
-background for .DMG
-
-## Supported by
-<table>
-  <tbody>
-    <td valign="middle">
-<a href="https://www.browserstack.com"><img width="200px" src="https://user-images.githubusercontent.com/2697570/60770117-f0361600-a0d7-11e9-8a1e-39393f4d0439.png" /></a>
-    </td>
-    <td valign="middle"><a href="https://sentry.io/"><img width="200px" src="https://user-images.githubusercontent.com/2697570/60827162-dd8f1000-a1af-11e9-9536-0bba6c71778c.png"/></a></td>
-    </tbody>
-</table>
-
+1. Fork the project & clone locally.
+2. Create a branch, naming it either a feature or bug: `git checkout -b feature/that-new-feature` or `bug/fixing-that-bug`
+3. Code and commit your changes. Bonus points if you write a [good commit message](https://chris.beams.io/posts/git-commit/).
+4. Push to the branch: `git push origin feature/that-new-feature`
+5. Create a pull request for your branch 🎉
 
 ## License
 

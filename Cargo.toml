@@ -1,0 +1,48 @@
+[workspace]
+resolver = "3"
+members = ["crates/kf-core", "crates/kube-forwarder"]
+
+[workspace.package]
+version = "2.0.0"
+edition = "2024"
+rust-version = "1.95"
+license = "MIT"
+authors = ["Pixel Point <info@pixelpoint.io>"]
+homepage = "https://kube-forwarder.pixelpoint.io"
+repository = "https://github.com/pixel-point/kube-forwarder"
+
+[workspace.dependencies]
+anyhow = "1"
+dirs = "7"
+futures = "0.3"
+indexmap = { version = "2", features = ["serde"] }
+k8s-openapi = { version = "0.29", features = ["earliest"] }
+kube = { version = "5.1", default-features = false, features = [
+    "client",
+    "rustls-tls",
+    "ring",
+    "ws",
+    "oidc",
+    "oauth",
+    "http-proxy",
+] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+thiserror = "2"
+tokio = { version = "1", features = [
+    "rt-multi-thread",
+    "net",
+    "io-util",
+    "time",
+    "sync",
+    "macros",
+    "process",
+    "fs",
+] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+uuid = { version = "1", features = ["v4"] }
+
+[profile.release]
+lto = "thin"
+strip = true

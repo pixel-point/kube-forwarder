@@ -1,0 +1,516 @@
+//! Window content: toolbar, navigation between pages and overlay layers.
+
+pub mod autocomplete;
+pub mod cluster_add;
+pub mod cluster_form;
+pub mod clusters;
+pub mod service_form;
+
+use gpui::{
+    AnyView, App, AppContext, Context, CursorStyle, Entity, EventEmitter, InteractiveElement,
+    IntoElement, MouseButton, ParentElement, Render, ScrollHandle, SharedString,
+    StatefulInteractiveElement, Styled, Subscription, Window, div, point, px,
+};
+use gpui_component::notification::Notification;
+use gpui_component::scroll::Scrollbar;
+use gpui_component::{InteractiveElementExt, Root, WindowExt};
+use kf_core::export::ImportedCluster;
+
+use crate::dialogs;
+use crate::store::{AppStore, StartupNotice, StoreEvent};
+use crate::theme::{self, FONT_BASE, TOOLBAR_HEIGHT};
+use crate::ui::ClickHandler;
+
+use cluster_add::ClusterAddPage;
+use cluster_form::{ClusterFormMode, ClusterFormPage};
+use clusters::ClustersPage;
+use service_form::{ServiceFormMode, ServiceFormPage};
+
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+
+/// Pages of the application (the routes of the original router).
+#[derive(Clone, Debug)]
+pub enum Route {
+    Clusters,
+    ClusterAdd,
+    ClusterNew {
+        back: Box<Route>,
+    },
+    ClusterEdit {
+        id: String,
+    },
+    ClusterImport {
+        imported: Box<ImportedCluster>,
+    },
+    ServiceNew {
+        cluster_id: Option<String>,
+        cluster_created: bool,
+    },
+    ServiceEdit {
+        id: String,
+    },
+    ServiceClone {
+        id: String,
+    },
+}
+
+/// Emitted by pages to switch to another page.
+pub struct Navigate(pub Route);
+
+/// Builds a click handler that emits [`Navigate`] from a page.
+pub fn navigate_on_click<T: EventEmitter<Navigate>>(cx: &Context<T>, route: Route) -> ClickHandler {
+    let page = cx.weak_entity();
+    std::rc::Rc::new(move |_, _, cx: &mut App| {
+        let route = route.clone();
+        page.update(cx, |_, cx| cx.emit(Navigate(route))).ok();
+    })
+}
+
+enum Page {
+    Clusters(Entity<ClustersPage>),
+    ClusterAdd(Entity<ClusterAddPage>),
+    ClusterForm(Entity<ClusterFormPage>),
+    ServiceForm(Entity<ServiceFormPage>),
+}
+
+impl Page {
+    fn view(&self) -> AnyView {
+        match self {
+            Page::Clusters(page) => page.clone().into(),
+            Page::ClusterAdd(page) => page.clone().into(),
+            Page::ClusterForm(page) => page.clone().into(),
+            Page::ServiceForm(page) => page.clone().into(),
+        }
+    }
+}
+
+pub struct MainView {
+    store: Entity<AppStore>,
+    page: Page,
+    scroll_handle: ScrollHandle,
+    should_move_window: bool,
+    _page_subscription: Subscription,
+    _store_subscription: Subscription,
+}
+
+impl MainView {
+    pub fn new(store: Entity<AppStore>, window: &mut Window, cx: &mut Context<Self>) -> Self {
+        let (page, page_subscription) = Self::build_page(Route::Clusters, &store, window, cx);
+        let store_subscription =
+            cx.subscribe_in(&store, window, |_, _, event, window, cx| match event {
+                StoreEvent::Error(error) => dialogs::show_error(window, cx, error),
+            });
+
+        let notice = store.update(cx, |store, _| store.startup_notice.take());
+        if let Some(notice) = notice {
+            cx.defer_in(window, move |_, window, cx| match notice {
+                StartupNotice::Imported { from, clusters } => {
+                    window.push_notification(
+                        Notification::success(format!(
+                            "Imported {clusters} cluster{} from the previous version of Kube Forwarder ({}).",
+                            if clusters == 1 { "" } else { "s" },
+                            from.display()
+                        ))
+                        .autohide(false),
+                        cx,
+                    );
+                }
+                StartupNotice::Warning(warning) => {
+                    dialogs::show_message(window, cx, "Kube Forwarder", Some(&warning));
+                }
+            });
+        }
+
+        let this = Self {
+            store,
+            page,
+            scroll_handle: ScrollHandle::new(),
+            should_move_window: false,
+            _page_subscription: page_subscription,
+            _store_subscription: store_subscription,
+        };
+        #[cfg(debug_assertions)]
+        this.apply_debug_env(window, cx);
+        this
+    }
+
+    /// Development aid (debug builds only) used to take screenshots of every page:
+    /// `KUBE_FORWARDER_DEBUG_ROUTE` opens a page (`add`, `new`, `edit:<cluster id>`,
+    /// `resource-new:<cluster id>`, `resource-edit:<id>`, `resource-clone:<id>`),
+    /// `KUBE_FORWARDER_DEBUG_SCROLL` scrolls the page down by the given number of pixels and
+    /// `KUBE_FORWARDER_DEBUG_START` starts resources (comma separated ids).
+    #[cfg(debug_assertions)]
+    fn apply_debug_env(&self, window: &mut Window, cx: &mut Context<Self>) {
+        if let Ok(ids) = std::env::var("KUBE_FORWARDER_DEBUG_START") {
+            for id in ids.split(',').map(str::trim).filter(|id| !id.is_empty()) {
+                let task = self
+                    .store
+                    .update(cx, |store, cx| store.start_service(id, cx));
+                cx.spawn_in(window, async move |_, cx| {
+                    if let Err(error) = task.await {
+                        cx.update(|window, cx| dialogs::show_error(window, cx, &error))
+                            .ok();
+                    }
+                })
+                .detach();
+            }
+        }
+        let route = std::env::var("KUBE_FORWARDER_DEBUG_ROUTE")
+            .ok()
+            .and_then(|route| {
+                let (name, arg) = route.split_once(':').unwrap_or((route.as_str(), ""));
+                let arg = arg.to_string();
+                Some(match name {
+                    "add" => Route::ClusterAdd,
+                    "new" => Route::ClusterNew {
+                        back: Box::new(Route::ClusterAdd),
+                    },
+                    "edit" => Route::ClusterEdit { id: arg },
+                    "resource-new" => Route::ServiceNew {
+                        cluster_id: Some(arg),
+                        cluster_created: true,
+                    },
+                    "resource-edit" => Route::ServiceEdit { id: arg },
+                    "resource-clone" => Route::ServiceClone { id: arg },
+                    _ => return None,
+                })
+            });
+        let scroll = std::env::var("KUBE_FORWARDER_DEBUG_SCROLL")
+            .ok()
+            .and_then(|scroll| scroll.parse::<f32>().ok());
+        if route.is_none() && scroll.is_none() {
+            return;
+        }
+        // Wait until the first page has loaded its images (GPUI notifies only the view that
+        // requested an asset first) and has been laid out.
+        cx.spawn_in(window, async move |this, cx| {
+            cx.background_executor()
+                .timer(std::time::Duration::from_millis(300))
+                .await;
+            this.update_in(cx, |this, window, cx| {
+                if let Some(route) = route {
+                    this.navigate(route, window, cx);
+                }
+                if let Some(scroll) = scroll {
+                    this.scroll_handle.set_offset(point(px(0.), px(-scroll)));
+                    cx.notify();
+                }
+            })
+            .ok();
+        })
+        .detach();
+    }
+
+    fn build_page(
+        route: Route,
+        store: &Entity<AppStore>,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> (Page, Subscription) {
+        let store = store.clone();
+        match route {
+            Route::Clusters => {
+                let page = cx.new(|cx| ClustersPage::new(store, window, cx));
+                let subscription = cx.subscribe_in(&page, window, Self::on_navigate);
+                (Page::Clusters(page), subscription)
+            }
+            Route::ClusterAdd => {
+                let page = cx.new(|cx| ClusterAddPage::new(store, window, cx));
+                let subscription = cx.subscribe_in(&page, window, Self::on_navigate);
+                (Page::ClusterAdd(page), subscription)
+            }
+            Route::ClusterNew { back } => {
+                let page = cx.new(|cx| {
+                    ClusterFormPage::new(store, ClusterFormMode::New { back: *back }, window, cx)
+                });
+                let subscription = cx.subscribe_in(&page, window, Self::on_navigate);
+                (Page::ClusterForm(page), subscription)
+            }
+            Route::ClusterEdit { id } => {
+                let page = cx.new(|cx| {
+                    ClusterFormPage::new(store, ClusterFormMode::Edit { id }, window, cx)
+                });
+                let subscription = cx.subscribe_in(&page, window, Self::on_navigate);
+                (Page::ClusterForm(page), subscription)
+            }
+            Route::ClusterImport { imported } => {
+                let page = cx.new(|cx| {
+                    ClusterFormPage::new(
+                        store,
+                        ClusterFormMode::Import {
+                            imported: *imported,
+                        },
+                        window,
+                        cx,
+                    )
+                });
+                let subscription = cx.subscribe_in(&page, window, Self::on_navigate);
+                (Page::ClusterForm(page), subscription)
+            }
+            Route::ServiceNew {
+                cluster_id,
+                cluster_created,
+            } => {
+                let page = cx.new(|cx| {
+                    ServiceFormPage::new(
+                        store,
+                        ServiceFormMode::New {
+                            cluster_id,
+                            cluster_created,
+                        },
+                        window,
+                        cx,
+                    )
+                });
+                let subscription = cx.subscribe_in(&page, window, Self::on_navigate);
+                (Page::ServiceForm(page), subscription)
+            }
+            Route::ServiceEdit { id } => {
+                let page = cx.new(|cx| {
+                    ServiceFormPage::new(store, ServiceFormMode::Edit { id }, window, cx)
+                });
+                let subscription = cx.subscribe_in(&page, window, Self::on_navigate);
+                (Page::ServiceForm(page), subscription)
+            }
+            Route::ServiceClone { id } => {
+                let page = cx.new(|cx| {
+                    ServiceFormPage::new(store, ServiceFormMode::Clone { id }, window, cx)
+                });
+                let subscription = cx.subscribe_in(&page, window, Self::on_navigate);
+                (Page::ServiceForm(page), subscription)
+            }
+        }
+    }
+
+    fn on_navigate<P>(
+        &mut self,
+        _: &Entity<P>,
+        event: &Navigate,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) {
+        self.navigate(event.0.clone(), window, cx);
+    }
+
+    pub fn navigate(&mut self, route: Route, window: &mut Window, cx: &mut Context<Self>) {
+        tracing::debug!(?route, "navigate");
+        let (page, subscription) = Self::build_page(route, &self.store, window, cx);
+        self.page = page;
+        self._page_subscription = subscription;
+        self.scroll_handle.set_offset(point(px(0.), px(0.)));
+        cx.notify();
+    }
+
+    #[cfg(test)]
+    pub fn page(&self) -> AnyView {
+        self.page.view()
+    }
+
+    fn render_toolbar(&self, cx: &mut Context<Self>) -> impl IntoElement {
+        div()
+            .id("toolbar")
+            .flex()
+            .flex_none()
+            .items_center()
+            .h(px(TOOLBAR_HEIGHT))
+            .px(px(20.))
+            .border_b_1()
+            .border_color(theme::border())
+            .bg(theme::white())
+            .on_double_click(|_, window, _| window.titlebar_double_click())
+            .on_mouse_down(
+                MouseButton::Left,
+                cx.listener(|this, _, _, _| this.should_move_window = true),
+            )
+            .on_mouse_up(
+                MouseButton::Left,
+                cx.listener(|this, _, _, _| this.should_move_window = false),
+            )
+            .on_mouse_move(cx.listener(|this, _, window, _| {
+                if this.should_move_window {
+                    this.should_move_window = false;
+                    window.start_window_move();
+                }
+            }))
+            .child(div().flex_1())
+            .child(
+                div()
+                    .id("version")
+                    .flex_none()
+                    .cursor(CursorStyle::PointingHand)
+                    .text_color(theme::text_quaternary())
+                    .on_mouse_down(MouseButton::Left, |_, _, cx| cx.stop_propagation())
+                    .on_click(|_, window, cx| {
+                        let detail = format!(
+                            "Version: {VERSION}\nPlatform: {} {}\nState: {}",
+                            std::env::consts::OS,
+                            std::env::consts::ARCH,
+                            kf_core::storage::default_state_path().display()
+                        );
+                        dialogs::show_message(
+                            window,
+                            cx,
+                            &format!("Kube Forwarder v{VERSION}"),
+                            Some(&detail),
+                        );
+                    })
+                    .child(SharedString::from(format!("v{VERSION}"))),
+            )
+    }
+}
+
+impl Render for MainView {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        div()
+            .id("main")
+            .size_full()
+            .flex()
+            .flex_col()
+            .bg(theme::white())
+            .text_color(theme::text())
+            .text_size(px(FONT_BASE))
+            .child(self.render_toolbar(cx))
+            .child(
+                // The scrollbar is a sibling of the scrolled element: as a child it would
+                // scroll away with the content.
+                div()
+                    .relative()
+                    .flex_1()
+                    .min_h_0()
+                    .child(
+                        div()
+                            .id("page-scroll")
+                            .size_full()
+                            .flex()
+                            .flex_col()
+                            .overflow_y_scroll()
+                            .track_scroll(&self.scroll_handle)
+                            .child(
+                                // GPUI measures the scrollable height from the children of the
+                                // scroll container: this element grows with the page, and fills
+                                // at least the visible area (for pages that stretch, like the
+                                // empty clusters page).
+                                div()
+                                    .id("page")
+                                    .debug_selector(|| "page".into())
+                                    .flex()
+                                    .flex_col()
+                                    .flex_grow()
+                                    .flex_shrink_0()
+                                    .child(self.page.view()),
+                            ),
+                    )
+                    .child(
+                        div()
+                            .debug_selector(|| "page-scrollbar".into())
+                            .absolute()
+                            .top_0()
+                            .left_0()
+                            .right_0()
+                            .bottom_0()
+                            .child(Scrollbar::vertical(&self.scroll_handle).id("page-scrollbar")),
+                    ),
+            )
+            .children(Root::render_dialog_layer(window, cx))
+            .children(Root::render_notification_layer(window, cx))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use gpui::{TestAppContext, px, size};
+    use kf_core::model::{AppState, Cluster, ClusterConfig, Forward, Service, WorkloadType};
+
+    use super::*;
+    use crate::test_support::{bounds, scroll_down, setup};
+
+    /// More clusters and resources than fit into the window.
+    fn long_state() -> AppState {
+        let mut state = AppState::default();
+        for cluster in 0..5 {
+            state.clusters.push(Cluster {
+                id: format!("c{cluster}"),
+                name: format!("cluster {cluster}"),
+                folded: false,
+                config: ClusterConfig::from_content("apiVersion: v1\n", None),
+            });
+            for service in 0..4 {
+                state.services.push(Service {
+                    id: format!("s{cluster}-{service}"),
+                    cluster_id: format!("c{cluster}"),
+                    alias: None,
+                    namespace: "default".into(),
+                    workload_type: WorkloadType::Deployment,
+                    workload_name: format!("app-{service}"),
+                    forwards: (0..6)
+                        .map(|port| Forward::new(10_000 + cluster * 100 + service * 10 + port, 80))
+                        .collect(),
+                    local_address: None,
+                });
+            }
+        }
+        state
+    }
+
+    #[gpui::test]
+    fn the_cluster_list_scrolls(cx: &mut TestAppContext) {
+        let (_harness, cx) = setup(cx, long_state());
+        cx.simulate_resize(size(px(800.), px(580.)));
+        let before = bounds(cx, "cluster-header-c0");
+        scroll_down(cx, 300.);
+        let after = bounds(cx, "cluster-header-c0");
+        assert_eq!(
+            after.origin.y,
+            before.origin.y - px(300.),
+            "the list didn't scroll"
+        );
+    }
+
+    #[gpui::test]
+    fn the_scrollbar_stays_in_place(cx: &mut TestAppContext) {
+        let (_harness, cx) = setup(cx, long_state());
+        cx.simulate_resize(size(px(800.), px(580.)));
+        let scrollbar = bounds(cx, "page-scrollbar");
+        assert_eq!(
+            scrollbar.origin.y,
+            px(TOOLBAR_HEIGHT),
+            "the scrollbar starts below the toolbar"
+        );
+        assert_eq!(scrollbar.size.height, px(580. - TOOLBAR_HEIGHT));
+
+        scroll_down(cx, 300.);
+        assert_eq!(
+            bounds(cx, "page-scrollbar"),
+            scrollbar,
+            "the scrollbar moved with the content"
+        );
+    }
+
+    #[gpui::test]
+    fn short_pages_fill_the_window(cx: &mut TestAppContext) {
+        let (_harness, cx) = setup(cx, AppState::default());
+        cx.simulate_resize(size(px(800.), px(580.)));
+        let page = bounds(cx, "page");
+        let empty = bounds(cx, "empty-state");
+        assert_eq!(page.size.height, px(580. - TOOLBAR_HEIGHT));
+        assert_eq!(
+            empty.size.height, page.size.height,
+            "the empty page fills the window"
+        );
+
+        // Nothing to scroll.
+        scroll_down(cx, 300.);
+        assert_eq!(bounds(cx, "empty-state").origin.y, empty.origin.y);
+    }
+
+    #[gpui::test]
+    fn forms_scroll(cx: &mut TestAppContext) {
+        let (harness, cx) = setup(cx, long_state());
+        cx.simulate_resize(size(px(800.), px(580.)));
+        harness.navigate(cx, Route::ServiceEdit { id: "s0-0".into() });
+        let before = bounds(cx, "button-submit-service");
+        scroll_down(cx, 200.);
+        let after = bounds(cx, "button-submit-service");
+        assert!(after.origin.y < before.origin.y, "the form didn't scroll");
+    }
+}
